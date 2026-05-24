@@ -1,0 +1,251 @@
+
+// === MEMORY & HISTORY ===
+let currentChatOffset = 0;
+const CHAT_PAGE_SIZE = 50;
+
+function loadMemoryData() {
+  // Update stats
+  Promise.all([
+    f(`${API}/api/memory/daily`),
+    f(`${API}/api/memory/chat?limit=1`),
+    f(`${API}/api/memory/tasks?limit=1`),
+    f(`${API}/api/deliverables?limit=1`)
+  ]).then(([daily, chat, tasks, del]) => {
+    const n1 = document.getElementById('mem-stat-files');
+    const n2 = document.getElementById('mem-stat-chat');
+    const n3 = document.getElementById('mem-stat-tasks');
+    const n4 = document.getElementById('mem-stat-deliverables');
+    if (n1) n1.textContent = daily.files ? daily.files.length : 0;
+    if (n2) n2.textContent = chat.messages ? chat.messages.length : 0;
+    if (n3) n3.textContent = tasks.tasks ? tasks.tasks.length : 0;
+    if (n4) n4.textContent = del.deliverables ? del.deliverables.length : 0;
+  }).catch(() => {});
+
+  // Load MEMORY.md
+  f(`${API}/api/memory`).then(d => {
+    const el = document.getElementById('memory-content');
+    const meta = document.getElementById('memory-file-meta');
+    if (!el) return;
+    if (d.success && d.content) {
+      el.textContent = d.content;
+      if (meta) meta.textContent = d.lastModified ? `Last updated: ${fd(d.lastModified)}` : 'Just created';
+    } else if (d.error) {
+      el.textContent = '# Error\n\nCould not load MEMORY.md\n\n' + d.error;
+    }
+  }).catch(() => {
+    const el = document.getElementById('memory-content');
+    if (el) el.textContent = '# Error\n\nCould not connect to server';
+  });
+
+  // Load daily files list
+  loadDailyFiles();
+
+  // Load chat history
+  loadChatHistory();
+
+  // Load task history
+  loadMemTaskHistory();
+
+  // Load deliverables
+  loadMemDeliverables();
+
+  // Load projects
+  loadMemProjects();
+}
+
+function loadDailyFiles() {
+  f(`${API}/api/memory/daily`).then(d => {
+    const list = document.getElementById('daily-files-list');
+    if (!list) return;
+    if (!d.success || !d.files || d.files.length === 0) {
+      list.innerHTML = '<div class="empty"><div class="icon">📭</div><span>No daily log files found</span></div>';
+      return;
+    }
+    list.innerHTML = d.files.map(f =>
+      `<div class="daily-file-item" onclick="loadDailyFile('${f.date}')">
+        <span class="daily-file-icon">📄</span>
+        <div class="daily-file-info">
+          <div class="daily-file-date">${f.date}</div>
+          <div class="daily-file-meta">${(f.size / 1024).toFixed(1)} KB • ${fd(f.lastModified)}</div>
+        </div>
+      </div>`
+    ).join('');
+  }).catch(() => {
+    const list = document.getElementById('daily-files-list');
+    if (list) list.innerHTML = '<div class="empty">Could not load daily files</div>';
+  });
+}
+
+function loadDailyFile(date) {
+  const contentEl = document.getElementById('daily-content');
+  if (!contentEl) return;
+  contentEl.style.display = 'block';
+  contentEl.textContent = 'Loading...';
+  f(`${API}/api/memory/daily/${date}`).then(d => {
+    contentEl.textContent = d.content || '# ' + date + '\n\n(Empty)';
+  }).catch(() => {
+    contentEl.textContent = 'Could not load daily file';
+  });
+}
+
+function loadChatHistory(append) {
+  if (!append) currentChatOffset = 0;
+  f(`${API}/api/memory/chat?limit=${CHAT_PAGE_SIZE}&offset=${currentChatOffset}`).then(d => {
+    const list = document.getElementById('chat-history-list');
+    if (!list) return;
+    if (!d.success || !d.messages || d.messages.length === 0) {
+      if (!append) list.innerHTML = '<div class="empty"><div class="icon">💬</div><span>No chat history yet</span></div>';
+      return;
+    }
+    const msgs = d.messages.map(m =>
+      `<div class="chat-history-msg">
+        <span class="ch-sender">${esc(m.sender)}</span>
+        <span class="ch-text">${esc(m.message)}</span>
+        <span class="ch-time">${ft(m.timestamp)}</span>
+      </div>`
+    ).join('');
+    if (append) {
+      list.innerHTML += msgs;
+    } else {
+      list.innerHTML = msgs;
+    }
+    currentChatOffset += d.messages.length;
+    if (!d.hasMore) {
+      list.innerHTML += '<div class="empty" style="padding:8px;font-size:9px;color:var(--muted)">— End of history —</div>';
+    }
+  }).catch(() => {
+    const list = document.getElementById('chat-history-list');
+    if (list && !append) list.innerHTML = '<div class="empty">Could not load chat history</div>';
+  });
+}
+
+function loadMoreChat() {
+  loadChatHistory(true);
+}
+
+function loadMemTaskHistory() {
+  f(`${API}/api/memory/tasks?limit=50`).then(d => {
+    const list = document.getElementById('task-history-list');
+    if (!list) return;
+    if (!d.success || !d.tasks || d.tasks.length === 0) {
+      list.innerHTML = '<div class="empty"><div class="icon">📋</div><span>No completed tasks yet</span></div>';
+      return;
+    }
+    list.innerHTML = d.tasks.map(t => {
+      const xpGain = 25;
+      return `<div class="task-history-item">
+        <span class="th-icon">✅</span>
+        <div class="th-info">
+          <div class="th-title">#${t.id} ${esc(t.title)}</div>
+          <div class="th-meta">${t.assignee ? esc(t.assignee) + ' • ' : ''}${fd(t.completed_at || t.updated_at)}</div>
+        </div>
+        <span class="th-xp">+${xpGain} XP</span>
+      </div>`;
+    }).join('');
+  }).catch(() => {
+    const list = document.getElementById('task-history-list');
+    if (list) list.innerHTML = '<div class="empty">Could not load task history</div>';
+  });
+}
+
+function loadMemDeliverables() {
+  f(`${API}/api/deliverables?limit=50`).then(d => {
+    const list = document.getElementById('deliverables-list');
+    if (!list) return;
+    if (!d.success || !d.deliverables || d.deliverables.length === 0) {
+      list.innerHTML = '<div class="empty"><div class="icon">📦</div><span>No deliverables yet</span></div>';
+      return;
+    }
+    list.innerHTML = d.deliverables.map(dl =>
+      `<div class="deliverable-item">
+        <span class="dl-icon">📄</span>
+        <div class="dl-info">
+          <div class="dl-title">${esc(dl.title || dl.task_title || 'Untitled')}</div>
+          <div class="dl-meta">${dl.category || 'general'} • ${fd(dl.createdAt || dl.created_at)}</div>
+          <div class="dl-preview">${esc((dl.content || dl.description || '').substring(0, 120))}${(dl.content || dl.description || '').length > 120 ? '...' : ''}</div>
+        </div>
+        <span class="dl-status ${dl.status || 'completed'}">${dl.status || 'completed'}</span>
+      </div>`
+    ).join('');
+  }).catch(() => {
+    const list = document.getElementById('deliverables-list');
+    if (list) list.innerHTML = '<div class="empty">Could not load deliverables</div>';
+  });
+}
+
+function loadMemProjects() {
+  f(`${API}/api/projects`).then(d => {
+    const list = document.getElementById('mem-projects-list');
+    if (!list) return;
+    if (!d.success || !d.projects || d.projects.length === 0) {
+      list.innerHTML = '<div class="empty"><div class="icon">🏗️</div><span>No projects yet</span></div>';
+      return;
+    }
+    list.innerHTML = d.projects.map(p =>
+      `<div class="mem-project-item" onclick="navTo('projects');showProjectDetail(${p.id})">
+        <span class="mp-icon">🏗️</span>
+        <div class="mp-info">
+          <div class="mp-name">${esc(p.name)}</div>
+          <div class="mp-desc">${esc((p.description || '').substring(0, 100))}${(p.description || '').length > 100 ? '...' : ''}</div>
+          <div class="mp-meta">${p.status} • ${p.category} • ${fd(p.updated_at)}</div>
+        </div>
+      </div>`
+    ).join('');
+  }).catch(() => {
+    const list = document.getElementById('mem-projects-list');
+    if (list) list.innerHTML = '<div class="empty">Could not load projects</div>';
+  });
+}
+
+function searchMemory() {
+  const q = document.getElementById('memory-search').value.trim();
+  if (!q) return;
+  const resultsList = document.getElementById('search-results-list');
+  const resultsMeta = document.getElementById('search-results-meta');
+  const searchTab = document.getElementById('mem-tab-search');
+  const searchCount = document.getElementById('search-count');
+  if (resultsList) resultsList.innerHTML = '<div class="empty"><div class="icon">🔍</div><span>Searching...</span></div>';
+  switchMemTab('search');
+  if (searchTab) searchTab.style.display = 'flex';
+  f(`${API}/api/memory/search?q=${encodeURIComponent(q)}`).then(d => {
+    if (!d.success || !d.results || d.results.length === 0) {
+      if (resultsList) resultsList.innerHTML = `<div class="empty"><div class="icon">🔍</div><span>No results for "${esc(q)}"</span></div>`;
+      if (searchCount) searchCount.textContent = '(0)';
+      return;
+    }
+    if (searchCount) searchCount.textContent = `(${d.total})`;
+    if (resultsMeta) resultsMeta.textContent = `Found ${d.total} results for "${q}"`;
+    if (resultsList) {
+      resultsList.innerHTML = d.results.map(r =>
+        `<div class="search-result-item">
+          <span class="search-result-source">${esc(r.source)}</span>
+          <span class="search-result-text">${esc(r.text)}</span>
+        </div>`
+      ).join('');
+    }
+  }).catch(() => {
+    if (resultsList) resultsList.innerHTML = '<div class="empty">Search failed</div>';
+  });
+}
+
+function switchMemTab(tab) {
+  document.querySelectorAll('.mem-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.mem-tab-panel').forEach(p => p.classList.remove('active'));
+  const tabEl = document.querySelector(`.mem-tab[data-tab="${tab}"]`);
+  if (tabEl) tabEl.classList.add('active');
+  const panel = document.getElementById(`mem-panel-${tab}`);
+  if (panel) panel.classList.add('active');
+  if (tab === 'search') {
+    const st = document.getElementById('mem-tab-search');
+    if (st) st.style.display = 'flex';
+  }
+}
+
+// Auto-load memory data when navigated to
+const origNavTo = navTo;
+navTo = function(page) {
+  origNavTo(page);
+  if (page === 'memory') {
+    setTimeout(loadMemoryData, 300);
+  }
+};

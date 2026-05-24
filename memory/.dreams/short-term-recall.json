@@ -1,0 +1,1069 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-21T22:26:32.641Z",
+  "entries": {
+    "memory:memory/2026-05-06.md:1:28": {
+      "key": "memory:memory/2026-05-06.md:1:28",
+      "path": "memory/2026-05-06.md",
+      "startLine": 1,
+      "endLine": 28,
+      "source": "memory",
+      "snippet": "# 2026-05-06 — Jorm's Daily Log ## Projects Worked On ### 1. Buckshot Roulette Recreation - Built complete web-based recreation at `C:\\Users\\kency\\.openclaw\\workspace\\buckshot-roulette\\index.html` - All 4 rounds, 6 items, dealer AI, horror atmosphere, sound effects - Accessible via local server at `http://192.168.0.62:8080` for mobile testing ### 2. 2D Minecraft R1 — Bug Fixes & Deployment - Fixed 12 bugs in `C:\\Users\\kency\\Desktop\\r1-2d-minecraft\\index.html` - Critical fixes: `player.inv` → `inventory`, `MINE_RANGE` undefined, `currentChest` undeclared, hunger system empty, duplicate torch render, `saveAndQuit()` missing name arg - Deployed to GitHub Pages: `https://mrghostguy.github.io/",
+      "recallCount": 20,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 19.261012475722048,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-07T06:22:13.745Z",
+      "lastRecalledAt": "2026-05-21T22:26:32.641Z",
+      "queryHashes": [
+        "f72bb241a495",
+        "2d385282167c",
+        "f4862dd48b7e",
+        "bbc9da7e6f29",
+        "cb2b77ccc756",
+        "d6c21af06a6e",
+        "dc5d99169ebf",
+        "2879e25089f4",
+        "d7d4bdd83890",
+        "28aeec6c122a",
+        "8f8ecbbb4c61",
+        "f83224b942db",
+        "88edc36e9628",
+        "d0419ad91fd8",
+        "4f392e57600a",
+        "3fb038f40b68",
+        "3867021c5121",
+        "2a0aa7cf286a",
+        "700514d48628",
+        "c85d7a38488d"
+      ],
+      "recallDays": [
+        "2026-05-07",
+        "2026-05-09",
+        "2026-05-10",
+        "2026-05-12",
+        "2026-05-13",
+        "2026-05-19",
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "web-based",
+        "buckshot-roulette",
+        "index.html",
+        "192.168.0.62",
+        "r1-2d-minecraft",
+        "player.inv",
+        "mine-range",
+        "mrghostguy.github.io"
+      ]
+    },
+    "memory:memory/2026-05-06.md:23:38": {
+      "key": "memory:memory/2026-05-06.md:23:38",
+      "path": "memory/2026-05-06.md",
+      "startLine": 23,
+      "endLine": 38,
+      "source": "memory",
+      "snippet": "### 4. Perfect Dashboard — Agent Office Rebuild - Completely rebuilt Agent Office with 6 workstations (Coding, Research, Chat, Creative, Ops, Break) - Agents auto-move between stations based on task/role keywords - Walking animation when agents change stations - Subagent support with separate row - Group chat panel showing all agent-to-agent communications - Customization modal: edit agent names, roles, colors, icons (12 colors, 20 icons) - Hover tooltips with logs, comms, task details per agent - Server running on port 3000 ## Technical Notes - Jeff's R1 device loads apps via QR codes → GitHub Pages hosting - Enhanced QR code generator is a browser favorite (can't access directly) - Perfec",
+      "recallCount": 25,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 22.28222735670271,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-07T06:22:13.745Z",
+      "lastRecalledAt": "2026-05-21T22:26:32.641Z",
+      "queryHashes": [
+        "f72bb241a495",
+        "2d385282167c",
+        "f4862dd48b7e",
+        "bbc9da7e6f29",
+        "cb2b77ccc756",
+        "d6c21af06a6e",
+        "dc5d99169ebf",
+        "e251e62a921c",
+        "2879e25089f4",
+        "8f8ecbbb4c61",
+        "21be52d0fd94",
+        "88edc36e9628",
+        "ee754cb915be",
+        "38baafa400d4",
+        "f2e232248f74",
+        "a6d4ce47f5aa",
+        "8addeba59712",
+        "d79378a78ff0",
+        "d0419ad91fd8",
+        "75a81d715a46",
+        "3867021c5121",
+        "2a0aa7cf286a",
+        "ef5341f2dfba",
+        "700514d48628",
+        "c85d7a38488d"
+      ],
+      "recallDays": [
+        "2026-05-07",
+        "2026-05-09",
+        "2026-05-10",
+        "2026-05-13",
+        "2026-05-14",
+        "2026-05-15",
+        "2026-05-17",
+        "2026-05-18",
+        "2026-05-19",
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "auto-move",
+        "task/role",
+        "agent-to-agent",
+        "perfect",
+        "dashboard",
+        "office",
+        "rebuild",
+        "completely"
+      ]
+    },
+    "memory:memory/2026-05-05.md:1:23": {
+      "key": "memory:memory/2026-05-05.md:1:23",
+      "path": "memory/2026-05-05.md",
+      "startLine": 1,
+      "endLine": 23,
+      "source": "memory",
+      "snippet": "# 2026-05-05 ## Perfect Dashboard Build - Built `C:\\Users\\kency\\perfect-dashboard\\` — complete rewrite of old mission-control - Old mission-control at `C:\\Users\\kency\\mission-control/` had 100% mock data, no persistence - New dashboard features: - **Real data only** — SQLite persistence (dashboard.db), real system metrics, real Twitch API, real trending from GitHub/Reddit APIs - **7 pre-seeded agents**: Jorm (Lead), Opus, Codex, Gemini, Claude, Llama, Mistral - **Agent workflow visualization** — status tracking, task assignment, progress bars, pipeline stages - **Agent-to-agent communication log** — tracked in DB, displayed in real-time - **Learning feedback loop** — feedback auto",
+      "recallCount": 21,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 19.40448736742332,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-07T06:22:13.745Z",
+      "lastRecalledAt": "2026-05-21T22:26:32.641Z",
+      "queryHashes": [
+        "f72bb241a495",
+        "f4862dd48b7e",
+        "bbc9da7e6f29",
+        "cb2b77ccc756",
+        "d6c21af06a6e",
+        "e251e62a921c",
+        "8f8ecbbb4c61",
+        "21be52d0fd94",
+        "f83224b942db",
+        "ee754cb915be",
+        "2adc79975d2f",
+        "57316aa81421",
+        "ba302e41971d",
+        "d79378a78ff0",
+        "d0419ad91fd8",
+        "459bd2c6d2c4",
+        "75a81d715a46",
+        "3867021c5121",
+        "2a0aa7cf286a",
+        "7de08509fdf1",
+        "c85d7a38488d"
+      ],
+      "recallDays": [
+        "2026-05-07",
+        "2026-05-09",
+        "2026-05-10",
+        "2026-05-12",
+        "2026-05-13",
+        "2026-05-19",
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "perfect-dashboard",
+        "mission-control",
+        "dashboard.db",
+        "github/reddit",
+        "pre-seeded",
+        "agent-to-agent",
+        "real-time",
+        "perfect"
+      ]
+    },
+    "memory:memory/2026-05-07.md:1:21": {
+      "key": "memory:memory/2026-05-07.md:1:21",
+      "path": "memory/2026-05-07.md",
+      "startLine": 1,
+      "endLine": 21,
+      "source": "memory",
+      "snippet": "# 2026-05-07 — Jorm's Daily Log ## Projects Worked On ### 1. 2D Minecraft R1 — QoL Upgrade & Deployment - Audited full codebase (1300+ lines) for R1 device compatibility issues - **Bug fixes:** - Fixed save/load to persist `toolDurability`, `chestData`, `doorStates`, `droppedItems`, weather state - Fixed `restartGame()` to reset persistent data and show save button - Fixed XSS vulnerability in save delete button (replaced inline onclick with event delegation + confirm dialog) - Fixed pause menu: added Quit to Menu button, proper state handling - **R1 QoL upgrades:** - Added R1 HUD action buttons (|| Pause, C Craft, E Eat, Atk Attack) in bottom-right corner - Added vibration fee",
+      "recallCount": 10,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 9.336180598716295,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-07T20:14:21.246Z",
+      "lastRecalledAt": "2026-05-20T20:50:48.629Z",
+      "queryHashes": [
+        "bbc9da7e6f29",
+        "d6c21af06a6e",
+        "2879e25089f4",
+        "d7d4bdd83890",
+        "f83224b942db",
+        "38baafa400d4",
+        "57316aa81421",
+        "5f0af9f525d4",
+        "4f392e57600a",
+        "3fb038f40b68"
+      ],
+      "recallDays": [
+        "2026-05-07",
+        "2026-05-09",
+        "2026-05-10",
+        "2026-05-12",
+        "2026-05-14",
+        "2026-05-19",
+        "2026-05-20"
+      ],
+      "conceptTags": [
+        "save/load",
+        "bottom-right",
+        "jorm's",
+        "log",
+        "projects",
+        "worked",
+        "minecraft",
+        "qol"
+      ]
+    },
+    "memory:memory/2026-05-09.md:56:69": {
+      "key": "memory:memory/2026-05-09.md:56:69",
+      "path": "memory/2026-05-09.md",
+      "startLine": 56,
+      "endLine": 69,
+      "source": "memory",
+      "snippet": "- Fixed loadMap function (orphaned code) - Added block name tooltip, tool repair, hunger bar, death screen improvements - GitHub: `mrghostguy/r1-2d-minecraft` ## QR Codes - survive-r1 QR: `C:\\Users\\kency\\.openclaw\\workspace\\survive-r1-qr.png` - 2D Minecraft QR: `C:\\Users\\kency\\.openclaw\\workspace\\2d-minecraft-qr.png` ## Jeff / Ghost Context - Goes by Ghost, content creator (Twitch + TikTok: GhostLegacyX) - Building games for the Rabbit R1 device - Wants comprehensive survival game with all GDD features - Said \"build it by any means necessary\"",
+      "recallCount": 13,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 13,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-10T10:38:21.283Z",
+      "lastRecalledAt": "2026-05-21T20:38:08.212Z",
+      "queryHashes": [
+        "e251e62a921c",
+        "2879e25089f4",
+        "d7d4bdd83890",
+        "28aeec6c122a",
+        "21be52d0fd94",
+        "ee754cb915be",
+        "370279adeb1a",
+        "4f392e57600a",
+        "3fb038f40b68",
+        "45f4cbbb9a3a",
+        "3867021c5121",
+        "2a0aa7cf286a",
+        "7de08509fdf1"
+      ],
+      "recallDays": [
+        "2026-05-10",
+        "2026-05-13",
+        "2026-05-15",
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "mrghostguy/r1-2d-minecraft",
+        "survive-r1",
+        "survive-r1-qr.png",
+        "2d-minecraft-qr.png",
+        "fixed",
+        "loadmap",
+        "function",
+        "orphaned"
+      ]
+    },
+    "memory:memory/2026-05-09.md:26:64": {
+      "key": "memory:memory/2026-05-09.md:26:64",
+      "path": "memory/2026-05-09.md",
+      "startLine": 26,
+      "endLine": 64,
+      "source": "memory",
+      "snippet": "- Fishing mechanic (fishing rod + use on water) - Boss encounter (Ancient Guardian, 50HP, 3 attack patterns) - Screen shake on damage - Weather overlays rendered on canvas - Torch light radius + campfire flickering lights - Mining crack progress animation - Boss health bar - Bug fix: player grounded detection ### Phase 3 (In Progress — needs to be added): - Quest system (kill quests, gather quests, explore quests) - Stats screen (kills, blocks mined, fish caught, etc.) - Minimap (shows terrain, entities, NPCs) - Farming (plant seeds, grow wheat) - More NPC quests with multi-step rewards - Leather armor (damage reduction) - Shield (block chance) - Spear (mid-range weapon) ### Technical Note",
+      "recallCount": 17,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 16.215474375869626,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-10T10:38:21.283Z",
+      "lastRecalledAt": "2026-05-21T22:25:55.110Z",
+      "queryHashes": [
+        "e251e62a921c",
+        "2879e25089f4",
+        "d7d4bdd83890",
+        "28aeec6c122a",
+        "426ba3fc296e",
+        "f83224b942db",
+        "88edc36e9628",
+        "370279adeb1a",
+        "f2e232248f74",
+        "f41ea5fbc4b8",
+        "095063a8ef49",
+        "4f392e57600a",
+        "3fb038f40b68",
+        "45f4cbbb9a3a",
+        "3867021c5121",
+        "2a0aa7cf286a",
+        "700514d48628"
+      ],
+      "recallDays": [
+        "2026-05-10",
+        "2026-05-11",
+        "2026-05-12",
+        "2026-05-13",
+        "2026-05-15",
+        "2026-05-17",
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "multi-step",
+        "mid-range",
+        "fishing",
+        "mechanic",
+        "rod",
+        "use",
+        "water",
+        "boss"
+      ]
+    },
+    "memory:memory/2026-05-09.md:1:35": {
+      "key": "memory:memory/2026-05-09.md:1:35",
+      "path": "memory/2026-05-09.md",
+      "startLine": 1,
+      "endLine": 35,
+      "source": "memory",
+      "snippet": "# 2026-05-09 Daily Memory ## Survive: The Untamed Wilderness (survive-r1) - Jeff asked to build a 2D survival game for the R1 device based on a 10-page GDD (game design document) - Built \"Survive: The Untamed Wilderness\" — a 2D survival game for Rabbit R1 (240x282px) - Deployed to GitHub Pages at `https://mrghostguy.github.io/survive-r1/` - Single HTML file, ~85KB, self-contained ### Phase 1 (Completed): - Full world generation with 5 biomes (Forest, Desert, Tundra, Mountain, Swamp) - Procedural terrain with octave noise, trees, cactus, caves - Day/night cycle, weather system (rain, storm, snow, fog, heatwave) - Crafting system with 30+ recipes - Build mode for structures - Combat with 4 e",
+      "recallCount": 10,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 10,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-10T18:03:27.367Z",
+      "lastRecalledAt": "2026-05-21T22:25:55.110Z",
+      "queryHashes": [
+        "2879e25089f4",
+        "d7d4bdd83890",
+        "28aeec6c122a",
+        "426ba3fc296e",
+        "370279adeb1a",
+        "2adc79975d2f",
+        "4f392e57600a",
+        "3fb038f40b68",
+        "45f4cbbb9a3a",
+        "700514d48628"
+      ],
+      "recallDays": [
+        "2026-05-10",
+        "2026-05-11",
+        "2026-05-15",
+        "2026-05-19",
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "survive-r1",
+        "10-page",
+        "mrghostguy.github.io/survive-r1",
+        "self-contained",
+        "day/night",
+        "survive",
+        "untamed",
+        "wilderness"
+      ]
+    },
+    "memory:memory/2026-05-10.md:1:28": {
+      "key": "memory:memory/2026-05-10.md:1:28",
+      "path": "memory/2026-05-10.md",
+      "startLine": 1,
+      "endLine": 28,
+      "source": "memory",
+      "snippet": "# 2026-05-10 ## Claw3D Integration — Full Setup - Installed Claw3D at `C:\\Users\\kency\\claw3d\\` — open-source 3D virtual office for AI agents - Built with Next.js, Three.js, connects to OpenClaw Gateway via WebSocket - Configured to run on port 3002 (dashboard on 3001) ### Device Pairing & Gateway Connection - Claw3D server acts as a WebSocket proxy between browser and OpenClaw Gateway - Device ID: `0eede746b16b1a1c4c5cc8c254ce5897062aa8192d6f5c7e8819923e98572c4b` - Device approved with scopes: `operator.pairing`, `operator.read` - Device token: `GGNwie0GMAWeKDGLRaYM337snFZzVOOKl0PfCjxXrLg` - Created `~/.openclaw/claw3d/settings.json` with device token for server-side proxy - Changed `NEXT_",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-11T03:30:17.209Z",
+      "lastRecalledAt": "2026-05-11T03:30:17.209Z",
+      "queryHashes": [
+        "21be52d0fd94"
+      ],
+      "recallDays": [
+        "2026-05-10"
+      ],
+      "conceptTags": [
+        "gateway",
+        "open-source",
+        "next.js",
+        "three.js",
+        "operator.pairing",
+        "operator.read",
+        "openclaw/claw3d/settings.json",
+        "server-side"
+      ]
+    },
+    "memory:memory/2026-05-10.md:1:15": {
+      "key": "memory:memory/2026-05-10.md:1:15",
+      "path": "memory/2026-05-10.md",
+      "startLine": 1,
+      "endLine": 15,
+      "source": "memory",
+      "snippet": "# 2026-05-10 (continued) ## Perfect Dashboard v2.0 — Major Feature Update ### New Features Built: 1. **Live Activity Ticker** — Always-updating activity strip at top of dashboard with category filters (ALL, AGENTS, TASKS, SYSTEM, PROJECTS), infinite scroll animation, real-time WebSocket updates 2. **Taskboard** — 4-column comprehensive task management: In Progress, Pinned to Revisit, Completed Recently, Backlog. Pin/unpin tasks, search across all columns, priority indicators, progress bars, completion results 3. **Projects Tracker** — Project cards with status, category, last-worked-on timestamps. Detail modal with full change history timeline. Add change log entries (Feature, Improvement,",
+      "recallCount": 11,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 11,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-11T09:53:46.965Z",
+      "lastRecalledAt": "2026-05-21T22:26:32.641Z",
+      "queryHashes": [
+        "426ba3fc296e",
+        "ee754cb915be",
+        "370279adeb1a",
+        "5a1460a4985d",
+        "f2e232248f74",
+        "4f6dbeb08fb3",
+        "f41ea5fbc4b8",
+        "d0419ad91fd8",
+        "75a81d715a46",
+        "700514d48628",
+        "c85d7a38488d"
+      ],
+      "recallDays": [
+        "2026-05-11",
+        "2026-05-13",
+        "2026-05-15",
+        "2026-05-19",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "v2.0",
+        "always-updating",
+        "real-time",
+        "4-column",
+        "pin/unpin",
+        "last-worked-on",
+        "continued",
+        "perfect"
+      ]
+    },
+    "memory:memory/2026-05-10.md:11:30": {
+      "key": "memory:memory/2026-05-10.md:11:30",
+      "path": "memory/2026-05-10.md",
+      "startLine": 11,
+      "endLine": 30,
+      "source": "memory",
+      "snippet": "6. **Database** — New tables: projects, project_history, pinned_tasks, subagent_activities, skills, activity_log. All with full CRUD operations 7. **API Routes** — 20+ new REST endpoints for all features, all WebSocket-broadcasted ### Technical Details: - index.html: 92KB (was 75KB) — new pages, CSS for ticker/taskboard/projects/skills/subagents - app.js: 69KB (was 53KB) — new functions for all features, WebSocket handlers - server.js: 34KB — new API routes inserted before Start Server - database.js: 29KB — new tables and CRUD functions - All existing features preserved: chat, agents, tasks, pipeline, comms, deliverables, learning, trending, twitch, office3d, Claw3D integration ### Status:",
+      "recallCount": 7,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 6.632354042271716,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-11T09:53:46.965Z",
+      "lastRecalledAt": "2026-05-19T11:20:10.950Z",
+      "queryHashes": [
+        "426ba3fc296e",
+        "ee754cb915be",
+        "38baafa400d4",
+        "f2e232248f74",
+        "4f6dbeb08fb3",
+        "f41ea5fbc4b8",
+        "75a81d715a46"
+      ],
+      "recallDays": [
+        "2026-05-11",
+        "2026-05-13",
+        "2026-05-14",
+        "2026-05-15",
+        "2026-05-19"
+      ],
+      "conceptTags": [
+        "project-history",
+        "pinned-tasks",
+        "subagent-activities",
+        "activity-log",
+        "websocket-broadcasted",
+        "index.html",
+        "app.js",
+        "server.js"
+      ]
+    },
+    "memory:memory/2026-05-12.md:1:18": {
+      "key": "memory:memory/2026-05-12.md:1:18",
+      "path": "memory/2026-05-12.md",
+      "startLine": 1,
+      "endLine": 18,
+      "source": "memory",
+      "snippet": "# 2026-05-12 ## Perfect Dashboard Bug Fixes (02:36-03:00) Fixed multiple bugs in the Perfect Dashboard (`C:\\Users\\kency\\perfect-dashboard\\public\\app.js`): ### Bugs Fixed: 1. **Double `renderTicker` function** — Second definition overwrote the first, losing the system status fallback with proper category tags. Removed duplicate. 2. **Double `navTo` overwrite** — `_origNavTo2` pattern chained incorrectly, causing page-specific load calls to only execute for the first definition. Replaced with single clean `navTo`. 3. **Double `updAgents` overwrite** — `_origUpdAgents2` pattern broken. Removed and ensured `renderOffice()` is called. 4. **`loadAll` double-await** — `const stats=await sr,sys=a",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 2,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-13T22:59:13.784Z",
+      "lastRecalledAt": "2026-05-19T11:11:17.322Z",
+      "queryHashes": [
+        "88edc36e9628",
+        "d79378a78ff0"
+      ],
+      "recallDays": [
+        "2026-05-13",
+        "2026-05-19"
+      ],
+      "conceptTags": [
+        "36-03",
+        "perfect-dashboard",
+        "app.js",
+        "page-specific",
+        "double-await",
+        "perfect",
+        "dashboard",
+        "bug"
+      ]
+    },
+    "memory:memory/2026-05-11.md:21:30": {
+      "key": "memory:memory/2026-05-11.md:21:30",
+      "path": "memory/2026-05-11.md",
+      "startLine": 21,
+      "endLine": 30,
+      "source": "memory",
+      "snippet": "6. **Verified** — no fake agent names remain in any source file ### Key lesson: **Never seed fake data. Not for demos, not for \"placeholders\", not for \"coming soon\". If it's not real, it doesn't go in.** ### Status: - Dashboard running on port 3000 with real data only - 1 agent (Jorm), 0 tasks, 2 projects, 9 skills, 1 activity entry - All system metrics (CPU, RAM) come from `os.cpus()` / `os.totalmem()` — real hardware data",
+      "recallCount": 3,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 2.5655871808309794,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-14T09:21:08.700Z",
+      "lastRecalledAt": "2026-05-21T22:07:20.324Z",
+      "queryHashes": [
+        "38baafa400d4",
+        "41b12145e81a",
+        "ef5341f2dfba"
+      ],
+      "recallDays": [
+        "2026-05-14",
+        "2026-05-17",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "os.cpus",
+        "os.totalmem",
+        "verified",
+        "fake",
+        "names",
+        "remain",
+        "any",
+        "source"
+      ]
+    },
+    "memory:memory/2026-05-11.md:1:28": {
+      "key": "memory:memory/2026-05-11.md:1:28",
+      "path": "memory/2026-05-11.md",
+      "startLine": 1,
+      "endLine": 28,
+      "source": "memory",
+      "snippet": "# 2026-05-11 ## Perfect Dashboard — Real Data Only Rebuild Jeff called out that the dashboard had simulated/fake data despite repeated instructions not to. He was right. ### What was fake: - 6 phantom agents (Opus, Codex, Gemini, Claude, Llama, Mistral) seeded in DB - 6 fake tasks assigned to fake agents with fake progress percentages - Fake CPU/memory metrics computed via deterministic formulas (`base + (i * 7 - 21)`) - Fake sub-agent optimization system (`triggerOptimization()` picked random targets) - Fake agent communications, feedback, learning logs, deliverables - Skills list included skills not actually installed ### What was done: 1. **Rebuilt database from scratch** — only Jorm",
+      "recallCount": 3,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 2.5830357229773395,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-14T09:21:08.700Z",
+      "lastRecalledAt": "2026-05-21T22:07:20.324Z",
+      "queryHashes": [
+        "38baafa400d4",
+        "41b12145e81a",
+        "ef5341f2dfba"
+      ],
+      "recallDays": [
+        "2026-05-14",
+        "2026-05-17",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "simulated/fake",
+        "cpu/memory",
+        "sub-agent",
+        "perfect",
+        "dashboard",
+        "real",
+        "data",
+        "only"
+      ]
+    },
+    "memory:memory/2026-05-15.md:1:25": {
+      "key": "memory:memory/2026-05-15.md:1:25",
+      "path": "memory/2026-05-15.md",
+      "startLine": 1,
+      "endLine": 25,
+      "source": "memory",
+      "snippet": "# 2026-05-15 ## Claw3D Loading Fix on JormUI (04:15-04:30) **Problem:** Claw3D (3D Office tab) wasn't loading in the Perfect Dashboard (JormUI). **Root Cause:** Multiple issues with the Claw3D proxy in `server.js`: 1. **Neither server was running** — Both the dashboard (port 3000) and Claw3D (port 3002) Node processes were down. Started both. 2. **Redirect loop** — Claw3D's Next.js server returns a 307 redirect from `/` → `/office`. The proxy was passing this redirect through unchanged, so the browser would follow it to `/office` (the dashboard's own Agent Office page) instead of staying within the proxy path. 3. **Missing asset proxy** — Claw3D's HTML references assets at absolute pat",
+      "recallCount": 12,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 11.942037797373995,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-16T00:03:07.585Z",
+      "lastRecalledAt": "2026-05-20T04:48:27.362Z",
+      "queryHashes": [
+        "4f6dbeb08fb3",
+        "f41ea5fbc4b8",
+        "03ba2d553fa9",
+        "41b12145e81a",
+        "a6d4ce47f5aa",
+        "095063a8ef49",
+        "8addeba59712",
+        "57316aa81421",
+        "d79378a78ff0",
+        "75a81d715a46",
+        "5f0af9f525d4",
+        "5cb1cb76b428"
+      ],
+      "recallDays": [
+        "2026-05-15",
+        "2026-05-16",
+        "2026-05-17",
+        "2026-05-18",
+        "2026-05-19"
+      ],
+      "conceptTags": [
+        "15-04",
+        "server.js",
+        "next.js",
+        "claw3d",
+        "loading",
+        "fix",
+        "jormui",
+        "problem"
+      ]
+    },
+    "memory:memory/2026-05-15.md:21:32": {
+      "key": "memory:memory/2026-05-15.md:21:32",
+      "path": "memory/2026-05-15.md",
+      "startLine": 21,
+      "endLine": 32,
+      "source": "memory",
+      "snippet": "2. **Asset proxy middleware** — Added a new middleware that catches `/_next/static/*`, `/favicon.ico`, and `/assets/*` paths and proxies them to Claw3D on port 3002. 3. **WebSocket upgrade proxy** — Added `server.on('upgrade', ...)` handler that intercepts WebSocket upgrade requests to `/api/gateway/ws` and proxies them to Claw3D. **Files Modified:** - `C:\\Users\\kency\\perfect-dashboard\\server.js` — All three fixes **Servers Status:** - Dashboard: port 3000 ✅ - Claw3D: port 3002 ✅ - Proxy: working ✅",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 2,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-16T00:03:07.585Z",
+      "lastRecalledAt": "2026-05-16T00:42:43.967Z",
+      "queryHashes": [
+        "4f6dbeb08fb3",
+        "f41ea5fbc4b8"
+      ],
+      "recallDays": [
+        "2026-05-15"
+      ],
+      "conceptTags": [
+        "gateway",
+        "next/static",
+        "favicon.ico",
+        "server.on",
+        "api/gateway/ws",
+        "perfect-dashboard",
+        "server.js",
+        "asset"
+      ]
+    },
+    "memory:memory/2026-05-15.md:21:49": {
+      "key": "memory:memory/2026-05-15.md:21:49",
+      "path": "memory/2026-05-15.md",
+      "startLine": 21,
+      "endLine": 49,
+      "source": "memory",
+      "snippet": "2. **Asset proxy middleware** — Added a new middleware that catches `/_next/static/*`, `/favicon.ico`, and `/assets/*` paths and proxies them to Claw3D on port 3002. 3. **WebSocket upgrade proxy** — Added `server.on('upgrade', ...)` handler that intercepts WebSocket upgrade requests to `/api/gateway/ws` and proxies them to Claw3D. **Files Modified:** - `C:\\Users\\kency\\perfect-dashboard\\server.js` — All three fixes **Servers Status:** - Dashboard: port 3000 ✅ - Claw3D: port 3002 ✅ - Proxy: working ✅ ## Claw3D Production Build Fix (19:41-20:00) **Problem:** Claw3D was still not working after the earlier proxy fixes. The 3D Office tab showed \"Opening Claw3D...\" but the connection failed wi",
+      "recallCount": 5,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 4.935290075340887,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-17T02:35:02.279Z",
+      "lastRecalledAt": "2026-05-21T20:38:08.212Z",
+      "queryHashes": [
+        "03ba2d553fa9",
+        "41b12145e81a",
+        "095063a8ef49",
+        "57316aa81421",
+        "7de08509fdf1"
+      ],
+      "recallDays": [
+        "2026-05-16",
+        "2026-05-17",
+        "2026-05-19",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "gateway",
+        "next/static",
+        "favicon.ico",
+        "server.on",
+        "api/gateway/ws",
+        "perfect-dashboard",
+        "server.js",
+        "41-20"
+      ]
+    },
+    "memory:memory/2026-05-15.md:44:66": {
+      "key": "memory:memory/2026-05-15.md:44:66",
+      "path": "memory/2026-05-15.md",
+      "startLine": 44,
+      "endLine": 66,
+      "source": "memory",
+      "snippet": "4. **Started production server** — `node server/index.js` (no `--dev` flag) **Key Findings:** - The dev server was compiling `/office` page and got stuck on Tailwind CSS processing - Production build resolved the compilation issue - The gateway (port 18789) was always working fine — the issue was solely on the Claw3D side - WebSocket connection from Claw3D browser to `ws://localhost:18789` works correctly - The `resolveStudioProxyGatewayUrl` function correctly returns `ws://localhost:18789` for loopback hosts - The `NEXT_PUBLIC_GATEWAY_URL=/api/gateway/ws` is a relative path that resolves to Claw3D's own proxy, which then forwards to the upstream gateway - Gateway WS endpoint is at root `/`",
+      "recallCount": 4,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 4,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-17T02:35:02.279Z",
+      "lastRecalledAt": "2026-05-21T20:38:08.212Z",
+      "queryHashes": [
+        "03ba2d553fa9",
+        "ba302e41971d",
+        "459bd2c6d2c4",
+        "7de08509fdf1"
+      ],
+      "recallDays": [
+        "2026-05-16",
+        "2026-05-19",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "gateway",
+        "server/index.js",
+        "next-public-gateway-url",
+        "api/gateway/ws",
+        "started",
+        "production",
+        "server",
+        "node"
+      ]
+    },
+    "memory:memory/2026-05-16.md:1:27": {
+      "key": "memory:memory/2026-05-16.md:1:27",
+      "path": "memory/2026-05-16.md",
+      "startLine": 1,
+      "endLine": 27,
+      "source": "memory",
+      "snippet": "# 2026-05-16 ## Claw3D Chat Fix + Performance Optimization (21:33-22:30) **Problem:** Claw3D agents couldn't respond in chat, and the 3D office was very laggy. ### Root Causes Found: 1. **Chat not responding:** - `chat.send` via gateway had no timeout — if the gateway was slow/stalled, the call would hang indefinitely - When streaming responses never completed (e.g., gateway disconnect), agents stayed in \"running\" state forever with no feedback - The `handleChatSend` in OfficeScreen.tsx had a logic gap where office trigger intents (desk, gym, etc.) were processed but the message was still sent to the agent — this was actually correct behavior but the agent would appear to not re",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 2,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-17T09:13:34.375Z",
+      "lastRecalledAt": "2026-05-18T17:12:22.710Z",
+      "queryHashes": [
+        "a6d4ce47f5aa",
+        "8addeba59712"
+      ],
+      "recallDays": [
+        "2026-05-17",
+        "2026-05-18"
+      ],
+      "conceptTags": [
+        "gateway",
+        "33-22",
+        "chat.send",
+        "slow/stalled",
+        "e.g",
+        "officescreen.tsx",
+        "claw3d",
+        "chat"
+      ]
+    },
+    "memory:memory/2026-05-16.md:43:52": {
+      "key": "memory:memory/2026-05-16.md:43:52",
+      "path": "memory/2026-05-16.md",
+      "startLine": 43,
+      "endLine": 52,
+      "source": "memory",
+      "snippet": "- Increased `clockTick` interval from 2s to 5s (reduces `officeAgents` recalculation) - Increased `loadAgents` polling interval from 60s to 120s - Increased `minIntervalMs` from 60s to 120s, `onlyWhenIdleForMs` from 120s to 180s - Removed `void clockTick` dependency from `officeAgents` memo (was forcing recalc) ### Build & Deploy: - Production build completed successfully - Restarted Claw3D server (PID 15088, port 3002) - Verified all services running: Dashboard (3000), Claw3D (3002), Gateway (18789)",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1.9152751453745578,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-17T21:47:05.523Z",
+      "lastRecalledAt": "2026-05-21T20:38:08.212Z",
+      "queryHashes": [
+        "095063a8ef49",
+        "7de08509fdf1"
+      ],
+      "recallDays": [
+        "2026-05-17",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "gateway",
+        "increased",
+        "clocktick",
+        "interval",
+        "reduces",
+        "officeagents",
+        "recalculation",
+        "loadagents"
+      ]
+    },
+    "memory:memory/2026-05-17.md:14:28": {
+      "key": "memory:memory/2026-05-17.md:14:28",
+      "path": "memory/2026-05-17.md",
+      "startLine": 14,
+      "endLine": 28,
+      "source": "memory",
+      "snippet": "- **Nice Guy Towers floor** — Added as new floor between Lobby and OpenClaw Floor (sortOrder 5). Set as default active floor. - **3 Resident Agents:** - Volt (#3B82F6) — Stream Tech Specialist, spiky hair/hoodie/headset/glasses - Cipher (#7C3AED) — Content Strategist, bun hair/jacket/glasses - Blaze (#F97316) — Community Champion, short hair/tee/cap/backpack - **Agent spawn points** — Each agent spawns near their specialty area (Volt near server room, Cipher near desks, Blaze near lounge) - **Agent roam preferences** — Each agent has 4 preferred roam points near their specialty - **Agent roster bulletin board** — Top-right overlay showing all agents with status colors and role labels -",
+      "recallCount": 4,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 3.9605552985060086,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-18T20:22:44.916Z",
+      "lastRecalledAt": "2026-05-21T22:07:20.324Z",
+      "queryHashes": [
+        "e4445330aac1",
+        "ba302e41971d",
+        "459bd2c6d2c4",
+        "ef5341f2dfba"
+      ],
+      "recallDays": [
+        "2026-05-18",
+        "2026-05-19",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "hair/hoodie/headset/glasses",
+        "hair/jacket/glasses",
+        "hair/tee/cap/backpack",
+        "top-right",
+        "nice",
+        "guy",
+        "towers",
+        "floor"
+      ]
+    },
+    "memory:memory/2026-05-17.md:1:18": {
+      "key": "memory:memory/2026-05-17.md:1:18",
+      "path": "memory/2026-05-17.md",
+      "startLine": 1,
+      "endLine": 18,
+      "source": "memory",
+      "snippet": "# 2026-05-17 ## Claw3D Performance Optimization + Nice Guy Towers (16:44-18:00) ### Performance Optimizations Made: 1. **agents.tsx** — Replaced per-frame `groupRef.current.traverse()` with direct `bodyLamberMatRefs` array for away-state opacity. Added shared `faceTextureCache` Map keyed by skin tone. Skip eye/mouth/face animation when `stateChanged` is false. 2. **visualSystems.tsx** — HeatmapSystem early return when `!heatmapMode`. TrailSystem only updates state when point count changes. 3. **sceneRuntime.tsx** — PingPongBall uses accumulated delta for phase instead of `Date.now()`. SpotlightEffect early return when no agent selected and light is off. 4. **cameraLighting.tsx** — DayNight",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-18T20:22:44.916Z",
+      "lastRecalledAt": "2026-05-18T20:22:44.916Z",
+      "queryHashes": [
+        "e4445330aac1"
+      ],
+      "recallDays": [
+        "2026-05-18"
+      ],
+      "conceptTags": [
+        "44-18",
+        "agents.tsx",
+        "per-frame",
+        "groupref.current.traverse",
+        "away-state",
+        "eye/mouth/face",
+        "visualsystems.tsx",
+        "sceneruntime.tsx"
+      ]
+    },
+    "memory:memory/2026-05-19.md:1:34": {
+      "key": "memory:memory/2026-05-19.md:1:34",
+      "path": "memory/2026-05-19.md",
+      "startLine": 1,
+      "endLine": 34,
+      "source": "memory",
+      "snippet": "# 2026-05-19 ## ⚠️ CRITICAL: Dashboard Theme Overhaul — THIRD ATTEMPT **Ghost has now requested this 3 times. This MUST NOT be forgotten again.** ### Request Details (EXACT): - Change the Perfect Dashboard theme from the current \"boring plain\" look to: - **Eye-catching, mechanically complex, high-tech, visually stunning** - Updated version number shown in the corner - Title should look unique and eye-catching - **Stunning mechanical animation effects** throughout - **High-tech moving parts** within the theme (gears, pistons, rotating elements, etc.) - Ghost loves seeing high-tech moving parts in the theme ### Context: - This is `C:\\Users\\kency\\perfect-dashboard\\` - Main files",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-19T13:38:14.804Z",
+      "lastRecalledAt": "2026-05-19T13:38:14.804Z",
+      "queryHashes": [
+        "5f0af9f525d4"
+      ],
+      "recallDays": [
+        "2026-05-19"
+      ],
+      "conceptTags": [
+        "eye-catching",
+        "high-tech",
+        "perfect-dashboard",
+        "critical",
+        "dashboard",
+        "theme",
+        "overhaul",
+        "third"
+      ]
+    },
+    "memory:memory/2026-05-14.md:1:12": {
+      "key": "memory:memory/2026-05-14.md:1:12",
+      "path": "memory/2026-05-14.md",
+      "startLine": 1,
+      "endLine": 12,
+      "source": "memory",
+      "snippet": "f=open(r'C:\\Users\\kency\\perfect-dashboard\\public\\index2.html','r',encoding='utf-8') h=f.read() f.close() import re pages=re.findall(r'id=\"page-([^\"]+)\"',h) navs=re.findall(r'data-page=\"([^\"]+)\"',h) print('Old dashboard pages:',sorted(set(pages))) print('Old dashboard navs:',sorted(set(navs))) # Count functions funcs=re.findall(r'function (\\w+)\\s*\\(',h) print('Functions:',len(funcs))",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-20T04:48:27.362Z",
+      "lastRecalledAt": "2026-05-20T04:48:27.362Z",
+      "queryHashes": [
+        "5cb1cb76b428"
+      ],
+      "recallDays": [
+        "2026-05-19"
+      ],
+      "conceptTags": [
+        "perfect-dashboard",
+        "index2.html",
+        "utf-8",
+        "f.read",
+        "f.close",
+        "re.findall",
+        "data-page",
+        "open"
+      ]
+    },
+    "memory:memory/2026-05-17.md:27:42": {
+      "key": "memory:memory/2026-05-17.md:27:42",
+      "path": "memory/2026-05-17.md",
+      "startLine": 27,
+      "endLine": 42,
+      "source": "memory",
+      "snippet": "- **Free roaming**: Removed `RESIDENT_AGENT_ROAM_PREFERENCES` and `RESIDENT_AGENT_SPAWN_POINTS` restrictions. All agents now pick from the full `ROAM_POINTS` array (expanded from 7 to 18 points covering the full office floor). - **Dynamic status**: Added `useEffect` with 8-second interval that toggles resident agents between \"working\" and \"idle\" status with offset phases, simulating real activity. - **Chat timeout**: Changed from 15s to 40s. - **Build**: ✅ PASSING, server running on port 3002. ### Round 3 Deep Optimization (02:07-02:30): - **AgentModel throttling**: Standing/idle agents now update every 3rd frame instead of every frame. Walking/active agents still update every frame. Positi",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-21T20:38:08.212Z",
+      "lastRecalledAt": "2026-05-21T20:38:08.212Z",
+      "queryHashes": [
+        "7de08509fdf1"
+      ],
+      "recallDays": [
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "resident-agent-roam-preferences",
+        "resident-agent-spawn-points",
+        "roam-points",
+        "8-second",
+        "07-02",
+        "standing/idle",
+        "walking/active",
+        "free"
+      ]
+    },
+    "memory:memory/2026-05-19.md:97:106": {
+      "key": "memory:memory/2026-05-19.md:97:106",
+      "path": "memory/2026-05-19.md",
+      "startLine": 97,
+      "endLine": 106,
+      "source": "memory",
+      "snippet": "3. Make sure server.js has Claw3D proxy route 4. Test thoroughly before telling Ghost it's done ## Lessons Learned - NEVER replace the entire CSS without testing incrementally - ALWAYS commit working state to git before making changes - The stacking context issue: `position:relative; z-index` on a parent traps children's z-index - BOM before doctype causes quirks mode which breaks everything - Ghost's working version was never in git — always backup before modifying",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-21T22:07:20.324Z",
+      "lastRecalledAt": "2026-05-21T22:07:20.324Z",
+      "queryHashes": [
+        "ef5341f2dfba"
+      ],
+      "recallDays": [
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "backup",
+        "server.js",
+        "z-index",
+        "sure",
+        "has",
+        "claw3d",
+        "proxy",
+        "route"
+      ]
+    },
+    "memory:memory/2026-05-19.md:74:103": {
+      "key": "memory:memory/2026-05-19.md:74:103",
+      "path": "memory/2026-05-19.md",
+      "startLine": 74,
+      "endLine": 103,
+      "source": "memory",
+      "snippet": "9. Fixed both issues but Ghost still reports tabs not working 10. Memory flush write restriction is now blocking all file writes ## Current State - Dashboard is running on port 3000 - Serving the v9 backup HTML with fixes applied - Ghost says tabs are still not clickable - Claw3D is running on port 3002 - Server.js has Claw3D proxy route ## What Needs To Be Done (when write access is restored) 1. Write a clean, complete index.html from scratch with: - NO BOM, starts with `<!DOCTYPE html>` - `.app` has NO `position:relative` or `z-index` - Sidebar has `position:fixed; z-index:100` - `.main` has `margin-left:240px` - `.content` has NO margin-left (it's inside .main which alrea",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-21T22:07:20.324Z",
+      "lastRecalledAt": "2026-05-21T22:07:20.324Z",
+      "queryHashes": [
+        "ef5341f2dfba"
+      ],
+      "recallDays": [
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "backup",
+        "server.js",
+        "index.html",
+        "z-index",
+        "margin-left",
+        "fixed",
+        "both",
+        "issues"
+      ]
+    },
+    "memory:memory/2026-05-19.md:54:83": {
+      "key": "memory:memory/2026-05-19.md:54:83",
+      "path": "memory/2026-05-19.md",
+      "startLine": 54,
+      "endLine": 83,
+      "source": "memory",
+      "snippet": "- **High-tech moving parts** within the theme (gears, pistons, rotating elements, etc.) - Ghost loves seeing high-tech moving parts in the theme ### Context: - This is `C:\\Users\\kency\\perfect-dashboard\\` - Main files: `public/index.html`, `public/app.js`, `public/style.css` (or similar) - Server: `server.js` on port 3000 - Ghost was extremely frustrated about having to repeat this request 3 times - **DO NOT fuck this up. DO NOT forget this again.** ## What Happened Today 1. Attempted v5.0 theme overhaul — replaced entire CSS with 1500+ lines of new CSS 2. This broke ALL functionality — tabs not clickable, chat broken, scrolling broken 3. Root cause: new CSS was incompatible with exist",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1,
+      "maxScore": 1,
+      "firstRecalledAt": "2026-05-21T22:25:55.110Z",
+      "lastRecalledAt": "2026-05-21T22:25:55.110Z",
+      "queryHashes": [
+        "700514d48628"
+      ],
+      "recallDays": [
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "high-tech",
+        "perfect-dashboard",
+        "public/index.html",
+        "public/app.js",
+        "public/style.css",
+        "server.js",
+        "v5.0",
+        "high"
+      ]
+    }
+  }
+}

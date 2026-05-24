@@ -1,0 +1,164 @@
+
+// === MEMORY & HISTORY ===
+let currentDailyPage = 0;
+let currentChatOffset = 0;
+const CHAT_PAGE_SIZE = 50;
+
+function loadMemoryData() {
+  // Load MEMORY.md
+  f(`${API}/api/memory`).then(d => {
+    const el = document.getElementById('memory-content');
+    const meta = document.getElementById('memory-file-meta');
+    if (d.success && d.content) {
+      el.textContent = d.content;
+      meta.textContent = d.lastModified ? `Last updated: ${fd(d.lastModified)}` : 'Just created';
+    } else if (d.error) {
+      el.textContent = `# Error\n\nCould not load MEMORY.md\n\n${d.error}`;
+    }
+  }).catch(() => {
+    document.getElementById('memory-content').textContent = '# Error\n\nCould not connect to server';
+  });
+
+  // Load daily files list
+  f(`${API}/api/memory/daily`).then(d => {
+    const list = document.getElementById('daily-files-list');
+    if (!d.success || !d.files || d.files.length === 0) {
+      list.innerHTML = '<div class="empty"><div class="icon">📭</div><span>No daily log files found</span></div>';
+      return;
+    }
+    list.innerHTML = d.files.map(f => `
+      <div class="daily-file-item" onclick="loadDailyFile('${f.date}')">
+        <span class="daily-file-icon">📄</span>
+        <div class="daily-file-info">
+          <div class="daily-file-date">${f.date}</div>
+          <div class="daily-file-meta">${(f.size / 1024).toFixed(1)} KB • ${fd(f.lastModified)}</div>
+        </div>
+      </div>`).join('');
+  }).catch(() => {
+    document.getElementById('daily-files-list').innerHTML = '<div class="empty">Could not load daily files</div>';
+  });
+
+  // Load chat history
+  loadChatHistory();
+
+  // Load task history
+  f(`${API}/api/memory/tasks?limit=30`).then(d => {
+    const list = document.getElementById('task-history-list');
+    if (!d.success || !d.tasks || d.tasks.length === 0) {
+      list.innerHTML = '<div class="empty"><div class="icon">📋</div><span>No completed tasks yet</span></div>';
+      return;
+    }
+    list.innerHTML = d.tasks.map(t => {
+      const xpGain = 25;
+      return `<div class="task-history-item">
+        <span class="th-icon">✅</span>
+        <div class="th-info">
+          <div class="th-title">#${t.id} ${t.title}</div>
+          <div class="th-meta">${t.assignee ? t.assignee + ' • ' : ''}${fd(t.completed_at || t.updated_at)}</div>
+        </div>
+        <span class="th-xp">+${xpGain} XP</span>
+      </div>`;
+    }).join('');
+  }).catch(() => {
+    document.getElementById('task-history-list').innerHTML = '<div class="empty">Could not load task history</div>';
+  });
+}
+
+function loadChatHistory(append = false) {
+  if (!append) currentChatOffset = 0;
+  f(`${API}/api/memory/chat?limit=${CHAT_PAGE_SIZE}&offset=${currentChatOffset}`).then(d => {
+    const list = document.getElementById('chat-history-list');
+    if (!d.success || !d.messages || d.messages.length === 0) {
+      if (!append) list.innerHTML = '<div class="empty"><div class="icon">💬</div><span>No chat history yet</span></div>';
+      return;
+    }
+    const msgs = d.messages.map(m => `
+      <div class="chat-history-msg">
+        <span class="ch-sender">${m.sender}</span>
+        <span class="ch-text">${esc(m.message)}</span>
+        <span class="ch-time">${ft(m.timestamp)}</span>
+      </div>`).join('');
+    if (append) {
+      list.innerHTML += msgs;
+    } else {
+      list.innerHTML = msgs;
+    }
+    currentChatOffset += d.messages.length;
+    if (!d.hasMore) {
+      list.innerHTML += '<div class="empty" style="padding:8px;font-size:9px;color:var(--muted)">— End of history —</div>';
+    }
+  }).catch(() => {
+    if (!append) document.getElementById('chat-history-list').innerHTML = '<div class="empty">Could not load chat history</div>';
+  });
+}
+
+function loadMoreChat() {
+  loadChatHistory(true);
+}
+
+function loadDailyFile(date) {
+  const contentEl = document.getElementById('daily-content');
+  contentEl.style.display = 'block';
+  contentEl.textContent = 'Loading...';
+  f(`${API}/api/memory/daily/${date}`).then(d => {
+    contentEl.textContent = d.content || '# ' + date + '\n\n(Empty)';
+  }).catch(() => {
+    contentEl.textContent = 'Could not load daily file';
+  });
+}
+
+function searchMemory() {
+  const q = document.getElementById('memory-search').value.trim();
+  if (!q) return;
+  const resultsList = document.getElementById('search-results-list');
+  const resultsMeta = document.getElementById('search-results-meta');
+  const searchTab = document.getElementById('search-tab');
+  const searchCount = document.getElementById('search-count');
+  resultsList.innerHTML = '<div class="empty"><div class="icon">🔍</div><span>Searching...</span></div>';
+  document.getElementById('search-results').classList.add('active');
+  document.querySelectorAll('.memory-tab').forEach(t => t.classList.remove('active'));
+  searchTab.style.display = 'flex';
+  searchTab.classList.add('active');
+  f(`${API}/api/memory/search?q=${encodeURIComponent(q)}`).then(d => {
+    if (!d.success || !d.results || d.results.length === 0) {
+      resultsList.innerHTML = `<div class="empty"><div class="icon">🔍</div><span>No results for "${esc(q)}"</span></div>`;
+      searchCount.textContent = '(0)';
+      return;
+    }
+    searchCount.textContent = `(${d.total})`;
+    resultsMeta.textContent = `Found ${d.total} results for "${q}"`;
+    resultsList.innerHTML = d.results.map(r => `
+      <div class="search-result-item">
+        <span class="search-result-source">${r.source}</span>
+        <span class="search-result-text">${esc(r.text)}</span>
+      </div>`).join('');
+  }).catch(() => {
+    resultsList.innerHTML = '<div class="empty">Search failed</div>';
+  });
+
+  // Also search chat
+  f(`${API}/api/memory/chat?limit=20&offset=0&search=${encodeURIComponent(q)}`).then(d => {
+    if (d.success && d.messages && d.messages.length > 0) {
+      // Chat results would be appended, but search API handles this
+    }
+  }).catch(() => {});
+}
+
+function switchMemoryTab(tab) {
+  document.querySelectorAll('.memory-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.memory-tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector('.memory-tab[data-tab="' + tab + '"]').classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'search-results') {
+    document.getElementById('search-tab').style.display = 'flex';
+  }
+}
+
+// Auto-load memory data when navigated to
+const origNavTo2 = navTo;
+navTo = function(page) {
+  origNavTo2(page);
+  if (page === 'memory') {
+    setTimeout(loadMemoryData, 300);
+  }
+};

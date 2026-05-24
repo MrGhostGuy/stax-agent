@@ -1,0 +1,3 @@
+@echo off
+echo 🏗️  Starting Stax Scheduler...
+node scheduler.js

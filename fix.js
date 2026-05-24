@@ -1,0 +1,5 @@
+var fs = require('fs')  
+var html = fs.readFileSync('C:\\Users\\kency\\perfect-dashboard\\public\\index2.html', 'utf8')  
+html = html.replace('class=\\" page "active\', 'class=\page\')  
+fs.writeFileSync('C:\\Users\\kency\\perfect-dashboard\\public\\index2.html', html)  
+console.log('Done:', html.length) 

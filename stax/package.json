@@ -1,0 +1,15 @@
+{
+  "name": "stax",
+  "version": "1.0.0",
+  "description": "Autonomous money-making opportunity agent",
+  "main": "stax.js",
+  "scripts": {
+    "start": "node stax.js",
+    "scout": "node stax.js --scout",
+    "briefing": "node stax.js --briefing",
+    "kalshi": "node stax.js --kalshi"
+  },
+  "dependencies": {
+    "node-cron": "^3.0.3"
+  }
+}

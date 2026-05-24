@@ -1,0 +1,12 @@
+use_default_settings: true
+
+server:
+  port: 8080
+  bind_address: "0.0.0.0"
+
+botdetection:
+  ip_limit:
+    link_token: false
+  ip_lists:
+    pass_ips: []
+    block_ips: []

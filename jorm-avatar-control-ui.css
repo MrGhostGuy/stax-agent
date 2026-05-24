@@ -1,0 +1,58 @@
+/* Jorm Avatar for OpenClaw Control UI */
+/* Add this via browser console or user style extension */
+
+openclaw-app::part(jorm-avatar-container) {
+  position: fixed;
+  top: 8px;
+  right: 120px;
+  z-index: 9999;
+  font-size: 24px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  animation: jorm-pulse 2s infinite;
+}
+
+@keyframes jorm-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+openclaw-app::part(jorm-avatar-container).thinking {
+  animation: jorm-think 1s infinite;
+  filter: drop-shadow(0 0 8px #0ff);
+}
+
+@keyframes jorm-think {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+}
+
+/* Inject script to add avatar element */
+/* Run this in browser console or create a bookmarklet:
+(function() {
+  const app = document.querySelector('openclaw-app');
+  if (!app || app.querySelector('#jorm-avatar')) return;
+  
+  const avatar = document.createElement('div');
+  avatar.id = 'jorm-avatar';
+  avatar.textContent = '🦑';
+  avatar.title = 'Jorm - AI Familiar';
+  avatar.style.cssText = 'position:fixed;top:8px;right:120px;z-index:9999;font-size:24px;cursor:pointer;transition:transform 0.3s;animation:jorm-pulse 2s infinite;';
+  
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes jorm-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+    @keyframes jorm-think { 0%,100%{transform:rotate(0deg)} 25%{transform:rotate(-10deg)} 75%{transform:rotate(10deg)} }
+    #jorm-avatar.thinking { animation:jorm-think 1s infinite; filter:drop-shadow(0 0 8px #0ff); }
+  `;
+  document.head.appendChild(style);
+  document.body.appendChild(avatar);
+  
+  window.JormAvatar = {
+    setState: s => avatar.className = s,
+    setIdle: () => avatar.classList.remove('thinking'),
+    setThinking: () => avatar.classList.add('thinking')
+  };
+})();
+*/

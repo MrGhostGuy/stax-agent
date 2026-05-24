@@ -1,0 +1,63 @@
+<!-- MEMORY & HISTORY -->
+<div class="page" id="page-memory">
+  <div class="memory-layout">
+    <!-- Search Bar -->
+    <div class="memory-search-bar">
+      <div class="memory-search-input-wrap">
+        <span class="memory-search-icon">🔍</span>
+        <input type="text" class="memory-search-input" id="memory-search" placeholder="Search memory, daily logs, chat history, tasks..." onkeydown="if(event.key==='Enter')searchMemory()">
+        <button class="btn btn-primary btn-sm" onclick="searchMemory()">Search</button>
+      </div>
+    </div>
+    <!-- Tabs -->
+    <div class="memory-tabs">
+      <div class="memory-tab active" data-tab="memory" onclick="switchMemoryTab('memory')">🧠 Memory</div>
+      <div class="memory-tab" data-tab="daily" onclick="switchMemoryTab('daily')">📅 Daily Logs</div>
+      <div class="memory-tab" data-tab="chat" onclick="switchMemoryTab('chat')">💬 Chat History</div>
+      <div class="memory-tab" data-tab="tasks" onclick="switchMemoryTab('tasks')">✅ Task History</div>
+      <div class="memory-tab" data-tab="search-results" onclick="switchMemoryTab('search-results')" id="search-tab" style="display:none">🔎 Results <span id="search-count"></span></div>
+    </div>
+    <!-- Tab Content -->
+    <div class="memory-content">
+      <!-- Memory Tab -->
+      <div class="memory-tab-content active" id="tab-memory">
+        <div class="memory-section-header">
+          <div class="memory-section-title">MEMORY.md</div>
+          <div class="memory-section-meta" id="memory-file-meta"></div>
+        </div>
+        <div class="memory-md-content" id="memory-content">Loading...</div>
+      </div>
+      <!-- Daily Logs Tab -->
+      <div class="memory-tab-content" id="tab-daily">
+        <div class="memory-section-header">
+          <div class="memory-section-title">Daily Logs</div>
+        </div>
+        <div class="daily-files-list" id="daily-files-list">Loading...</div>
+        <div class="memory-md-content" id="daily-content" style="display:none"></div>
+      </div>
+      <!-- Chat History Tab -->
+      <div class="memory-tab-content" id="tab-chat">
+        <div class="memory-section-header">
+          <div class="memory-section-title">Chat History</div>
+          <button class="btn btn-secondary btn-sm" onclick="loadMoreChat()">Load More</button>
+        </div>
+        <div class="chat-history-list" id="chat-history-list">Loading...</div>
+      </div>
+      <!-- Task History Tab -->
+      <div class="memory-tab-content" id="tab-tasks">
+        <div class="memory-section-header">
+          <div class="memory-section-title">Completed Tasks</div>
+        </div>
+        <div class="task-history-list" id="task-history-list">Loading...</div>
+      </div>
+      <!-- Search Results Tab -->
+      <div class="memory-tab-content" id="tab-search-results">
+        <div class="memory-section-header">
+          <div class="memory-section-title">Search Results</div>
+          <div class="memory-section-meta" id="search-results-meta"></div>
+        </div>
+        <div class="search-results-list" id="search-results-list"></div>
+      </div>
+    </div>
+  </div>
+</div>

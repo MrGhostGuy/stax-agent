@@ -1,0 +1,62 @@
+// === MEMORY & HISTORY ===
+let currentDailyPage = 0;
+let currentChatOffset = 0;
+const CHAT_PAGE_SIZE = 50;
+
+function loadMemoryData() {
+  // Load MEMORY.md
+  f(`${API}/api/memory`).then(d => {
+    const el = document.getElementById('memory-content');
+    const meta = document.getElementById('memory-file-meta');
+    if (d.success && d.content) {
+      el.textContent = d.content;
+      meta.textContent = d.lastModified ? `Last updated: ${fd(d.lastModified)}` : 'Just created';
+    } else if (d.error) {
+      el.textContent = `# Error\n\nCould not load MEMORY.md\n\n${d.error}`;
+    }
+  }).catch(() => {
+    document.getElementById('memory-content').textContent = '# Error\n\nCould not connect to server';
+  });
+
+  // Load daily files list
+  f(`${API}/api/memory/daily`).then(d => {
+    const list = document.getElementById('daily-files-list');
+    if (!d.success || !d.files || d.files.length === 0) {
+      list.innerHTML = '<div class="empty"><div class="icon">📭</div><span>No daily log files found</span></div>';
+      return;
+    }
+    list.innerHTML = d.files.map(f => `
+      <div class="daily-file-item" onclick="loadDailyFile('${f.date}')">
+        <span class="daily-file-icon">📄</span>
+        <div class="daily-file-info">
+          <div class="daily-file-date">${f.date}</div>
+          <div class="daily-file-meta">${(f.size / 1024).toFixed(1)} KB • ${fd(f.lastModified)}</div>
+        </div>
+      </div>`).join('');
+  }).catch(() => {
+    document.getElementById('daily-files-list').innerHTML = '<div class="empty">Could not load daily files</div>';
+  });
+
+  // Load deliverables
+  f(`${API}/api/deliverables?limit=30`).then(d => {
+    const list = document.getElementById('deliverables-list');
+    if (list && (!d.success || !d.deliverables || d.deliverables.length === 0)) {
+      list.innerHTML = '<div class="empty"><div class="icon">📦</div><span>No deliverables yet</span></div>';
+    } else if (list && d.deliverables) {
+      list.innerHTML = d.deliverables.map(dl => `
+        <div class="deliverable-item">
+          <div class="dl-icon">📄</div>
+          <div class="dl-info">
+            <div class="dl-title">${dl.title}</div>
+            <div class="dl-meta">${dl.category} • ${fd(dl.createdAt)}</div>
+            <div class="dl-preview">${(dl.content || '').substring(0, 120)}${dl.content && dl.content.length > 120 ? '...' : ''}</div>
+          </div>
+          <span class="dl-status ${dl.status}">${dl.status}</span>
+        </div>`).join('');
+    }
+  }).catch(() => {});
+
+  // Load chat history
+  loadChatHistory();
+
+  // Load task history

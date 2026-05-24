@@ -1,0 +1,75 @@
+// === JORM AVATAR 2.0 ===
+const avatarEl=document.getElementById('jorm-avatar');
+const speechEl=document.getElementById('jorm-speech');
+let avatarState='idle';
+let speechTimer=null;
+let randomIdleTimer=null;
+const avatarStates=['idle','thinking','writing','working','excited','error','sleeping'];
+const speechTexts={
+  idle:['Hey Jeff! 🦑',"What's up?",'Ready to work!','What can I do?','Listening...'],
+  thinking:['Hmm...','Let me think...','Processing...','Analyzing...','One sec...'],
+  writing:['Typing it up...','Crafting response...','Writing...','Almost there...'],
+  working:['On it!','Working...',"Executing...",'Getting it done...','Crunching...'],
+  excited:['Awesome! 🎉','Nice one!',"Love it! ✨","That's cool!",'Sweet!'],
+  error:['Oops! 😅','Hmm, that broke...','Let me fix that...','Something went wrong...'],
+  sleeping:['Zzz...','💤','...'],
+  eating:["Nom nom nom 🍕",'Mmm, delicious! 🍔',"Can't stop eating 🌮",'Is that pizza? 🍕'],
+  smoking:['😮‍💨','Puff puff...','Just one more...','*cough*','Breathing out clouds 🌫️'],
+  angry:['Grrr! 😡','Not cool!','So frustrated! 💢','Ugh, come on!','I told you already! 😤']};
+
+function setAvatarState(state){
+  if(!avatarEl)return;
+  const allStates=['idle','thinking','writing','working','excited','error','sleeping','eating','smoking','angry'];
+  allStates.forEach(s=>avatarEl.classList.remove(s));
+  avatarEl.classList.add(state);
+  avatarState=state;
+  const texts=speechTexts[state]||speechTexts.idle;
+  const text=texts[Math.floor(Math.random()*texts.length)];
+  if(speechEl){
+    speechEl.textContent=text;
+    speechEl.classList.add('show');
+    if(speechTimer)clearTimeout(speechTimer);
+    speechTimer=setTimeout(()=>speechEl.classList.remove('show'),3000);
+  }
+  scheduleRandomIdle();
+}
+
+function scheduleRandomIdle(){
+  if(randomIdleTimer)clearTimeout(randomIdleTimer);
+  // Only pick random fun states when already idle
+  if(avatarState!=='idle')return;
+  // Random interval between 30-90 seconds
+  const delay=30000+Math.random()*60000;
+  randomIdleTimer=setTimeout(()=>{
+    if(avatarState!=='idle')return;
+    const funStates=['eating','smoking','angry'];
+    const pick=funStates[Math.floor(Math.random()*funStates.length)];
+    setAvatarState(pick);
+    // Hold the fun state for 5-10 seconds then go back to idle
+    setTimeout(()=>setAvatarState('idle'),5000+Math.random()*5000);
+  },delay);
+}
+
+avatarEl.addEventListener('click',()=>{
+  const funStates=['eating','smoking','angry'];
+  const pick=funStates[Math.floor(Math.random()*funStates.length)];
+  setAvatarState(pick);
+  setTimeout(()=>setAvatarState('idle'),4000);
+});
+
+function resetIdleTimer(){
+  scheduleRandomIdle();
+}
+
+const origSendChat=sendChat;
+sendChat=function(){setAvatarState('thinking');resetIdleTimer();return origSendChat.apply(this,arguments)};
+const origAppendChat=appendChat;
+appendChat=function(msg,scroll){
+  if(msg.sender==='Jorm'){setAvatarState('writing');setTimeout(()=>setAvatarState('idle'),2000);}
+  else if(msg.sender==='Ghost'){setAvatarState('thinking');}
+  resetIdleTimer();
+  return origAppendChat.apply(this,arguments);
+};
+
+// Start the random idle cycle
+setAvatarState('idle');
