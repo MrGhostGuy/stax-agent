@@ -520,7 +520,7 @@
         <li>Community support</li>
         <li>Basic analytics</li>
       </ul>
-      <a href="#" class="btn btn-ghost" style="width:100%;justify-content:center">Get Started</a>
+      <a href="#get-started" class="btn btn-ghost" style="width:100%;justify-content:center">Get Started</a>
     </div>
     <div class="pricing-card featured">
       <h3>Pro</h3>
@@ -534,7 +534,7 @@
         <li>Auto-failover</li>
         <li>Custom rate limits</li>
       </ul>
-      <a href="#" class="btn btn-primary" style="width:100%;justify-content:center">Start Free Trial</a>
+      <a href="#get-started" class="btn btn-primary" style="width:100%;justify-content:center">Start Free Trial</a>
     </div>
     <div class="pricing-card">
       <h3>Scale</h3>
@@ -549,18 +549,39 @@
         <li>SLA guarantee</li>
         <li>IP allowlisting</li>
       </ul>
-      <a href="#" class="btn btn-ghost" style="width:100%;justify-content:center">Contact Sales</a>
+      <a href="mailto:ghost@ghostapi.dev" class="btn btn-ghost" style="width:100%;justify-content:center">Contact Sales</a>
     </div>
   </div>
 </section>
 
-<section class="cta" id="get-started">
-  <div class="cta-box">
-    <h2>Ready to <span class="gradient">Ghost</span> Your API Chaos?</h2>
-    <p>Join the private beta. Get 10,000 free requests. No credit card required.</p>
-    <div class="hero-buttons">
-      <a href="#" class="btn btn-primary">Claim Your API Key →</a>
-      <a href="#" class="btn btn-ghost">Read the Docs</a>
+<section class="quick-start" id="get-started" style="padding:120px 20px;text-align:center">
+  <div class="container" style="max-width:800px;margin:0 auto">
+    <div class="section-label">Quick Start</div>
+    <h2 class="section-title">Up and Running in <span class="gradient">30 Seconds</span></h2>
+    <p class="section-subtitle">One endpoint. Every AI model. Zero config switching.</p>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin:40px 0;text-align:left;font-family:'JetBrains Mono','Fira Code',monospace;font-size:13px;line-height:1.8;overflow-x:auto">
+      <div style="color:var(--muted);margin-bottom:12px"># 1. Get your free API key (no signup required)</div>
+      <div style="color:#7c5cfc">curl</span> <span style="color:#a855f7">-X POST</span> <span style="color:#6366f1">https://ghostapi.dev/admin/keys</span> <span style="color:#8a8a9a">\</span></div>
+      <div style="padding-left:20px;color:#8a8a9a">-H <span style="color:#6366f1">"X-Admin-Secret: your-secret"</span> <span style="color:#8a8a9a">\</span></div>
+      <div style="padding-left:20px;color:#8a8a9a">-H <span style="color:#6366f1">"Content-Type: application/json"</span> <span style="color:#8a8a9a">\</span></div>
+      <div style="padding-left:20px;color:#8a8a9a">-d <span style="color:#6366f1">'{"name":"My App","tier":"free"}'</span></div>
+
+      <div style="color:var(--muted);margin:20px 0 12px"># 2. Make your first request — works with any OpenAI SDK</div>
+      <div style="color:#7c5cfc">curl</span> <span style="color:#a855f7">https://ghostapi.dev/v1/chat/completions</span> <span style="color:#8a8a9a">\</span></div>
+      <div style="padding-left:20px;color:#8a8a9a">-H <span style="color:#6366f1">"X-API-Key: gsk_live_..."</span> <span style="color:#8a8a9a">\</span></div>
+      <div style="padding-left:20px;color:#8a8a9a">-H <span style="color:#6366f1">"Content-Type: application/json"</span> <span style="color:#8a8a9a">\</span></div>
+      <div style="padding-left:20px;color:#8a8a9a">-d <span style="color:#6366f1">'{</span></div>
+      <div style="padding-left:40px;color:#8a8a9a"><span style="color:#6366f1">"model":</span> "openrouter/anthropic/claude-sonnet-4",</div>
+      <div style="padding-left:40px;color:#8a8a9a"><span style="color:#6366f1">"messages":</span> [{"role":"user","content":"Hello!"}]</div>
+      <div style="padding-left:20px;color:#8a8a9a"><span style="color:#6366f1">}'</span></div>
+    </div>
+
+    <p style="color:var(--muted);font-size:14px">Works with the <strong>official OpenAI SDKs</strong> for Python, JS, Go, and more — just change the base URL.</p>
+
+    <div style="margin-top:32px">
+      <a href="/docs" class="btn btn-primary">API Docs</a>
+      <a href="https://github.com/MrGhostGuy/stax-agent" target="_blank" class="btn btn-ghost">View on GitHub</a>
     </div>
   </div>
 </section>
