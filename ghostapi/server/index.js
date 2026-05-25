@@ -322,7 +322,7 @@ app.post('/v1/chat/completions', authenticate, async (req, res) => {
     const result = await proxyToProvider(provider, resolvedModel, messages, stream);
 
     // Update usage
-    db.prepare('UPDATE api_keys SET monthly_used = monthly_used + 1, total_requests = total_requests + 1, last_used_at = datetime("now") WHERE id = ?')
+    db.prepare('UPDATE api_keys SET monthly_used = monthly_used + 1, total_requests = total_requests + 1, last_used_at = datetime('now') WHERE id = ?')
       .run(req.apiKey.id);
 
     db.prepare('INSERT INTO usage_log (api_key_id, model, provider, status, latency_ms) VALUES (?, ?, ?, ?, ?)')
