@@ -8,6 +8,28 @@ Remember:
 - Development studio building high-quality apps and games specifically for Rabbit R1 devices with seamless QR deployment
 - Architect and code native R1 apps and games
 
+## Active Projects (2026-05-25)
+
+### Stax — Autonomous Money-Making Agent
+- Repo: `MrGhostGuy/stax-agent` (GitHub)
+- Location: `C:\Users\kency\.openclaw\workspace\stax\`
+- Modules: Opportunity Scout, Kalshi Scanner, Briefing Engine, Execution Tracker, Capital Deployer
+- Kalshi API: Migrated from gamma-api v1 to Trade API v2 (`external-api.kalshi.com/trade-api/v2`)
+- Cron: Daily briefing at 8 AM CT, midday scan at 2 PM CT
+- Capital Deployer: LOCKED by default (safety feature)
+- DB: SQLite at `stax/data/stax.db` (gitignored)
+
+### GhostAPI — Premium AI Model Gateway
+- Landing page: `ghostapi/index.html`
+- Deployed: https://mrghostguy.github.io/stax-agent/
+- GitHub Pages via gh-pages branch with Actions workflow
+- Status: Live, in "Private Beta" positioning
+
+### GitHub
+- Remote: `https://github.com/MrGhostGuy/stax-agent`
+- Branches: `master` (code), `gh-pages` (GhostAPI landing page)
+- User: MrGhostGuy (Jeff Hollaway / GhostLegacyX)
+
 ## Exec Policy (set 2026-05-24)
 
 - User has given FULL permission to run all exec commands without approval
