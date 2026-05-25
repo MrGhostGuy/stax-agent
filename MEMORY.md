@@ -20,10 +20,13 @@ Remember:
 - DB: SQLite at `stax/data/stax.db` (gitignored)
 
 ### GhostAPI — Premium AI Model Gateway
-- Landing page: `ghostapi/index.html`
-- Deployed: https://mrghostguy.github.io/stax-agent/
-- GitHub Pages via gh-pages branch with Actions workflow
-- Status: Live, in "Private Beta" positioning
+- Landing page: `ghostapi/index.html` → https://mrghostguy.github.io/stax-agent/
+- API server: https://ghostapi-1v1f.onrender.com (Render.com, free tier)
+- GitHub Pages (landing) + Render (API) with auto-deploy from master
+- Status: **LIVE** — Auth, proxy, admin panel, rate limiting all working
+- OpenRouter account needs credits for live AI completions
+- Admin key: gsk_live_d04... (scale tier, stored in Render env)
+- GHOSTAPI_SECRET: ghost-2026-secret-key-change-me
 
 ### GitHub
 - Remote: `https://github.com/MrGhostGuy/stax-agent`
