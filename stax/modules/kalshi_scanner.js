@@ -5,26 +5,26 @@ const { getDb } = require('../lib/db'); const db = getDb();
  * Monitors Kalshi markets for mispriced odds and betting edges.
  * 
  * Kalshi API docs: https://docs.kalshi.com/
- * Public Gamma API for market data.
+ * Trade API v2: https://external-api.kalshi.com/trade-api/v2
+ * Public market data — no auth required.
  */
 class KalshiScanner {
   constructor() {
-    this.baseUrl = 'https://gamma-api.kalshi.com';
-    this.eventUrl = 'https://gamma-api.kalshi.com/events';
-    this.marketsUrl = 'https://gamma-api.kalshi.com/markets';
+    this.baseUrl = 'https://external-api.kalshi.com/trade-api/v2';
   }
 
   /**
-   * Fetch active markets from Kalshi.
+   * Fetch open markets from Kalshi Trade API v2.
    */
-  async fetchMarkets(limit = 100, status = 'active') {
+  async fetchMarkets(limit = 100, status = 'open') {
     try {
-      const url = `${this.marketsUrl}?limit=${limit}&status=${status}`;
+      const url = `${this.baseUrl}/markets?limit=${limit}&status=${status}`;
       const res = await fetch(url, {
         headers: { 'User-Agent': 'Stax-Agent/1.0' }
       });
       if (!res.ok) throw new Error(`Kalshi API: ${res.status}`);
-      return await res.json();
+      const data = await res.json();
+      return data.markets || data || [];
     } catch (err) {
       console.log('[Kalshi] Fetch markets error:', err.message);
       return [];
@@ -32,16 +32,17 @@ class KalshiScanner {
   }
 
   /**
-   * Fetch events with their markets.
+   * Fetch events with nested markets included.
    */
   async fetchEvents(limit = 50) {
     try {
-      const url = `${this.eventUrl}?limit=${limit}&active=true&closed=false`;
+      const url = `${this.baseUrl}/events?limit=${limit}&with_nested_markets=true`;
       const res = await fetch(url, {
         headers: { 'User-Agent': 'Stax-Agent/1.0' }
       });
       if (!res.ok) throw new Error(`Kalshi Events API: ${res.status}`);
-      return await res.json();
+      const data = await res.json();
+      return data.events || data || [];
     } catch (err) {
       console.log('[Kalshi] Fetch events error:', err.message);
       return [];
@@ -53,7 +54,7 @@ class KalshiScanner {
    */
   async fetchMarketDetail(ticker) {
     try {
-      const url = `${this.marketsUrl}/${ticker}`;
+      const url = `${this.baseUrl}/markets/${ticker}`;
       const res = await fetch(url, {
         headers: { 'User-Agent': 'Stax-Agent/1.0' }
       });
@@ -73,28 +74,36 @@ class KalshiScanner {
    * Positive edge means the market is mispriced in our favor.
    */
   analyzeMarket(market) {
-    const yesBid = market.yes_bid || 0;
-    const yesAsk = market.yes_ask || 0;
-    const noBid = market.no_bid || 0;
-    const noAsk = market.no_ask || 0;
-    const lastPrice = market.last_trade_price || 0;
-    const volume = market.volume || 0;
-    const title = market.title || '';
+    // v2 API returns dollar prices (e.g. 0.45 = 45 cents)
+    // Some market types (multivariate) may not have standard fields
+    const yesBid = parseFloat(market.yes_bid_dollars || market.yes_bid || 0);
+    const yesAsk = parseFloat(market.yes_ask_dollars || market.yes_ask || 0);
+    const noBid = parseFloat(market.no_bid_dollars || market.no_bid || 0);
+    const noAsk = parseFloat(market.no_ask_dollars || market.no_ask || 0);
+    const lastPrice = parseFloat(market.last_trade_price_dollars || market.last_trade_price || 0);
+    const volume = parseFloat(market.volume || market.volume_fp || 0);
+    const title = market.title || market.event_title || '';
     const subtitle = market.subtitle || '';
+    const ticker = market.ticker || market.id || '';
 
-    // Market implied probability (midpoint of yes bid/ask)
+    // Skip markets with no usable price data
+    if (yesBid === 0 && yesAsk === 0 && lastPrice === 0) {
+      return null;
+    }
+
+    // Market implied probability (midpoint of yes bid/ask in probability [0-1])
     const marketYesProb = yesBid > 0 && yesAsk > 0
-      ? (yesBid + yesAsk) / 2 / 100
-      : lastPrice > 0 ? lastPrice / 100 : 0.5;
+      ? (yesBid + yesAsk) / 2
+      : lastPrice > 0 ? lastPrice : 0.5;
 
     // Stax's calculated probability based on analysis
-    const staxProb = this._calculateProbability(market);
+    const staxProb = this._calculateProbability(market, yesBid, yesAsk, volume);
 
     // Edge is the difference
     const edge = staxProb - marketYesProb;
 
     // Confidence based on data quality and volume
-    const confidence = this._calculateConfidence(market, volume);
+    const confidence = this._calculateConfidence(market, volume, yesBid, yesAsk);
 
     // Recommendation
     let recommendation = 'neutral';
@@ -104,7 +113,7 @@ class KalshiScanner {
     else if (edge < -0.05 && confidence > 40) recommendation = 'lean_no';
 
     return {
-      market_id: market.ticker || market.id,
+      market_id: ticker,
       title,
       subtitle,
       yes_bid: yesBid,
@@ -119,7 +128,7 @@ class KalshiScanner {
       edge_direction: edge > 0 ? 'yes' : 'no',
       confidence,
       recommendation,
-      reasoning: this._generateReasoning(market, staxProb, marketYesProb, edge)
+      reasoning: this._generateReasoning(title, staxProb, marketYesProb, edge, volume)
     };
   }
 
@@ -127,26 +136,21 @@ class KalshiScanner {
    * Calculate probability for a market outcome.
    * Uses multiple signals: market structure, volume, category analysis.
    */
-  _calculateProbability(market) {
+  _calculateProbability(market, yesBid, yesAsk, volume) {
     const title = (market.title || '').toLowerCase();
     const subtitle = (market.subtitle || '').toLowerCase();
     const combined = `${title} ${subtitle}`;
-    const volume = market.volume || 0;
-    const yesBid = market.yes_bid || 0;
-    const yesAsk = market.yes_ask || 0;
 
-    // Start with market midpoint as baseline
+    // Start with market midpoint as baseline (already in probability)
     let prob = yesBid > 0 && yesAsk > 0
-      ? (yesBid + yesAsk) / 2 / 100
+      ? (yesBid + yesAsk) / 2
       : 0.5;
 
     // --- Category-based adjustments ---
 
     // Sports markets: check for heavy favorites
     if (combined.includes('win') || combined.includes('beat') || combined.includes('defeat')) {
-      // Look for heavy favorite indicators
       if (combined.includes('vs') || combined.includes('over') || combined.includes('under')) {
-        // Slight lean toward market price for sports (efficient market)
         prob = prob * 0.95 + 0.5 * 0.05;
       }
     }
@@ -160,7 +164,6 @@ class KalshiScanner {
 
     // Economic/macro markets
     if (combined.includes('fed') || combined.includes('interest rate') || combined.includes('inflation') || combined.includes('gdp')) {
-      // Markets tend to underprice Fed decisions — slight mean reversion
       if (combined.includes('raise') || combined.includes('increase')) {
         prob = prob * 0.9 + 0.5 * 0.1;
       }
@@ -168,48 +171,39 @@ class KalshiScanner {
 
     // Weather/natural events
     if (combined.includes('hurricane') || combined.includes('temperature') || combined.includes('snow') || combined.includes('rain')) {
-      // Weather markets are generally efficient, stay close to market price
       prob = prob * 0.95 + 0.5 * 0.05;
     }
 
     // Volume-based confidence adjustment
-    // Higher volume = more efficient market = trust market price more
     if (volume > 100000) {
-      prob = prob * 0.7 + (yesBid > 0 && yesAsk > 0 ? (yesBid + yesAsk) / 2 / 100 : 0.5) * 0.3;
+      prob = prob * 0.7 + (yesBid > 0 && yesAsk > 0 ? (yesBid + yesAsk) / 2 : 0.5) * 0.3;
     } else if (volume < 1000) {
-      // Low volume = potentially mispriced = more weight on our analysis
       prob = prob * 0.8 + 0.5 * 0.2;
     }
 
-    // Time-based: markets close to resolution tend to be more accurate
-    // (This would need event date data from the API)
-
-    return Math.max(0.05, Math.min(0.95, prob));
+    const result = Math.max(0.05, Math.min(0.95, prob));
+    if (isNaN(result) || !isFinite(result)) return 0.5;
+    return result;
   }
 
   /**
    * Calculate confidence in our analysis.
    */
-  _calculateConfidence(market, volume) {
-    let confidence = 40; // Base confidence
+  _calculateConfidence(market, volume, yesBid, yesAsk) {
+    let confidence = 40;
 
-    // Volume increases confidence (more data)
     if (volume > 50000) confidence += 15;
     else if (volume > 10000) confidence += 10;
     else if (volume > 1000) confidence += 5;
     else confidence -= 10;
 
-    // Spread tightness (tight spread = more efficient = higher confidence in market price)
-    const yesBid = market.yes_bid || 0;
-    const yesAsk = market.yes_ask || 0;
     if (yesBid > 0 && yesAsk > 0) {
       const spread = yesAsk - yesBid;
-      if (spread < 5) confidence += 10;
-      else if (spread < 10) confidence += 5;
+      if (spread < 0.05) confidence += 10;
+      else if (spread < 0.10) confidence += 5;
       else confidence -= 5;
     }
 
-    // Category familiarity
     const title = (market.title || '').toLowerCase();
     const familiarCategories = ['sports', 'politics', 'economy', 'weather', 'crypto', 'tech'];
     for (const cat of familiarCategories) {
@@ -222,11 +216,8 @@ class KalshiScanner {
   /**
    * Generate human-readable reasoning for the analysis.
    */
-  _generateReasoning(market, staxProb, marketProb, edge) {
+  _generateReasoning(title, staxProb, marketProb, edge, volume) {
     const parts = [];
-    const title = market.title || 'Unknown market';
-    const volume = market.volume || 0;
-
     parts.push(`Market: "${title}"`);
     parts.push(`Market implied probability: ${(marketProb * 100).toFixed(1)}%`);
     parts.push(`Stax calculated probability: ${(staxProb * 100).toFixed(1)}%`);
@@ -259,7 +250,10 @@ class KalshiScanner {
       return this._scanEvents(events);
     }
 
-    console.log(`[Kalshi] Fetched ${markets.length} markets`);
+    // Handle both array and paginated response
+    const marketList = Array.isArray(markets) ? markets : (markets.markets || []);
+
+    console.log(`[Kalshi] Fetched ${marketList.length} markets`);
 
     const analyses = [];
     const insertMarket = db.prepare(`
@@ -275,12 +269,15 @@ class KalshiScanner {
 
     let flagged = 0;
 
-    for (const market of markets) {
+    for (const market of marketList) {
       try {
         const analysis = this.analyzeMarket(market);
+        if (!analysis || analysis.stax_probability == null) {
+          console.log(`[Kalshi] Skipping ${market.ticker || market.id} — no valid analysis`);
+          continue;
+        }
         analyses.push(analysis);
 
-        // Store market data
         insertMarket.run(
           analysis.market_id,
           analysis.title,
@@ -299,7 +296,6 @@ class KalshiScanner {
           analysis.edge > 0.08 && analysis.confidence > 45 ? 1 : 0
         );
 
-        // Store prediction
         insertPrediction.run(
           analysis.market_id,
           analysis.stax_probability,
@@ -312,11 +308,10 @@ class KalshiScanner {
 
         if (analysis.edge > 0.08 && analysis.confidence > 45) flagged++;
       } catch (err) {
-        console.log(`[Kalshi] Error analyzing ${market.ticker}:`, err.message);
+        console.log(`[Kalshi] Error analyzing ${market.ticker || market.id}:`, err.message);
       }
     }
 
-    // Sort by edge descending
     analyses.sort((a, b) => b.edge - a.edge);
 
     console.log(`\n[Kalshi] Scan complete. ${analyses.length} markets analyzed, ${flagged} flagged with significant edge.\n`);
@@ -329,7 +324,8 @@ class KalshiScanner {
    */
   async _scanEvents(events) {
     const allMarkets = [];
-    for (const event of (events || [])) {
+    const eventList = Array.isArray(events) ? events : (events.events || []);
+    for (const event of eventList) {
       const markets = event.markets || [];
       for (const m of markets) {
         allMarkets.push({ ...m, event_title: event.title });
@@ -377,4 +373,3 @@ class KalshiScanner {
 }
 
 module.exports = { KalshiScanner };
-
