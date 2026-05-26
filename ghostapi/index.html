@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GhostAPI — One API for Every AI Model</title>
-  <meta name="description" content="Access 17+ AI models through a single API. Free tier available. No credit card required.">
+  <meta name="description" content="Access 17+ AI models through a single API. Create websites, generate images, songs, PDFs, podcasts, and more. Free tier available.">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif; background: #0a0a0f; color: #e8e8ec; line-height: 1.6; }
-    .container { max-width: 900px; margin: 0 auto; padding: 60px 24px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; background: #0a0a0f; color: #e8e8ec; line-height: 1.6; }
+    .container { max-width: 960px; margin: 0 auto; padding: 60px 24px; }
     .hero { text-align: center; padding: 80px 0 60px; }
     .hero h1 { font-size: 52px; font-weight: 800; background: linear-gradient(135deg, #a78bfa, #818cf8, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px; }
     .hero p { font-size: 20px; color: #9ca3af; max-width: 600px; margin: 0 auto 32px; }
@@ -18,9 +18,7 @@
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.3); }
     .btn-secondary { background: rgba(255,255,255,0.08); color: #e8e8ec; margin-left: 12px; }
     .btn-secondary:hover { background: rgba(255,255,255,0.12); }
-    .models { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 40px 0; }
-    .model-tag { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); padding: 8px 16px; border-radius: 8px; font-size: 13px; color: #9ca3af; }
-    .model-tag strong { color: #e8e8ec; }
+    .btn-small { padding: 10px 20px; font-size: 14px; }
     .section { padding: 60px 0; border-top: 1px solid rgba(255,255,255,0.06); }
     .section h2 { font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 12px; }
     .section-sub { text-align: center; color: #9ca3af; margin-bottom: 40px; }
@@ -28,33 +26,52 @@
     .pricing-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 32px; text-align: center; transition: all 0.2s; }
     .pricing-card:hover { border-color: rgba(99,102,241,0.3); }
     .pricing-card.popular { border-color: #6366f1; position: relative; }
-    .pricing-card.popular::before { content: 'POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #6366f1; color: white; padding: 4px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .pricing-card.popular::before { content: 'BEST VALUE'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #6366f1; color: white; padding: 4px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; }
     .pricing-card h3 { font-size: 18px; margin-bottom: 8px; }
-    .pricing-card .price { font-size: 42px; font-weight: 800; margin: 16px 0; }
+    .pricing-card .price { font-size: 42px; font-weight: 800; margin: 16px 0 4px; }
     .pricing-card .price span { font-size: 16px; color: #9ca3af; font-weight: 400; }
-    .pricing-card ul { list-style: none; margin: 24px 0; text-align: left; }
-    .pricing-card ul li { padding: 8px 0; color: #9ca3af; font-size: 14px; }
+    .pricing-card .tagline { font-size: 13px; color: #818cf8; font-weight: 600; margin-bottom: 16px; }
+    .pricing-card ul { list-style: none; margin: 20px 0; text-align: left; }
+    .pricing-card ul li { padding: 6px 0; color: #9ca3af; font-size: 13px; }
     .pricing-card ul li::before { content: '✓ '; color: #34d399; }
-    .pricing-card .savings { color: #34d399; font-size: 13px; font-weight: 600; margin-top: 4px; }
-    .signup-form { max-width: 480px; margin: 0 auto; }
-    .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #9ca3af; }
-    .form-group input, .form-group select { width: 100%; padding: 14px 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #e8e8ec; font-size: 15px; outline: none; transition: border-color 0.2s; }
-    .form-group input:focus, .form-group select:focus { border-color: #6366f1; }
+    .pricing-card ul li.locked { color: #4b5563; }
+    .pricing-card ul li.locked::before { content: '✗ '; color: #4b5563; }
+    .pricing-card ul li.highlight::before { content: '★ '; color: #fbbf24; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .feature-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 24px; }
+    .feature-card .icon { font-size: 28px; margin-bottom: 12px; }
+    .feature-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .feature-card p { font-size: 13px; color: #9ca3af; }
+    .feature-card .tier-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-top: 8px; }
+    .tier-free { background: rgba(107,114,128,0.2); color: #9ca3af; }
+    .tier-pro { background: rgba(99,102,241,0.2); color: #818cf8; }
+    .tier-premium { background: rgba(251,191,36,0.2); color: #fbbf24; }
     .code-block { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; overflow-x: auto; margin: 24px 0; }
     .code-block .comment { color: #6b7280; }
     .code-block .string { color: #34d399; }
     .code-block .keyword { color: #a78bfa; }
     .code-block .url { color: #60a5fa; }
     .alert { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.2); border-radius: 10px; padding: 16px 20px; margin: 16px 0; font-size: 14px; color: #34d399; }
-    .alert.error { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2); color: #f87171; }
-    .alert.success { background: rgba(52,211,153,0.1); border-color: rgba(52,211,153,0.2); color: #34d399; }
+    .alert.info { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.2); color: #818cf8; }
+    .signup-form { max-width: 480px; margin: 0 auto; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #9ca3af; }
+    .form-group input, .form-group select { width: 100%; padding: 14px 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #e8e8ec; font-size: 15px; outline: none; }
+    .form-group input:focus, .form-group select:focus { border-color: #6366f1; }
     #apikey-display { display: none; }
     #apikey-display code { background: rgba(99,102,241,0.2); padding: 4px 10px; border-radius: 6px; font-family: monospace; font-size: 13px; word-break: break-all; }
+    .comparison-table { width: 100%; border-collapse: collapse; margin: 24px 0; }
+    .comparison-table th, .comparison-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 14px; }
+    .comparison-table th { color: #9ca3af; font-weight: 600; font-size: 12px; text-transform: uppercase; }
+    .comparison-table td { color: #e8e8ec; }
+    .comparison-table tr:hover { background: rgba(255,255,255,0.02); }
+    .check { color: #34d399; }
+    .cross { color: #4b5563; }
     footer { text-align: center; padding: 40px 0; color: #4b5563; font-size: 13px; }
     @media (max-width: 768px) {
       .hero h1 { font-size: 36px; }
-      .pricing-grid { grid-template-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
       .btn-secondary { margin-left: 0; margin-top: 12px; }
     }
   </style>
@@ -64,99 +81,254 @@
     <!-- HERO -->
     <div class="hero">
       <div class="badge">🚀 Live Now — Free Tier Available</div>
-      <h1>One API for Every AI Model</h1>
-      <p>Access DeepSeek, Llama, Qwen, GPT, Gemma, and more through a single OpenAI-compatible endpoint. No credit card required.</p>
+      <h1>One API for Everything AI</h1>
+      <p>Chat, build websites, generate images, create music, produce podcasts, and more — all through a single API endpoint.</p>
       <a href="#signup" class="btn btn-primary">Get Your Free API Key</a>
-      <a href="#docs" class="btn btn-secondary">View Docs</a>
+      <a href="#features" class="btn btn-secondary">See Features</a>
+    </div>
 
-      <div class="models">
-        <span class="model-tag"><strong>DeepSeek V4 Flash</strong> • 1M context</span>
-        <span class="model-tag"><strong>Qwen3 Coder</strong> • Free</span>
-        <span class="model-tag"><strong>Llama 3.3 70B</strong> • Free</span>
-        <span class="model-tag"><strong>GPT-OSS 120B</strong> • Free</span>
-        <span class="model-tag"><strong>Gemma 4 31B</strong> • Vision</span>
-        <span class="model-tag"><strong>MiniMax M2.5</strong> • Tools</span>
-        <span class="model-tag"><strong>+ 11 more</strong></span>
+    <!-- FEATURES -->
+    <div class="section" id="features">
+      <h2>What You Can Build</h2>
+      <p class="section-sub">One API key unlocks everything. No juggling providers, no separate billing.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="icon">💬</div>
+          <h4>AI Chat & Text</h4>
+          <p>17+ models including DeepSeek, Llama, Qwen, GPT, Gemma. Tools, vision, coding, reasoning.</p>
+          <span class="tier-badge tier-free">FREE</span>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🌐</div>
+          <h4>Website Creation</h4>
+          <p>Create and customize websites with AI. Local testing on all tiers. Hosting on Premium.</p>
+          <span class="tier-badge tier-free">FREE (local)</span>
+          <span class="tier-badge tier-premium">HOSTED</span>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🎮</div>
+          <h4>Games & Apps</h4>
+          <p>Build and play games, create custom apps and tools. Full program creation and testing.</p>
+          <span class="tier-badge tier-pro">PRO+</span>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🖼️</div>
+          <h4>Image Generation</h4>
+          <p>1 free image to start. Generate more with Pro and Premium tiers.</p>
+          <span class="tier-badge tier-free">1 FREE</span>
+          <span class="tier-badge tier-pro">PRO+</span>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🎵</div>
+          <h4>Music & Songs</h4>
+          <p>1 free custom song. Up to 90s songs on paid tiers, with weekly limits.</p>
+          <span class="tier-badge tier-free">1 FREE</span>
+          <span class="tier-badge tier-pro">PRO (90s, weekly cap)</span>
+          <span class="tier-badge tier-premium">PREMIUM (higher cap)</span>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🎙️</div>
+          <h4>Podcast Generation</h4>
+          <p>1 free 1-minute podcast preview. Longer episodes on paid tiers.</p>
+          <span class="tier-badge tier-free">1 MIN FREE</span>
+          <span class="tier-badge tier-pro">PRO+</span>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📄</div>
+          <h4>PDF Generation</h4>
+          <p>1 free custom PDF. Generate documents, reports, and more on paid tiers.</p>
+          <span class="tier-badge tier-free">1 FREE</span>
+          <span class="tier-badge tier-pro">PRO+</span>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🤖</div>
+          <h4>Sub-Agents & Scheduling</h4>
+          <p>1 sub-agent + 1 scheduled task on Pro. Unlimited on Premium.</p>
+          <span class="tier-badge tier-pro">PRO (limited)</span>
+          <span class="tier-badge tier-premium">PREMIUM (unlimited)</span>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔗</div>
+          <h4>Custom Domain Hosting</h4>
+          <p>Host your AI-generated websites with your own custom domain name.</p>
+          <span class="tier-badge tier-premium">PREMIUM</span>
+        </div>
       </div>
     </div>
 
     <!-- PRICING -->
     <div class="section" id="pricing">
-      <h2>Cheapest API Gateway, Period.</h2>
-      <p class="section-sub">We route through subsidized free models and pass the savings to you. No markup on token costs.</p>
+      <h2>Simple, Transparent Pricing</h2>
+      <p class="section-sub">Start free. Upgrade when you need more. No hidden fees, no surprises.</p>
       <div class="pricing-grid">
+        <!-- FREE -->
         <div class="pricing-card">
           <h3>Free</h3>
           <div class="price">$0<span>/mo</span></div>
+          <div class="tagline">Try it out — no credit card</div>
           <ul>
-            <li>50 requests/month</li>
-            <li>DeepSeek V4 Flash, Llama 3.3 70B</li>
-            <li>Qwen3 Coder, GPT-OSS 120B</li>
-            <li>Gemma 4 31B (vision)</li>
-            <li>Community support</li>
+            <li>20 AI requests per week</li>
+            <li>Requests reset every week</li>
+            <li>5 AI models</li>
+            <li>Website creation (local testing)</li>
+            <li class="highlight">1 free custom image</li>
+            <li class="highlight">1 free custom song</li>
+            <li class="highlight">1 free PDF document</li>
+            <li class="highlight">1 free 1-min podcast</li>
+            <li class="locked">Games & apps</li>
+            <li class="locked">Website hosting</li>
+            <li class="locked">Sub-agents & scheduling</li>
+            <li class="locked">Custom domain</li>
           </ul>
-          <a href="#signup" class="btn btn-secondary" style="width:100%">Get Started</a>
+          <a href="#signup" class="btn btn-secondary btn-small" style="width:100%">Get Started</a>
         </div>
+        <!-- PRO -->
         <div class="pricing-card popular">
           <h3>Pro</h3>
-          <div class="price">$5<span>/mo</span></div>
-          <div class="savings">17+ models • No per-token fees</div>
+          <div class="price">$6<span>/mo</span></div>
+          <div class="tagline">For builders & creators</div>
           <ul>
-            <li>5,000 requests/month</li>
-            <li>All 17+ free models, zero token cost</li>
-            <li>Up to 1M context window</li>
-            <li>Tools, vision, coding models</li>
-            <li>Higher rate limits (200/day)</li>
+            <li>Increased request limits</li>
+            <li>All 17+ AI models</li>
+            <li>Build & play games and apps</li>
+            <li>Website creation + local testing</li>
+            <li>1 sub-agent</li>
+            <li>1 recurring scheduled task</li>
+            <li>Image generation (daily limit)</li>
+            <li>Song generation up to 90s (weekly limit)</li>
+            <li>PDF generation with page limits</li>
+            <li>Podcast generation (weekly limit)</li>
+            <li>Higher rate limits</li>
             <li>Email support</li>
+            <li class="locked">Website hosting</li>
+            <li class="locked">Custom domain</li>
           </ul>
-          <a href="#signup" class="btn btn-primary" style="width:100%">Subscribe — $5</a>
+          <a href="#signup" class="btn btn-primary btn-small" style="width:100%">Subscribe — $6</a>
         </div>
+        <!-- PREMIUM -->
         <div class="pricing-card">
-          <h3>Scale</h3>
-          <div class="price">$29<span>/mo</span></div>
-          <div class="savings">Premium models included</div>
+          <h3>Premium</h3>
+          <div class="price">$27<span>/mo</span></div>
+          <div class="tagline">Full power unlocked</div>
           <ul>
-            <li>50,000 requests/month</li>
-            <li>All free + premium models</li>
-            <li>Claude Sonnet, GPT-4o, Gemini</li>
-            <li>Lowest per-token rates in market</li>
-            <li>Highest rate limits</li>
+            <li>Highest request limits</li>
+            <li>Everything in Pro</li>
+            <li class="highlight">Unlimited sub-agents</li>
+            <li class="highlight">Unlimited scheduled tasks</li>
+            <li class="highlight">Website hosting included</li>
+            <li class="highlight">Custom domain support</li>
+            <li class="highlight">Highest media generation limits</li>
+            <li>Premium AI models (Claude, GPT-4o, Gemini)</li>
             <li>Priority support</li>
+            <li>Pay-as-you-go refills available</li>
           </ul>
-          <a href="#signup" class="btn btn-secondary" style="width:100%">Subscribe — $29</a>
+          <a href="#signup" class="btn btn-secondary btn-small" style="width:100%">Subscribe — $27</a>
         </div>
       </div>
 
-      <h3 style="margin:48px 0 16px; font-size:18px; text-align:center;">How We Compare — Cost Per 1M Tokens</h3>
-      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px;">
-        <div style="background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.3); border-radius:12px; padding:16px; text-align:center;">
-          <div style="font-size:11px; color:#818cf8; font-weight:700; text-transform:uppercase; letter-spacing:1px;">GhostAPI</div>
-          <div style="font-size:24px; font-weight:800; color:#e8e8ec; margin:8px 0;">$0</div>
-          <div style="font-size:12px; color:#9ca3af;">Free models<br/>Zero token cost</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; text-align:center;">
-          <div style="font-size:11px; color:#9ca3af; font-weight:700; text-transform:uppercase; letter-spacing:1px;">OpenRouter</div>
-          <div style="font-size:24px; font-weight:800; color:#e8e8ec; margin:8px 0;">$0.44</div>
-          <div style="font-size:12px; color:#9ca3af;">DeepSeek V4 paid<br/>+ 5.5% fee</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; text-align:center;">
-          <div style="font-size:11px; color:#9ca3af; font-weight:700; text-transform:uppercase; letter-spacing:1px;">OpenAI Direct</div>
-          <div style="font-size:24px; font-weight:800; color:#e8e8ec; margin:8px 0;">$2.50</div>
-          <div style="font-size:12px; color:#9ca3af;">GPT-4o input<br/>per 1M tokens</div>
-        </div>
-        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; text-align:center;">
-          <div style="font-size:11px; color:#9ca3af; font-weight:700; text-transform:uppercase; letter-spacing:1px;">Anthropic</div>
-          <div style="font-size:24px; font-weight:800; color:#e8e8ec; margin:8px 0;">$3.00</div>
-          <div style="font-size:12px; color:#9ca3af;">Claude Sonnet<br/>per 1M tokens</div>
-        </div>
+      <!-- PAY AS YOU GO -->
+      <div class="alert info" style="margin-top: 32px; text-align: center;">
+        <strong>💡 Pay-as-you-go refills available.</strong> Hit your limit but don't want to upgrade? Buy extra requests at a per-request rate — cheaper than upgrading if you just need a few more. Available on all tiers.
       </div>
-      <p style="text-align:center; font-size:13px; color:#6b7280;">GhostAPI free models = $0/token (subsidized). Even our premium rates undercut direct API pricing.<br/>No hidden fees, no minimum deposits, no markup on token costs.</p>
+
+      <!-- COMPARISON TABLE -->
+      <h3 style="margin: 48px 0 16px; font-size: 18px; text-align: center;">Feature Comparison</h3>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Free</th>
+            <th>Pro ($6)</th>
+            <th>Premium ($27)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>AI Chat Requests</td>
+            <td>20/week</td>
+            <td>Increased limits</td>
+            <td>Highest limits</td>
+          </tr>
+          <tr>
+            <td>AI Models</td>
+            <td>5 models</td>
+            <td>All 17+ free models</td>
+            <td>All models (incl. premium)</td>
+          </tr>
+          <tr>
+            <td>Complex Tasks</td>
+            <td>Standard</td>
+            <td>Multi-request support</td>
+            <td>Multi-request support</td>
+          </tr>
+          <tr>
+            <td>Website Creation</td>
+            <td class="check">Local testing</td>
+            <td class="check">Local testing</td>
+            <td class="check">Hosted + custom domain</td>
+          </tr>
+          <tr>
+            <td>Games & Apps</td>
+            <td class="cross">✗</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+          </tr>
+          <tr>
+            <td>Image Generation</td>
+            <td>1 free</td>
+            <td class="check">Increased limit</td>
+            <td class="check">Highest limit</td>
+          </tr>
+          <tr>
+            <td>Song Generation</td>
+            <td>1 free</td>
+            <td class="check">Increased limit</td>
+            <td class="check">Highest limit</td>
+          </tr>
+          <tr>
+            <td>PDF Generation</td>
+            <td>1 free</td>
+            <td class="check">Increased limit</td>
+            <td class="check">Highest limit</td>
+          </tr>
+          <tr>
+            <td>Podcast Generation</td>
+            <td>1 min free</td>
+            <td class="check">Extended length</td>
+            <td class="check">Full length</td>
+          </tr>
+          <tr>
+            <td>Sub-Agents</td>
+            <td class="cross">✗</td>
+            <td class="check">1 agent</td>
+            <td class="check">Unlimited</td>
+          </tr>
+          <tr>
+            <td>Scheduled Tasks</td>
+            <td class="cross">✗</td>
+            <td class="check">1 recurring task</td>
+            <td class="check">Unlimited</td>
+          </tr>
+          <tr>
+            <td>Custom Domain</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="check">✓</td>
+          </tr>
+          <tr>
+            <td>Pay-as-you-go Refill</td>
+            <td class="check">$0.05/req</td>
+            <td class="check">$0.02/req</td>
+            <td class="check">$0.01/req</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- SIGNUP -->
     <div class="section" id="signup">
       <h2>Get Your API Key</h2>
-      <p class="section-sub">Sign up in seconds. Start making API calls immediately.</p>
+      <p class="section-sub">Sign up in seconds. Start building immediately.</p>
       <div class="signup-form">
         <div class="form-group">
           <label>Email</label>
@@ -165,19 +337,18 @@
         <div class="form-group">
           <label>Plan</label>
           <select id="plan">
-            <option value="free">Free — $0/mo — 50 requests</option>
-            <option value="pro">Pro — $5/mo — 5,000 requests</option>
-            <option value="scale">Scale — $29/mo — 50,000 requests</option>
+            <option value="free">Free — $0/mo — 20 requests/week</option>
+            <option value="pro">Pro — $6/mo — increased limits, games, media, sub-agents</option>
+            <option value="premium">Premium — $27/mo — hosting, custom domain, everything</option>
           </select>
         </div>
-        <div id="paypal-button-container" style="display:none; margin: 20px 0;"></div>
         <div id="form-message"></div>
         <button class="btn btn-primary" style="width:100%" id="signup-btn" onclick="handleSignup()">Create Free API Key</button>
       </div>
-      <div id="apikey-display" class="alert success" style="margin-top: 24px;">
+      <div id="apikey-display" class="alert" style="margin-top: 24px;">
         <strong>🎉 Your API Key:</strong><br><br>
         <code id="apikey-value"></code><br><br>
-        <small>Save this key — it won't be shown again. Use it in the <code>X-API-Code> header.</small>
+        <small>Save this key — it won't be shown again. Use it in the <code>X-API-Key</code> header.</small>
       </div>
     </div>
 
@@ -185,10 +356,9 @@
     <div class="section" id="docs">
       <h2>Quick Start</h2>
       <p class="section-sub">Make your first API call in under a minute.</p>
-
       <h3 style="margin: 32px 0 12px; font-size: 18px;">cURL</h3>
       <div class="code-block">
-<span class="comment"># Chat with DeepSeek V4 Flash (free)</span>
+<span class="comment"># Chat with DeepSeek V4 Flash (free model)</span>
 curl -X POST <span class="url">https://ghostapi-1v1f.onrender.com/v1/chat/completions</span> \
   -H <span class="string">"X-API-Key: gsk_live_..."</span> \
   -H <span class="string">"Content-Type: application/json"</span> \
@@ -197,7 +367,6 @@ curl -X POST <span class="url">https://ghostapi-1v1f.onrender.com/v1/chat/comple
     "messages": [{"role": "user", "content": "Hello!"}]
   }'</span>
       </div>
-
       <h3 style="margin: 32px 0 12px; font-size: 18px;">JavaScript</h3>
       <div class="code-block">
 <span class="keyword">const</span> res = <span class="keyword">await</span> fetch(<span class="string">"https://ghostapi-1v1f.onrender.com/v1/chat/completions"</span>, {
@@ -208,55 +377,16 @@ curl -X POST <span class="url">https://ghostapi-1v1f.onrender.com/v1/chat/comple
   },
   body: JSON.stringify({
     model: <span class="string">"openrouter/deepseek/deepseek-v4-flash:free"</span>,
-    messages: [{ role: <span class="string">"user"</span>, content: <span class="string">"Hello!"</span> }],
+    messages: [{ role: <span class="string">"user"</span>, content: <span class="string">"Build me a website"</span> }],
   }),
 });
 <span class="keyword">const</span> data = <span class="keyword">await</span> res.json();
 console.log(data.choices[0].message.content);
       </div>
-
-      <h3 style="margin: 32px 0 12px; font-size: 18px;">Python</h3>
+      <h3 style="margin: 32px 0 12px; font-size: 18px;">Check Your Usage</h3>
       <div class="code-block">
-<span class="keyword">import</span> requests
-
-res = requests.post(
-    <span class="string">"https://ghostapi-1v1f.onrender.com/v1/chat/completions"</span>,
-    headers={<span class="string">"X-API-Key"</span>: <span class="string">"gsk_live_..."</span>},
-    json={
-        <span class="string">"model"</span>: <span class="string">"openrouter/deepseek/deepseek-v4-flash:free"</span>,
-        <span class="string">"messages"</span>: [{<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: <span class="string">"Hello!"</span>}],
-    },
-)
-print(res.json()[<span class="string">"choices"</span>][0][<span class="string">"message"</span>][<span class="string">"content"</span>])
-      </div>
-
-      <div class="alert" style="margin-top: 32px;">
-        <strong>💡 All 17+ models are free to start.</strong> Use the <code>:free</code> suffix on any OpenRouter model for zero-cost inference. Premium models (Claude, GPT-4o, Gemini) available on Pro and Scale plans.
-      </div>
-    </div>
-
-    <!-- AVAILABLE MODELS -->
-    <div class="section" id="models">
-      <h2>Available Models</h2>
-      <p class="section-sub">All models accessible through one endpoint. Use <code>openrouter/model-name:free</code> format.</p>
-      <div class="models" style="justify-content: flex-start;">
-        <span class="model-tag"><strong>deepseek-v4-flash:free</strong> • 1M ctx • Tools</span>
-        <span class="model-tag"><strong>qwen3-coder:free</strong> • 1M ctx • Coding</span>
-        <span class="model-tag"><strong>llama-3.3-70b:free</strong> • 131K ctx • Tools</span>
-        <span class="model-tag"><strong>gpt-oss-120b:free</strong> • 131K ctx • Tools</span>
-        <span class="model-tag"><strong>gemma-4-31b:free</strong> • 262K ctx • Vision</span>
-        <span class="model-tag"><strong>minimax-m2.5:free</strong> • 205K ctx • Tools</span>
-        <span class="model-tag"><strong>gpt-oss-20b:free</strong> • 131K ctx • Tools</span>
-        <span class="model-tag"><strong>glm-4.5-air:free</strong> • 131K ctx • Tools</span>
-        <span class="model-tag"><strong>nemotron-3-super-120b:free</strong> • 1M ctx</span>
-        <span class="model-tag"><strong>hermes-3-llama-3.1-405b:free</strong> • 131K ctx</span>
-        <span class="model-tag"><strong>trinity-large-thinking:free</strong> • 262K ctx • Reasoning</span>
-        <span class="model-tag"><strong>qwen3-next-80b:free</strong> • 262K ctx</span>
-        <span class="model-tag"><strong>nemotron-nano-9b:free</strong> • 128K ctx</span>
-        <span class="model-tag"><strong>llama-3.2-3b:free</strong> • 131K ctx</span>
-        <span class="model-tag"><strong>nemotron-3-nano-30b:free</strong> • 256K ctx</span>
-        <span class="model-tag"><strong>gemma-4-26b:free</strong> • 262K ctx • Vision</span>
-        <span class="model-tag"><strong>nemotron-nano-12b-vl:free</strong> • 128K ctx • Vision</span>
+curl -H <span class="string">"X-API-Key: gsk_live_..."</span> \
+  <span class="url">https://ghostapi-1v1f.onrender.com/v1/usage</span>
       </div>
     </div>
 
@@ -277,21 +407,20 @@ print(res.json()[<span class="string">"choices"</span>][0][<span class="string">
       const msg = document.getElementById('form-message');
 
       if (!email) {
-        msg.innerHTML = '<div class="alert error">Please enter your email.</div>';
+        msg.innerHTML = '<div class="alert" style="background:rgba(239,68,68,0.1);color:#f87171;border-color:rgba(239,68,68,0.2);">Please enter your email.</div>';
         return;
       }
 
-      // For paid plans, show PayPal
       if (plan !== 'free') {
-        const prices = { pro: 5, scale: 29 };
+        const prices = { pro: 6, premium: 27 };
         const price = prices[plan];
-        msg.innerHTML = `<div class="alert">Pay <strong>$${price}/mo</strong> via PayPal to activate your ${plan} plan:<br><br>
-          <a href="https://paypal.me/kencyrus3/${price}" class="btn btn-primary" target="_blank">Pay $${price} with PayPal</a><br><br>
-          <small>After payment, contact us with your email to get your API key.</small></div>`;
+        const names = { pro: 'Pro', premium: 'Premium' };
+        msg.innerHTML = `<div class="alert info">Pay <strong>$${price}/mo</strong> via PayPal to activate ${names[plan]}:<br><br>
+          <a href="https://paypal.me/kencyrus3/${price}" class="btn btn-primary btn-small" target="_blank">Pay $${price} with PayPal</a><br><br>
+          <small>After payment, email us with your address and we'll activate your key.</small></div>`;
         return;
       }
 
-      // Free plan — create key immediately
       btn.disabled = true;
       btn.textContent = 'Creating...';
       msg.innerHTML = '';
@@ -300,21 +429,21 @@ print(res.json()[<span class="string">"choices"</span>][0][<span class="string">
         const res = await fetch(`${API_BASE}/admin/keys`, {
           method: 'POST',
           headers: { 'X-Admin-Secret': ADMIN_SECRET, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: email.split('@')[0], email, tier: 'free', monthly_limit: 1000 }),
+          body: JSON.stringify({ name: email.split('@')[0], email, tier: 'free' }),
         });
         const data = await res.json();
         if (data.key) {
           document.getElementById('apikey-value').textContent = data.key;
           document.getElementById('apikey-display').style.display = 'block';
-          msg.innerHTML = '<div class="alert success">✅ Your API key is ready! Save it above.</div>';
+          msg.innerHTML = '<div class="alert">✅ Your API key is ready! Save it above.</div>';
           btn.textContent = 'Key Created!';
         } else {
-          msg.innerHTML = `<div class="alert error">Error: ${data.error || 'Unknown error'}</div>`;
+          msg.innerHTML = `<div class="alert" style="background:rgba(239,68,68,0.1);color:#f87171;border-color:rgba(239,68,68,0.2);">Error: ${data.error || 'Unknown error'}</div>`;
           btn.disabled = false;
           btn.textContent = 'Create Free API Key';
         }
       } catch (err) {
-        msg.innerHTML = `<div class="alert error">Connection error. The server may be waking up — try again in 30 seconds.</div>`;
+        msg.innerHTML = `<div class="alert" style="background:rgba(239,68,68,0.1);color:#f87171;border-color:rgba(239,68,68,0.2);">Connection error. Server may be waking up — try again in 30 seconds.</div>`;
         btn.disabled = false;
         btn.textContent = 'Create Free API Key';
       }
