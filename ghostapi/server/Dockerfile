@@ -13,7 +13,7 @@ COPY index.js ./
 # Create data directory for SQLite
 RUN mkdir -p /app/data
 
-ENV GHOSTAPI_PORT=3000
+ENV NICEGUYAPI_PORT=3000
 ENV NODE_ENV=production
 
 EXPOSE 3000

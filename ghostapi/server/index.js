@@ -227,9 +227,13 @@ async function proxyToProvider(provider, model, messages, stream = false) {
   if (provider.id === 'openrouter') {
     url = `${provider.base_url}/chat/completions`;
     headers['Authorization'] = `Bearer ${provider.api_key || process.env.OPENROUTER_API_KEY || ''}`;
-    headers['HTTP-Referer'] = 'https://niceguyapi.dev';
+    headers['HTTP-Referer'] = 'https://mrghostguy.github.io/stax-agent/';
     headers['X-Title'] = 'NiceGuyAPI';
-    body = { model, messages, stream, max_tokens: 8192 };
+    // Model name should be the OpenRouter model ID (e.g., deepseek/deepseek-v4-flash:free)
+    const openRouterModel = model.includes('/') && model.split('/').length >= 3
+      ? model.split('/').slice(1).join('/')  // strip leading provider prefix
+      : model;
+    body = { model: openRouterModel, messages, stream, max_tokens: 8192 };
   } else {
     throw new Error(`Unknown provider: ${provider.id}`);
   }
@@ -267,21 +271,30 @@ function resolveModel(modelName, tier) {
   const providers = getProviders();
   const allowedModels = getModelsForTier(tier);
 
-  // Direct provider/model format
+  // Direct provider/model format: "provider/model" or "provider/model:variant"
   if (modelName.includes('/')) {
     const [providerId, ...rest] = modelName.split('/');
     const provider = providers.find(p => p.id === providerId);
     if (provider) {
       const fullModel = rest.join('/');
-      const available = allowedModels.find(m => m.id === `${providerId}/${fullModel}` || m.model === fullModel);
-      if (available) return { provider, model: fullModel };
+      // Check exact match or model name match
+      const available = allowedModels.find(
+        m => m.model === fullModel || m.id === `${providerId}/${fullModel}` ||
+             m.model.toLowerCase() === fullModel.toLowerCase()
+      );
+      if (available) return { provider, model: available.model };
+      // Fallback to first model for this provider
+      const fallback = allowedModels.find(m => m.provider === providerId);
+      if (fallback) return { provider, model: fallback.model };
       return { provider, model: allowedModels[0]?.model || provider.models[0] };
     }
   }
 
-  // Search by model name
+  // Short name search (e.g. "deepseek" matches "deepseek/deepseek-v4-flash:free")
+  const searchLower = modelName.toLowerCase();
   for (const am of allowedModels) {
-    if (am.model.toLowerCase().includes(modelName.toLowerCase()) || am.name.toLowerCase().includes(modelName.toLowerCase())) {
+    if (am.model.toLowerCase().includes(searchLower) ||
+        am.name.toLowerCase().includes(searchLower)) {
       const provider = providers.find(p => p.id === am.provider);
       if (provider) return { provider, model: am.model };
     }
@@ -623,7 +636,7 @@ app.get('/v1/usage', authenticate, (req, res) => {
 // ── Chat Completions ──────────────────────────────────────────────────────
 
 app.post('/v1/chat/completions', authenticate, async (req, res) => {
-  const { model = 'openrouter/deepseek/deepseek-v4-flash:free', messages, stream = false } = req.body;
+  const { model = 'deepseek/deepseek-v4-flash:free', messages, stream = false } = req.body;
 
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: { message: 'messages array is required', type: 'validation_error' } });

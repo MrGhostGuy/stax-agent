@@ -1,15 +1,15 @@
 services:
   - type: web
-    name: ghostapi
+    name: niceguyapi
     runtime: docker
     repo: https://github.com/MrGhostGuy/stax-agent
     branch: master
     rootDir: ghostapi/server
     plan: free
     envVars:
-      - key: GHOSTAPI_PORT
+      - key: NICEGUYAPI_PORT
         value: "3000"
-      - key: GHOSTAPI_SECRET
+      - key: NICEGUYAPI_SECRET
         generateValue: true
       - key: NODE_ENV
         value: "production"
