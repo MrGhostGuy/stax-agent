@@ -1,12 +1,12 @@
 /**
- * GhostAPI — Premium AI Model Gateway
+ * NiceGuyAPI — Premium AI Model Gateway
  *
  * One API endpoint for Claude, GPT, Gemini, Grok, and 17+ more.
  * OpenAI-compatible /v1/chat/completions interface.
  *
  * Environment variables:
- *   GHOSTAPI_PORT — server port (default 3000)
- *   GHOSTAPI_SECRET — admin secret for key management
+ *   NICEGUYAPI_PORT — server port (default 3000)
+ *   NICEGUYAPI_SECRET — admin secret for key management
  *   OPENROUTER_API_KEY — OpenRouter API key (free tier ok)
  */
 
@@ -21,8 +21,8 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
-const PORT = parseInt(process.env.GHOSTAPI_PORT || '3000', 10);
-const ADMIN_SECRET = process.env.GHOSTAPI_SECRET || 'ghost-dev-secret-change-me';
+const PORT = parseInt(process.env.NICEGUYAPI_PORT || '3000', 10);
+const ADMIN_SECRET = process.env.NICEGUYAPI_SECRET || 'niceguy-dev-secret-change-me';
 
 // ── Tier Configuration ────────────────────────────────────────────────────
 
@@ -106,17 +106,17 @@ function scheduleUsageResets() {
     // Weekly reset: Sunday midnight (day 0, hour 0)
     if (now.getUTCDay() === 0 && now.getUTCHours() === 0) {
       db.prepare("UPDATE api_keys SET monthly_used = 0, billing_period_start = datetime('now') WHERE tier = 'free'").run();
-      console.log('[GhostAPI] Weekly free-tier usage reset');
+      console.log('[NiceGuyAPI] Weekly free-tier usage reset');
     }
     // Monthly reset: 1st of month
     if (now.getUTCDate() === 1 && now.getUTCHours() === 0) {
       db.prepare("UPDATE api_keys SET monthly_used = 0, billing_period_start = datetime('now') WHERE tier IN ('pro', 'premium')").run();
-      console.log('[GhostAPI] Monthly paid-tier usage reset');
+      console.log('[NiceGuyAPI] Monthly paid-tier usage reset');
     }
   }
   // Check every minute
   setInterval(tryReset, 60 * 1000);
-  console.log('[GhostAPI] Usage reset scheduler active');
+  console.log('[NiceGuyAPI] Usage reset scheduler active');
 }
 
 // Count tokens roughly (4 chars ≈ 1 token)
@@ -187,7 +187,7 @@ function checkScheduledTaskLimit(apiKeyId, tierConfig) {
 
 // ── Database ──────────────────────────────────────────────────────────────
 
-const dbPath = path.join(__dirname, '..', 'data', 'ghostapi.db');
+const dbPath = path.join(__dirname, '..', 'data', 'niceguyapi.db');
 fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
@@ -339,8 +339,8 @@ async function proxyToProvider(provider, model, messages, stream = false) {
   if (provider.id === 'openrouter') {
     url = `${provider.base_url}/chat/completions`;
     headers['Authorization'] = `Bearer ${provider.api_key || process.env.OPENROUTER_API_KEY || ''}`;
-    headers['HTTP-Referer'] = 'https://ghostapi.dev';
-    headers['X-Title'] = 'GhostAPI';
+    headers['HTTP-Referer'] = 'https://niceguyapi.dev';
+    headers['X-Title'] = 'NiceGuyAPI';
     body = { model, messages, stream, max_tokens: 8192 };
   } else {
     throw new Error(`Unknown provider: ${provider.id}`);
@@ -688,7 +688,7 @@ app.post('/v1/chat/completions', authenticate, async (req, res) => {
 
     res.json(responseData);
   } catch (err) {
-    console.error('[GhostAPI] Proxy error:', err.message);
+    console.error('[NiceGuyAPI] Proxy error:', err.message);
     res.status(502).json({ error: { message: 'Provider request failed: ' + err.message, type: 'proxy_error' } });
   }
 });
@@ -782,7 +782,7 @@ app.post('/v1/websites', authenticate, (req, res) => {
     .run(id, req.apiKey.id, name || 'My Website', 'local');
   res.json({
     id, name: name || 'My Website', status: 'local',
-    url: req._tierConfig.allows_website_hosting ? `https://${id}.ghostapi.dev` : null,
+    url: req._tierConfig.allows_website_hosting ? `https://${id}.niceguyapi.dev` : null,
     message: req._tierConfig.allows_website_hosting
       ? 'Website created and hosted!'
       : 'Website created for local testing. Upgrade to Premium for hosting with a custom domain.',
@@ -860,7 +860,7 @@ app.get('/admin/stats', adminAuth, (req, res) => {
 
 app.get('/', (req, res) => {
   res.json({
-    name: 'GhostAPI', version: '1.0.0',
+    name: 'NiceGuyAPI', version: '1.0.0',
     description: 'One API for every AI provider. OpenAI-compatible interface.',
     base_url: '/v1',
     pricing: {
@@ -906,7 +906,7 @@ app.post('/v1/webhook/paypal', (req, res) => {
       if (keyRecord && keyRecord.tier !== tier) {
         const tierConfig = TIERS[tier];
         db.prepare('UPDATE api_keys SET tier = ?, monthly_limit = ? WHERE id = ?').run(tier, tierConfig.monthly_requests, keyRecord.id);
-        console.log(`[GhostAPI] Upgraded ${custom} to ${tier} via PayPal ($${mc_gross})`);
+        console.log(`[NiceGuyAPI] Upgraded ${custom} to ${tier} via PayPal ($${mc_gross})`);
       }
     }
   }
@@ -917,7 +917,7 @@ app.post('/v1/webhook/paypal', (req, res) => {
 
 app.get('/', (req, res) => {
   res.json({
-    name: 'GhostAPI', version: '1.0.0',
+    name: 'NiceGuyAPI', version: '1.0.0',
     description: 'One API for every AI provider. OpenAI-compatible interface.',
     base_url: '/v1',
     pricing: {
@@ -949,14 +949,14 @@ app.get('/', (req, res) => {
 
 app.use((req, res) => {
   apiError(res, 404, `Route ${req.method} ${req.path} not found`, 'not_found', {
-    docs: 'https://ghostapi-1v1f.onrender.com/',
+    docs: 'https://niceguyapi-1v1f.onrender.com/',
   });
 });
 
 // ── Global Error Handler ──────────────────────────────────────────────────
 
 app.use((err, req, res, next) => {
-  console.error('[GhostAPI] Unhandled error:', err);
+  console.error('[NiceGuyAPI] Unhandled error:', err);
   apiError(res, 500, 'An unexpected error occurred', 'server_error', {
     request_id: uuidv4().slice(0, 8),
   });
@@ -966,10 +966,10 @@ app.use((err, req, res, next) => {
 
 let server;
 function gracefulShutdown(signal) {
-  console.log(`\n[GhostAPI] ${signal} received. Shutting down gracefully...`);
+  console.log(`\n[NiceGuyAPI] ${signal} received. Shutting down gracefully...`);
   if (server) {
     server.close(() => {
-      console.log('[GhostAPI] Server closed');
+      console.log('[NiceGuyAPI] Server closed');
       try { db.close(); } catch (e) {}
       process.exit(0);
     });
@@ -982,7 +982,7 @@ function gracefulShutdown(signal) {
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 process.on('unhandledRejection', (err) => {
-  console.error('[GhostAPI] Unhandled rejection:', err);
+  console.error('[NiceGuyAPI] Unhandled rejection:', err);
 });
 
 // ── Start ──────────────────────────────────────────────────────────────────
@@ -993,7 +993,7 @@ server = app.listen(PORT, () => {
   const bootTime = Date.now() - startTime;
   console.log(`
   ╔══════════════════════════════════════════════╗
-  ║  🏗️  GhostAPI v1.0 — AI Model Gateway         ║
+  ║  🏗️  NiceGuyAPI v1.0 — AI Model Gateway         ║
   ║  Running on port ${PORT}${' '.repeat(Math.max(0, 19 - String(PORT).length))}║
   ║  Endpoint: http://localhost:${PORT}/v1${' '.repeat(Math.max(0, 8 - String(PORT).length))}║
   ║  Boot: ${bootTime}ms${' '.repeat(Math.max(0, 29 - String(bootTime).length))}║

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GhostAPI — One API for Every AI Model</title>
+  <title>NiceGuyAPI — One API for Every AI Model</title>
   <meta name="description" content="Access 17+ AI models through a single API. Create websites, generate images, songs, PDFs, podcasts, and more. Free tier available.">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -359,7 +359,7 @@
       <h3 style="margin: 32px 0 12px; font-size: 18px;">cURL</h3>
       <div class="code-block">
 <span class="comment"># Chat with DeepSeek V4 Flash (free model)</span>
-curl -X POST <span class="url">https://ghostapi-1v1f.onrender.com/v1/chat/completions</span> \
+curl -X POST <span class="url">https://niceguyapi-1v1f.onrender.com/v1/chat/completions</span> \
   -H <span class="string">"X-API-Key: gsk_live_..."</span> \
   -H <span class="string">"Content-Type: application/json"</span> \
   -d <span class="string">'{
@@ -369,7 +369,7 @@ curl -X POST <span class="url">https://ghostapi-1v1f.onrender.com/v1/chat/comple
       </div>
       <h3 style="margin: 32px 0 12px; font-size: 18px;">JavaScript</h3>
       <div class="code-block">
-<span class="keyword">const</span> res = <span class="keyword">await</span> fetch(<span class="string">"https://ghostapi-1v1f.onrender.com/v1/chat/completions"</span>, {
+<span class="keyword">const</span> res = <span class="keyword">await</span> fetch(<span class="string">"https://niceguyapi-1v1f.onrender.com/v1/chat/completions"</span>, {
   method: <span class="string">"POST"</span>,
   headers: {
     <span class="string">"X-API-Key"</span>: <span class="string">"gsk_live_..."</span>,
@@ -386,19 +386,19 @@ console.log(data.choices[0].message.content);
       <h3 style="margin: 32px 0 12px; font-size: 18px;">Check Your Usage</h3>
       <div class="code-block">
 curl -H <span class="string">"X-API-Key: gsk_live_..."</span> \
-  <span class="url">https://ghostapi-1v1f.onrender.com/v1/usage</span>
+  <span class="url">https://niceguyapi-1v1f.onrender.com/v1/usage</span>
       </div>
     </div>
 
     <footer>
-      <p>GhostAPI v1.0 — Built by <a href="https://github.com/MrGhostGuy" style="color:#818cf8">MrGhostGuy</a></p>
+      <p>NiceGuyAPI v1.0 — Built by <a href="https://github.com/MrGhostGuy" style="color:#818cf8">MrGhostGuy</a></p>
       <p style="margin-top:8px">PayPal: <a href="https://paypal.me/kencyrus3" style="color:#818cf8">paypal.me/kencyrus3</a></p>
     </footer>
   </div>
 
   <script>
-    const API_BASE = 'https://ghostapi-1v1f.onrender.com';
-    const ADMIN_SECRET = 'ghost-2026-secret-key-change-me';
+    const API_BASE = 'https://niceguyapi-1v1f.onrender.com';
+    const ADMIN_SECRET = 'niceguy-2026-secret-key-change-me';
 
     async function handleSignup() {
       const email = document.getElementById('email').value.trim();

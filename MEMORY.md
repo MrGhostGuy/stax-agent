@@ -19,15 +19,15 @@ Remember:
 - Capital Deployer: LOCKED by default (safety feature)
 - DB: SQLite at `stax/data/stax.db` (gitignored)
 
-### GhostAPI — Premium AI Model Gateway
+### NiceGuyAPI — Premium AI Model Gateway
 - Landing page: `ghostapi/index.html` → https://mrghostguy.github.io/stax-agent/
-- API server: https://ghostapi-1v1f.onrender.com (Render.com, free tier)
+- API server: https://niceguyapi-1v1f.onrender.com (Render.com, free tier)
 - GitHub Pages (landing) + Render (API) with auto-deploy from master
 - Status: **LIVE** — Auth, proxy, admin panel, rate limiting all working
 - **Zero-cost operation** — uses OpenRouter free models (no credits needed)
 - PayPal: paypal.me/kencyrus3 (for Pro/Scale subscription payments)
 - Admin key: gsk_live_d04... (scale tier, stored in Render env)
-- GHOSTAPI_SECRET: ghost-2026-secret-key-change-me
+- NICEGUYAPI_SECRET: niceguy-2026-secret-key-change-me
 
 #### Pricing (aggressive below-market)
 | Plan | Price | Requests | Models |
@@ -37,7 +37,7 @@ Remember:
 | Scale | $29/mo | 50,000/mo | All models including premium (Claude, GPT-4o, Gemini) |
 
 #### Per-token cost comparison (competitive moat)
-- GhostAPI free models: $0/token (OpenRouter subsidized)
+- NiceGuyAPI free models: $0/token (OpenRouter subsidized)
 - OpenRouter paid: $0.44/1M input + 5.5% platform fee
 - OpenAI direct: $2.50/1M input (GPT-4o)
 - Anthropic direct: $3.00/1M input (Claude Sonnet)
@@ -50,7 +50,7 @@ Remember:
 
 ### GitHub
 - Remote: `https://github.com/MrGhostGuy/stax-agent`
-- Branches: `master` (code), `gh-pages` (GhostAPI landing page)
+- Branches: `master` (code), `gh-pages` (NiceGuyAPI landing page)
 - User: MrGhostGuy (Jeff Hollaway / GhostLegacyX)
 
 ## Exec Policy (set 2026-05-24)
