@@ -23,30 +23,30 @@ Remember:
 - Landing page: `ghostapi/index.html` → https://mrghostguy.github.io/stax-agent/
 - API server: https://niceguyapi-1v1f.onrender.com (Render.com, free tier)
 - GitHub Pages (landing) + Render (API) with auto-deploy from master
-- Status: **LIVE** — Auth, proxy, admin panel, rate limiting all working
+- Status: **LIVE** — Full signup + payment flow working
 - **Zero-cost operation** — uses OpenRouter free models (no credits needed)
-- PayPal: paypal.me/kencyrus3 (for Pro/Scale subscription payments)
-- Admin key: gsk_live_d04... (scale tier, stored in Render env)
-- NICEGUYAPI_SECRET: niceguy-2026-secret-key-change-me
+- PayPal: paypal.me/kencyrus3 (for Pro/Premium subscription payments)
+- NICEGUYAPI_SECRET: stored in Render env (NOT in frontend code)
 
-#### Pricing (aggressive below-market)
+#### Pricing
 | Plan | Price | Requests | Models |
 |------|-------|----------|--------|
 | Free | $0/mo | 50/mo | 5 free models (DeepSeek, Llama, Qwen, GPT-OSS, Gemma) |
-| Pro | $5/mo | 5,000/mo | All 17+ free models, zero token cost, vision+tools |
-| Scale | $29/mo | 50,000/mo | All models including premium (Claude, GPT-4o, Gemini) |
-
-#### Per-token cost comparison (competitive moat)
-- NiceGuyAPI free models: $0/token (OpenRouter subsidized)
-- OpenRouter paid: $0.44/1M input + 5.5% platform fee
-- OpenAI direct: $2.50/1M input (GPT-4o)
-- Anthropic direct: $3.00/1M input (Claude Sonnet)
+| Pro | $6/mo | 5,000/mo | All 17+ free models |
+| Premium | $27/mo | 25,000/mo | All models including premium (Claude, GPT-4o, Gemini) |
 
 #### Revenue math
-- 50 Pro subscribers × $5 = $250/mo
-- 20 Scale subscribers × $29 = $580/mo
-- Combined: $830/mo recurring with just 70 paying users
-- Payment via PayPal (paypal.me/kencyrus3) — manual activation for now
+- 50 Pro users × $6 = $300/mo
+- 20 Premium users × $27 = $540/mo
+- Combined: $840/mo recurring with just 70 paying users
+- Payment via PayPal → auto-activation via billing/confirm endpoint
+
+#### Security fixes (v2)
+- Admin secret removed from frontend — signup is server-side only
+- Rate limiting on signup: 5/hour per IP
+- Fake feature endpoints return 501 (media, sub-agents, websites)
+- Paid tiers created at 'free' until PayPal payment confirmed
+- bcrypt key hashing, key prefix lookup for auth
 
 ### GitHub
 - Remote: `https://github.com/MrGhostGuy/stax-agent`
