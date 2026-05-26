@@ -78,9 +78,7 @@ const providerCount = db.prepare('SELECT COUNT(*) as c FROM provider_config').ge
 if (providerCount.c === 0) {
   const insert = db.prepare('INSERT INTO provider_config (id, name, base_url, priority, models) VALUES (?, ?, ?, ?, ?)');
   const defaults = [
-    ['openrouter', 'OpenRouter', 'https://openrouter.ai/api/v1', 1, '["anthropic/claude-sonnet-4","openai/gpt-4o","google/gemini-2.0-flash","x-ai/grok-beta"]'],
-    ['anthropic', 'Anthropic', 'https://api.anthropic.com', 2, '["claude-sonnet-4-20250514","claude-haiku-4-20250514"]'],
-    ['openai', 'OpenAI', 'https://api.openai.com/v1', 3, '["gpt-4o","gpt-4o-mini","o3-mini"]'],
+    ['openrouter', 'OpenRouter', 'https://openrouter.ai/api/v1', 1, '["deepseek/deepseek-v4-flash:free","qwen/qwen3-coder:free","meta-llama/llama-3.3-70b-instruct:free","nvidia/nemotron-3-super-120b-a12b:free","openai/gpt-oss-120b:free","google/gemma-4-31b-it:free","minimax/minimax-m2.5:free","qwen/qwen3-next-80b-a3b-instruct:free","openai/gpt-oss-20b:free","z-ai/glm-4.5-air:free","nvidia/nemotron-3-nano-30b-a3b:free","nvidia/nemotron-nano-9b-v2:free","meta-llama/llama-3.2-3b-instruct:free","nousresearch/hermes-3-llama-3.1-405b:free","arcee-ai/trinity-large-thinking:free","google/gemma-4-26b-a4b-it:free"]'],
   ];
   for (const p of defaults) insert.run(...p);
 }
@@ -296,7 +294,7 @@ app.get('/v1/models', authenticate, (req, res) => {
 
 // Chat completions (OpenAI-compatible) — THE MAIN ENDPOINT
 app.post('/v1/chat/completions', authenticate, async (req, res) => {
-  const { model = 'openrouter/anthropic/claude-sonnet-4', messages, stream = false, temperature, max_tokens } = req.body;
+  const { model = 'openrouter/deepseek/deepseek-v4-flash:free', messages, stream = false, temperature, max_tokens } = req.body;
 
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: { message: 'messages array is required', type: 'validation_error' } });
@@ -375,7 +373,7 @@ app.post('/admin/keys', adminAuth, (req, res) => {
   const rawKey = `gsk_live_${uuidv4().replace(/-/g, '')}${uuidv4().replace(/-/g, '')}`;
   const keyHash = bcrypt.hashSync(rawKey, 10);
   const keyPrefix = rawKey.slice(0, 12);
-  const limit = monthly_limit || (tier === 'scale' ? 1000000 : tier === 'pro' ? 100000 : 1000);
+  const limit = monthly_limit || (tier === 'scale' ? 50000 : tier === 'pro' ? 5000 : 50);
 
   db.prepare('INSERT INTO api_keys (id, key_hash, key_prefix, name, email, tier, monthly_limit) VALUES (?, ?, ?, ?, ?, ?, ?)')
     .run(id, keyHash, keyPrefix, name || 'Default', email || '', tier, limit);
@@ -468,9 +466,9 @@ app.get('/docs', (req, res) => {
       },
     },
     pricing: {
-      free: '$0/mo — 1,000 requests/month',
-      pro: '$29/mo — 100,000 requests/month',
-      scale: '$99/mo — 1,000,000 requests/month',
+      free: '$0/mo — 50 requests/month',
+      pro: '$5/mo — 5,000 requests/month (17+ free models, zero token cost)',
+      scale: '$29/mo — 50,000 requests/month (all models including premium)',
     },
   });
 });
