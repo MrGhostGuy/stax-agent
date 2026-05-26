@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NiceGuyAPI — One API for Every AI Model</title>
-  <meta name="description" content="Access 17+ AI models through a single API. Create websites, generate images, songs, PDFs, podcasts, and more. Free tier available.">
+  <meta name="description" content="Access 17+ AI models through a single API. Fast, reliable, affordable. Free tier available — no credit card required.">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; background: #0a0a0f; color: #e8e8ec; line-height: 1.6; }
@@ -13,12 +13,16 @@
     .hero h1 { font-size: 52px; font-weight: 800; background: linear-gradient(135deg, #a78bfa, #818cf8, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px; }
     .hero p { font-size: 20px; color: #9ca3af; max-width: 600px; margin: 0 auto 32px; }
     .badge { display: inline-block; background: rgba(99,102,241,0.15); color: #818cf8; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 24px; }
+    .badge-green { background: rgba(52,211,153,0.15); color: #34d399; }
     .btn { display: inline-block; padding: 14px 32px; border-radius: 12px; font-size: 16px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s; }
     .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.3); }
     .btn-secondary { background: rgba(255,255,255,0.08); color: #e8e8ec; margin-left: 12px; }
     .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+    .btn-success { background: linear-gradient(135deg, #059669, #10b981); color: white; }
+    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(16,185,129,0.3); }
     .btn-small { padding: 10px 20px; font-size: 14px; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
     .section { padding: 60px 0; border-top: 1px solid rgba(255,255,255,0.06); }
     .section h2 { font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 12px; }
     .section-sub { text-align: center; color: #9ca3af; margin-bottom: 40px; }
@@ -26,7 +30,7 @@
     .pricing-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 32px; text-align: center; transition: all 0.2s; }
     .pricing-card:hover { border-color: rgba(99,102,241,0.3); }
     .pricing-card.popular { border-color: #6366f1; position: relative; }
-    .pricing-card.popular::before { content: 'BEST VALUE'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #6366f1; color: white; padding: 4px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .pricing-card.popular::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #6366f1; color: white; padding: 4px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; }
     .pricing-card h3 { font-size: 18px; margin-bottom: 8px; }
     .pricing-card .price { font-size: 42px; font-weight: 800; margin: 16px 0 4px; }
     .pricing-card .price span { font-size: 16px; color: #9ca3af; font-weight: 400; }
@@ -37,29 +41,27 @@
     .pricing-card ul li.locked { color: #4b5563; }
     .pricing-card ul li.locked::before { content: '✗ '; color: #4b5563; }
     .pricing-card ul li.highlight::before { content: '★ '; color: #fbbf24; }
-    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .feature-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 24px; }
-    .feature-card .icon { font-size: 28px; margin-bottom: 12px; }
-    .feature-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
-    .feature-card p { font-size: 13px; color: #9ca3af; }
-    .feature-card .tier-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-top: 8px; }
-    .tier-free { background: rgba(107,114,128,0.2); color: #9ca3af; }
-    .tier-pro { background: rgba(99,102,241,0.2); color: #818cf8; }
-    .tier-premium { background: rgba(251,191,36,0.2); color: #fbbf24; }
-    .code-block { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; overflow-x: auto; margin: 24px 0; }
+    .code-block { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; overflow-x: auto; margin: 24px 0; white-space: pre-wrap; word-break: break-all; }
     .code-block .comment { color: #6b7280; }
     .code-block .string { color: #34d399; }
     .code-block .keyword { color: #a78bfa; }
     .code-block .url { color: #60a5fa; }
     .alert { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.2); border-radius: 10px; padding: 16px 20px; margin: 16px 0; font-size: 14px; color: #34d399; }
     .alert.info { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.2); color: #818cf8; }
+    .alert.error { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2); color: #f87171; }
+    .alert.warning { background: rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.2); color: #fbbf24; }
     .signup-form { max-width: 480px; margin: 0 auto; }
     .form-group { margin-bottom: 20px; }
     .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #9ca3af; }
-    .form-group input, .form-group select { width: 100%; padding: 14px 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #e8e8ec; font-size: 15px; outline: none; }
+    .form-group input, .form-group select { width: 100%; padding: 14px 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #e8e8ec; font-size: 15px; outline: none; transition: border-color 0.2s; }
     .form-group input:focus, .form-group select:focus { border-color: #6366f1; }
     #apikey-display { display: none; }
     #apikey-display code { background: rgba(99,102,241,0.2); padding: 4px 10px; border-radius: 6px; font-family: monospace; font-size: 13px; word-break: break-all; }
+    .key-box { background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); border-radius: 10px; padding: 16px; margin: 16px 0; word-break: break-all; font-family: monospace; font-size: 13px; color: #a5b4fc; text-align: center; }
+    .step-indicator { display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; }
+    .step-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+    .step-dot.active { background: #6366f1; }
+    .step-dot.done { background: #34d399; }
     .comparison-table { width: 100%; border-collapse: collapse; margin: 24px 0; }
     .comparison-table th, .comparison-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 14px; }
     .comparison-table th { color: #9ca3af; font-weight: 600; font-size: 12px; text-transform: uppercase; }
@@ -67,11 +69,19 @@
     .comparison-table tr:hover { background: rgba(255,255,255,0.02); }
     .check { color: #34d399; }
     .cross { color: #4b5563; }
+    .models-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 24px 0; }
+    .model-pill { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 6px 14px; font-size: 12px; color: #9ca3af; }
+    .model-pill.free { border-color: rgba(107,114,128,0.3); }
+    .model-pill.pro { border-color: rgba(99,102,241,0.3); color: #818cf8; }
+    .model-pill.premium { border-color: rgba(251,191,36,0.3); color: #fbbf24; }
+    .pending-box { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: 12px; padding: 20px; margin: 16px 0; text-align: center; }
+    .pending-box h4 { color: #fbbf24; margin-bottom: 8px; }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.2); border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
     footer { text-align: center; padding: 40px 0; color: #4b5563; font-size: 13px; }
     @media (max-width: 768px) {
       .hero h1 { font-size: 36px; }
       .pricing-grid { grid-template-columns: 1fr; }
-      .features-grid { grid-template-columns: 1fr; }
       .btn-secondary { margin-left: 0; margin-top: 12px; }
     }
   </style>
@@ -80,86 +90,28 @@
   <div class="container">
     <!-- HERO -->
     <div class="hero">
-      <div class="badge">🚀 Live Now — Free Tier Available</div>
-      <h1>One API for Everything AI</h1>
-      <p>Chat, build websites, generate images, create music, produce podcasts, and more — all through a single API endpoint.</p>
+      <div class="badge badge-green">● Live &amp; Running</div>
+      <h1>One API for Every AI Model</h1>
+      <p>Access DeepSeek, Llama, Qwen, GPT, Claude, Gemini, and more through a single OpenAI-compatible endpoint. Free tier available.</p>
       <a href="#signup" class="btn btn-primary">Get Your Free API Key</a>
-      <a href="#features" class="btn btn-secondary">See Features</a>
-    </div>
-
-    <!-- FEATURES -->
-    <div class="section" id="features">
-      <h2>What You Can Build</h2>
-      <p class="section-sub">One API key unlocks everything. No juggling providers, no separate billing.</p>
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="icon">💬</div>
-          <h4>AI Chat & Text</h4>
-          <p>17+ models including DeepSeek, Llama, Qwen, GPT, Gemma. Tools, vision, coding, reasoning.</p>
-          <span class="tier-badge tier-free">FREE</span>
-        </div>
-        <div class="feature-card">
-          <div class="icon">🌐</div>
-          <h4>Website Creation</h4>
-          <p>Create and customize websites with AI. Local testing on all tiers. Hosting on Premium.</p>
-          <span class="tier-badge tier-free">FREE (local)</span>
-          <span class="tier-badge tier-premium">HOSTED</span>
-        </div>
-        <div class="feature-card">
-          <div class="icon">🎮</div>
-          <h4>Games & Apps</h4>
-          <p>Build and play games, create custom apps and tools. Full program creation and testing.</p>
-          <span class="tier-badge tier-pro">PRO+</span>
-        </div>
-        <div class="feature-card">
-          <div class="icon">🖼️</div>
-          <h4>Image Generation</h4>
-          <p>1 free image to start. Generate more with Pro and Premium tiers.</p>
-          <span class="tier-badge tier-free">1 FREE</span>
-          <span class="tier-badge tier-pro">PRO+</span>
-        </div>
-        <div class="feature-card">
-          <div class="icon">🎵</div>
-          <h4>Music & Songs</h4>
-          <p>1 free custom song. Up to 90s songs on paid tiers, with weekly limits.</p>
-          <span class="tier-badge tier-free">1 FREE</span>
-          <span class="tier-badge tier-pro">PRO (90s, weekly cap)</span>
-          <span class="tier-badge tier-premium">PREMIUM (higher cap)</span>
-        </div>
-        <div class="feature-card">
-          <div class="icon">🎙️</div>
-          <h4>Podcast Generation</h4>
-          <p>1 free 1-minute podcast preview. Longer episodes on paid tiers.</p>
-          <span class="tier-badge tier-free">1 MIN FREE</span>
-          <span class="tier-badge tier-pro">PRO+</span>
-        </div>
-        <div class="feature-card">
-          <div class="icon">📄</div>
-          <h4>PDF Generation</h4>
-          <p>1 free custom PDF. Generate documents, reports, and more on paid tiers.</p>
-          <span class="tier-badge tier-free">1 FREE</span>
-          <span class="tier-badge tier-pro">PRO+</span>
-        </div>
-        <div class="feature-card">
-          <div class="icon">🤖</div>
-          <h4>Sub-Agents & Scheduling</h4>
-          <p>1 sub-agent + 1 scheduled task on Pro. Unlimited on Premium.</p>
-          <span class="tier-badge tier-pro">PRO (limited)</span>
-          <span class="tier-badge tier-premium">PREMIUM (unlimited)</span>
-        </div>
-        <div class="feature-card">
-          <div class="icon">🔗</div>
-          <h4>Custom Domain Hosting</h4>
-          <p>Host your AI-generated websites with your own custom domain name.</p>
-          <span class="tier-badge tier-premium">PREMIUM</span>
-        </div>
+      <a href="#pricing" class="btn btn-secondary">View Pricing</a>
+      <div class="models-list">
+        <span class="model-pill free">DeepSeek V4 Flash</span>
+        <span class="model-pill free">Llama 3.3 70B</span>
+        <span class="model-pill free">Qwen3 Coder</span>
+        <span class="model-pill free">GPT-OSS 120B</span>
+        <span class="model-pill free">Gemma 4 31B</span>
+        <span class="model-pill pro">+ 12 more free models</span>
+        <span class="model-pill premium">Claude Sonnet</span>
+        <span class="model-pill premium">GPT-4o</span>
+        <span class="model-pill premium">Gemini 2.0</span>
       </div>
     </div>
 
     <!-- PRICING -->
     <div class="section" id="pricing">
       <h2>Simple, Transparent Pricing</h2>
-      <p class="section-sub">Start free. Upgrade when you need more. No hidden fees, no surprises.</p>
+      <p class="section-sub">Start free. Upgrade when you need more. No hidden fees, no credit card required for free tier.</p>
       <div class="pricing-grid">
         <!-- FREE -->
         <div class="pricing-card">
@@ -167,18 +119,11 @@
           <div class="price">$0<span>/mo</span></div>
           <div class="tagline">Try it out — no credit card</div>
           <ul>
-            <li>20 AI requests per week</li>
-            <li>Requests reset every week</li>
+            <li>50 AI requests per month</li>
             <li>5 AI models</li>
-            <li>Website creation (local testing)</li>
-            <li class="highlight">1 free custom image</li>
-            <li class="highlight">1 free custom song</li>
-            <li class="highlight">1 free PDF document</li>
-            <li class="highlight">1 free 1-min podcast</li>
-            <li class="locked">Games & apps</li>
-            <li class="locked">Website hosting</li>
-            <li class="locked">Sub-agents & scheduling</li>
-            <li class="locked">Custom domain</li>
+            <li>Up to 4K tokens per request</li>
+            <li>5 requests per minute</li>
+            <li>Community support</li>
           </ul>
           <a href="#signup" class="btn btn-secondary btn-small" style="width:100%">Get Started</a>
         </div>
@@ -186,24 +131,17 @@
         <div class="pricing-card popular">
           <h3>Pro</h3>
           <div class="price">$6<span>/mo</span></div>
-          <div class="tagline">For builders & creators</div>
+          <div class="tagline">For developers &amp; builders</div>
           <ul>
-            <li>Increased request limits</li>
-            <li>All 17+ AI models</li>
-            <li>Build & play games and apps</li>
-            <li>Website creation + local testing</li>
-            <li>1 sub-agent</li>
-            <li>1 recurring scheduled task</li>
-            <li>Image generation (daily limit)</li>
-            <li>Song generation up to 90s (weekly limit)</li>
-            <li>PDF generation with page limits</li>
-            <li>Podcast generation (weekly limit)</li>
-            <li>Higher rate limits</li>
+            <li>5,000 AI requests per month</li>
+            <li>All 17+ free models</li>
+            <li>Up to 32K tokens per request</li>
+            <li>20 requests per minute</li>
+            <li>Build games &amp; apps</li>
+            <li>Pay-as-you-go refills available</li>
             <li>Email support</li>
-            <li class="locked">Website hosting</li>
-            <li class="locked">Custom domain</li>
           </ul>
-          <a href="#signup" class="btn btn-primary btn-small" style="width:100%">Subscribe — $6</a>
+          <a href="#signup" class="btn btn-primary btn-small" style="width:100%">Subscribe — $6/mo</a>
         </div>
         <!-- PREMIUM -->
         <div class="pricing-card">
@@ -211,24 +149,16 @@
           <div class="price">$27<span>/mo</span></div>
           <div class="tagline">Full power unlocked</div>
           <ul>
-            <li>Highest request limits</li>
-            <li>Everything in Pro</li>
-            <li class="highlight">Unlimited sub-agents</li>
-            <li class="highlight">Unlimited scheduled tasks</li>
-            <li class="highlight">Website hosting included</li>
-            <li class="highlight">Custom domain support</li>
-            <li class="highlight">Highest media generation limits</li>
-            <li>Premium AI models (Claude, GPT-4o, Gemini)</li>
+            <li>25,000 AI requests per month</li>
+            <li>All models including premium</li>
+            <li>Up to 128K tokens per request</li>
+            <li>60 requests per minute</li>
+            <li>Claude, GPT-4o, Gemini included</li>
+            <li>Cheapest refill rates</li>
             <li>Priority support</li>
-            <li>Pay-as-you-go refills available</li>
           </ul>
-          <a href="#signup" class="btn btn-secondary btn-small" style="width:100%">Subscribe — $27</a>
+          <a href="#signup" class="btn btn-secondary btn-small" style="width:100%">Subscribe — $27/mo</a>
         </div>
-      </div>
-
-      <!-- PAY AS YOU GO -->
-      <div class="alert info" style="margin-top: 32px; text-align: center;">
-        <strong>💡 Pay-as-you-go refills available.</strong> Hit your limit but don't want to upgrade? Buy extra requests at a per-request rate — cheaper than upgrading if you just need a few more. Available on all tiers.
       </div>
 
       <!-- COMPARISON TABLE -->
@@ -244,10 +174,10 @@
         </thead>
         <tbody>
           <tr>
-            <td>AI Chat Requests</td>
-            <td>20/week</td>
-            <td>Increased limits</td>
-            <td>Highest limits</td>
+            <td>Monthly Requests</td>
+            <td>50</td>
+            <td>5,000</td>
+            <td>25,000</td>
           </tr>
           <tr>
             <td>AI Models</td>
@@ -256,61 +186,25 @@
             <td>All models (incl. premium)</td>
           </tr>
           <tr>
-            <td>Complex Tasks</td>
-            <td>Standard</td>
-            <td>Multi-request support</td>
-            <td>Multi-request support</td>
+            <td>Max Tokens/Request</td>
+            <td>4K</td>
+            <td>32K</td>
+            <td>128K</td>
           </tr>
           <tr>
-            <td>Website Creation</td>
-            <td class="check">Local testing</td>
-            <td class="check">Local testing</td>
-            <td class="check">Hosted + custom domain</td>
+            <td>Rate Limit</td>
+            <td>5/min</td>
+            <td>20/min</td>
+            <td>60/min</td>
           </tr>
           <tr>
-            <td>Games & Apps</td>
+            <td>Build Games &amp; Apps</td>
             <td class="cross">✗</td>
             <td class="check">✓</td>
             <td class="check">✓</td>
           </tr>
           <tr>
-            <td>Image Generation</td>
-            <td>1 free</td>
-            <td class="check">Increased limit</td>
-            <td class="check">Highest limit</td>
-          </tr>
-          <tr>
-            <td>Song Generation</td>
-            <td>1 free</td>
-            <td class="check">Increased limit</td>
-            <td class="check">Highest limit</td>
-          </tr>
-          <tr>
-            <td>PDF Generation</td>
-            <td>1 free</td>
-            <td class="check">Increased limit</td>
-            <td class="check">Highest limit</td>
-          </tr>
-          <tr>
-            <td>Podcast Generation</td>
-            <td>1 min free</td>
-            <td class="check">Extended length</td>
-            <td class="check">Full length</td>
-          </tr>
-          <tr>
-            <td>Sub-Agents</td>
-            <td class="cross">✗</td>
-            <td class="check">1 agent</td>
-            <td class="check">Unlimited</td>
-          </tr>
-          <tr>
-            <td>Scheduled Tasks</td>
-            <td class="cross">✗</td>
-            <td class="check">1 recurring task</td>
-            <td class="check">Unlimited</td>
-          </tr>
-          <tr>
-            <td>Custom Domain</td>
+            <td>Premium Models (Claude, GPT-4o, Gemini)</td>
             <td class="cross">✗</td>
             <td class="cross">✗</td>
             <td class="check">✓</td>
@@ -321,6 +215,12 @@
             <td class="check">$0.02/req</td>
             <td class="check">$0.01/req</td>
           </tr>
+          <tr>
+            <td>Key Rotation</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -328,66 +228,120 @@
     <!-- SIGNUP -->
     <div class="section" id="signup">
       <h2>Get Your API Key</h2>
-      <p class="section-sub">Sign up in seconds. Start building immediately.</p>
-      <div class="signup-form">
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" id="email" placeholder="you@example.com" required>
-        </div>
-        <div class="form-group">
-          <label>Plan</label>
-          <select id="plan">
-            <option value="free">Free — $0/mo — 20 requests/week</option>
-            <option value="pro">Pro — $6/mo — increased limits, games, media, sub-agents</option>
-            <option value="premium">Premium — $27/mo — hosting, custom domain, everything</option>
-          </select>
-        </div>
-        <div id="form-message"></div>
-        <button class="btn btn-primary" style="width:100%" id="signup-btn" onclick="handleSignup()">Create Free API Key</button>
+      <p class="section-sub">Sign up in seconds. Start making API calls immediately.</p>
+
+      <div class="step-indicator" id="step-indicator">
+        <div class="step-dot active" id="step1-dot"></div>
+        <div class="step-dot" id="step2-dot"></div>
+        <div class="step-dot" id="step3-dot"></div>
       </div>
-      <div id="apikey-display" class="alert" style="margin-top: 24px;">
-        <strong>🎉 Your API Key:</strong><br><br>
-        <code id="apikey-value"></code><br><br>
-        <small>Save this key — it won't be shown again. Use it in the <code>X-API-Key</code> header.</small>
+
+      <div class="signup-form">
+        <!-- STEP 1: Email + Plan -->
+        <div id="step1">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="email" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label>Plan</label>
+            <select id="plan" onchange="updatePlanInfo()">
+              <option value="free">Free — $0/mo — 50 requests/month</option>
+              <option value="pro">Pro — $6/mo — 5,000 requests/month</option>
+              <option value="premium">Premium — $27/mo — 25,000 requests/month</option>
+            </select>
+          </div>
+          <div id="plan-info"></div>
+          <div id="form-message"></div>
+          <button class="btn btn-primary" style="width:100%" id="signup-btn" onclick="handleSignup()">Continue →</button>
+        </div>
+
+        <!-- STEP 2: Payment (for paid tiers) -->
+        <div id="step2" style="display:none;">
+          <div id="payment-section">
+            <div class="pending-box">
+              <h4>Complete Your Payment</h4>
+              <p style="color:#9ca3af; font-size:14px; margin:8px 0;">
+                Your API key has been created. Complete payment to activate <strong id="pay-tier-name">Pro</strong> tier.
+              </p>
+              <p style="font-size:24px; font-weight:700; margin:12px 0;" id="pay-amount">$6.00/mo</p>
+              <a id="paypal-link" href="#" class="btn btn-success" target="_blank" onclick="markPayPalClicked()">
+                💳 Pay with PayPal
+              </a>
+              <p style="color:#6b7280; font-size:12px; margin-top:12px;">
+                After payment, click the button below to activate your account.
+              </p>
+            </div>
+            <div class="form-group" style="margin-top:16px;">
+              <label>PayPal Order ID (from your receipt)</label>
+              <input type="text" id="paypal-order-id" placeholder="PAY-XXXXXXXXXXXX">
+              <small style="color:#6b7280; font-size:11px;">Find this in your PayPal receipt email or transaction details.</small>
+            </div>
+            <div id="payment-message"></div>
+            <button class="btn btn-success" style="width:100%" id="activate-btn" onclick="handleActivate()">
+              ✓ I've Paid — Activate My Account
+            </button>
+            <button class="btn btn-secondary" style="width:100%; margin-top:8px;" onclick="goBack()">← Go Back</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Success -->
+        <div id="step3" style="display:none;">
+          <div id="success-section">
+            <div class="alert" style="text-align:center;">
+              <div style="font-size:32px; margin-bottom:8px;">🎉</div>
+              <strong style="font-size:18px;">You're All Set!</strong>
+              <p style="margin-top:8px;">Your API key is ready. Save it below — it won't be shown again.</p>
+            </div>
+            <div class="key-box" id="final-key"></div>
+            <div class="alert info" style="font-size:13px;">
+              <strong>Tier:</strong> <span id="final-tier"></span><br>
+              <strong>Monthly Requests:</strong> <span id="final-limit"></span><br>
+              <strong>Usage Endpoint:</strong> <code>GET /v1/usage</code>
+            </div>
+            <button class="btn btn-primary" style="width:100%" onclick="resetForm()">Create Another Key</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- DOCS -->
+    <!-- QUICK START -->
     <div class="section" id="docs">
       <h2>Quick Start</h2>
       <p class="section-sub">Make your first API call in under a minute.</p>
       <h3 style="margin: 32px 0 12px; font-size: 18px;">cURL</h3>
       <div class="code-block">
-<span class="comment"># Chat with DeepSeek V4 Flash (free model)</span>
+<span class="comment"># Chat with any model — just swap the model name</span>
 curl -X POST <span class="url">https://niceguyapi-1v1f.onrender.com/v1/chat/completions</span> \
-  -H <span class="string">"X-API-Key: gsk_live_..."</span> \
+  -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
   -H <span class="string">"Content-Type: application/json"</span> \
   -d <span class="string">'{
     "model": "openrouter/deepseek/deepseek-v4-flash:free",
     "messages": [{"role": "user", "content": "Hello!"}]
-  }'</span>
-      </div>
+  }'</span></div>
       <h3 style="margin: 32px 0 12px; font-size: 18px;">JavaScript</h3>
       <div class="code-block">
 <span class="keyword">const</span> res = <span class="keyword">await</span> fetch(<span class="string">"https://niceguyapi-1v1f.onrender.com/v1/chat/completions"</span>, {
   method: <span class="string">"POST"</span>,
   headers: {
-    <span class="string">"X-API-Key"</span>: <span class="string">"gsk_live_..."</span>,
+    <span class="string">"X-API-Key"</span>: <span class="string">"gsk_live_YOUR_KEY_HERE"</span>,
     <span class="string">"Content-Type"</span>: <span class="string">"application/json"</span>,
   },
   body: JSON.stringify({
     model: <span class="string">"openrouter/deepseek/deepseek-v4-flash:free"</span>,
-    messages: [{ role: <span class="string">"user"</span>, content: <span class="string">"Build me a website"</span> }],
+    messages: [{ role: <span class="string">"user"</span>, content: <span class="string">"Hello!"</span> }],
   }),
 });
 <span class="keyword">const</span> data = <span class="keyword">await</span> res.json();
-console.log(data.choices[0].message.content);
-      </div>
+console.log(data.choices[0].message.content);</div>
       <h3 style="margin: 32px 0 12px; font-size: 18px;">Check Your Usage</h3>
       <div class="code-block">
-curl -H <span class="string">"X-API-Key: gsk_live_..."</span> \
-  <span class="url">https://niceguyapi-1v1f.onrender.com/v1/usage</span>
-      </div>
+curl -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
+  <span class="url">https://niceguyapi-1v1f.onrender.com/v1/usage</span></div>
+      <h3 style="margin: 32px 0 12px; font-size: 18px;">List Available Models</h3>
+      <div class="code-block">
+curl -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
+  <span class="url">https://niceguyapi-1v1f.onrender.com/v1/models</span></div>
     </div>
 
     <footer>
@@ -398,7 +352,39 @@ curl -H <span class="string">"X-API-Key: gsk_live_..."</span> \
 
   <script>
     const API_BASE = 'https://niceguyapi-1v1f.onrender.com';
-    const ADMIN_SECRET = 'ghost-2026-secret-key-change-me';
+    let currentApiKey = '';
+    let currentTier = '';
+    let paypalClicked = false;
+
+    function updatePlanInfo() {
+      const plan = document.getElementById('plan').value;
+      const prices = { free: 0, pro: 6, premium: 27 };
+      const limits = { free: '50', pro: '5,000', premium: '25,000' };
+      const names = { free: 'Free', pro: 'Pro', premium: 'Premium' };
+      if (plan === 'free') {
+        document.getElementById('plan-info').innerHTML = '<div class="alert info" style="font-size:13px;">Free tier — no payment required. Get your API key instantly.</div>';
+      } else {
+        document.getElementById('plan-info').innerHTML = `<div class="alert info" style="font-size:13px;"><strong>${names[plan]}:</strong> $${prices[plan]}/mo for ${limits[plan]} requests. You'll pay via PayPal after signup.</div>`;
+      }
+    }
+
+    function setStep(n) {
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById('step' + i).style.display = i === n ? 'block' : 'none';
+        const dot = document.getElementById('step' + i + '-dot');
+        dot.className = 'step-dot' + (i < n ? ' done' : i === n ? ' active' : '');
+      }
+    }
+
+    function goBack() {
+      setStep(1);
+      document.getElementById('form-message').innerHTML = '';
+      document.getElementById('payment-message').innerHTML = '';
+    }
+
+    function markPayPalClicked() {
+      paypalClicked = true;
+    }
 
     async function handleSignup() {
       const email = document.getElementById('email').value.trim();
@@ -407,47 +393,126 @@ curl -H <span class="string">"X-API-Key: gsk_live_..."</span> \
       const msg = document.getElementById('form-message');
 
       if (!email) {
-        msg.innerHTML = '<div class="alert" style="background:rgba(239,68,68,0.1);color:#f87171;border-color:rgba(239,68,68,0.2);">Please enter your email.</div>';
+        msg.innerHTML = '<div class="alert error">Please enter your email.</div>';
         return;
       }
-
-      if (plan !== 'free') {
-        const prices = { pro: 6, premium: 27 };
-        const price = prices[plan];
-        const names = { pro: 'Pro', premium: 'Premium' };
-        msg.innerHTML = `<div class="alert info">Pay <strong>$${price}/mo</strong> via PayPal to activate ${names[plan]}:<br><br>
-          <a href="https://paypal.me/kencyrus3/${price}" class="btn btn-primary btn-small" target="_blank">Pay $${price} with PayPal</a><br><br>
-          <small>After payment, email us with your address and we'll activate your key.</small></div>`;
+      if (!email.includes('@') || !email.includes('.')) {
+        msg.innerHTML = '<div class="alert error">Please enter a valid email address.</div>';
         return;
       }
 
       btn.disabled = true;
-      btn.textContent = 'Creating...';
+      btn.innerHTML = '<span class="spinner"></span>Creating your key...';
       msg.innerHTML = '';
 
       try {
-        const res = await fetch(`${API_BASE}/admin/keys`, {
+        const res = await fetch(`${API_BASE}/v1/signup`, {
           method: 'POST',
-          headers: { 'X-Admin-Secret': ADMIN_SECRET, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: email.split('@')[0], email, tier: 'free' }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, tier: plan }),
         });
         const data = await res.json();
+
         if (data.key) {
-          document.getElementById('apikey-value').textContent = data.key;
-          document.getElementById('apikey-display').style.display = 'block';
-          msg.innerHTML = '<div class="alert">✅ Your API key is ready! Save it above.</div>';
-          btn.textContent = 'Key Created!';
+          currentApiKey = data.key;
+          currentTier = data.tier;
+
+          if (data.payment_required) {
+            // Paid tier — show payment step
+            setStep(2);
+            document.getElementById('pay-tier-name').textContent = data.pending_tier.charAt(0).toUpperCase() + data.pending_tier.slice(1);
+            document.getElementById('pay-amount').textContent = '$' + (data.pending_tier === 'pro' ? '6' : '27') + '/mo';
+            document.getElementById('paypal-link').href = data.paypal_url;
+            document.getElementById('payment-message').innerHTML = '';
+          } else {
+            // Free tier — show success immediately
+            showSuccess(data);
+          }
         } else {
-          msg.innerHTML = `<div class="alert" style="background:rgba(239,68,68,0.1);color:#f87171;border-color:rgba(239,68,68,0.2);">Error: ${data.error || 'Unknown error'}</div>`;
+          msg.innerHTML = `<div class="alert error">Error: ${data.error?.message || data.error || 'Unknown error'}</div>`;
           btn.disabled = false;
-          btn.textContent = 'Create Free API Key';
+          btn.textContent = 'Continue →';
         }
       } catch (err) {
-        msg.innerHTML = `<div class="alert" style="background:rgba(239,68,68,0.1);color:#f87171;border-color:rgba(239,68,68,0.2);">Connection error. Server may be waking up — try again in 30 seconds.</div>`;
+        msg.innerHTML = `<div class="alert error">Connection error. Server may be waking up (free tier). Try again in 30 seconds.</div>`;
         btn.disabled = false;
-        btn.textContent = 'Create Free API Key';
+        btn.textContent = 'Continue →';
       }
     }
+
+    async function handleActivate() {
+      const orderId = document.getElementById('paypal-order-id').value.trim();
+      const btn = document.getElementById('activate-btn');
+      const msg = document.getElementById('payment-message');
+
+      if (!paypalClicked) {
+        msg.innerHTML = '<div class="alert error">Please click the PayPal payment link above first.</div>';
+        return;
+      }
+
+      if (!orderId) {
+        msg.innerHTML = '<div class="alert error">Please enter your PayPal Order ID from the receipt.</div>';
+        return;
+      }
+
+      if (!orderId.startsWith('PAY-')) {
+        msg.innerHTML = '<div class="alert error">Order ID should start with PAY-. Find it in your PayPal receipt.</div>';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Activating...';
+      msg.innerHTML = '';
+
+      try {
+        const res = await fetch(`${API_BASE}/v1/billing/confirm`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ api_key: currentApiKey, paypal_order_id: orderId }),
+        });
+        const data = await res.json();
+
+        if (data.status === 'activated') {
+          showSuccess({ tier: data.tier, monthly_limit: data.monthly_limit, key: currentApiKey });
+        } else {
+          msg.innerHTML = `<div class="alert error">Activation failed: ${data.error?.message || 'Unknown error'}</div>`;
+          btn.disabled = false;
+          btn.textContent = "✓ I've Paid — Activate My Account";
+        }
+      } catch (err) {
+        msg.innerHTML = '<div class="alert error">Connection error. Please try again.</div>';
+        btn.disabled = false;
+        btn.textContent = "✓ I've Paid — Activate My Account";
+      }
+    }
+
+    function showSuccess(data) {
+      setStep(3);
+      document.getElementById('final-key').textContent = data.key;
+      document.getElementById('final-tier').textContent = data.tier.charAt(0).toUpperCase() + data.tier.slice(1);
+      document.getElementById('final-limit').textContent = data.monthly_limit.toLocaleString() + ' requests/month';
+    }
+
+    function resetForm() {
+      currentApiKey = '';
+      currentTier = '';
+      paypalClicked = false;
+      document.getElementById('email').value = '';
+      document.getElementById('plan').value = 'free';
+      document.getElementById('paypal-order-id').value = '';
+      document.getElementById('form-message').innerHTML = '';
+      document.getElementById('payment-message').innerHTML = '';
+      document.getElementById('plan-info').innerHTML = '';
+      document.getElementById('signup-btn').disabled = false;
+      document.getElementById('signup-btn').textContent = 'Continue →';
+      document.getElementById('activate-btn').disabled = false;
+      document.getElementById('activate-btn').textContent = "✓ I've Paid — Activate My Account";
+      setStep(1);
+      updatePlanInfo();
+    }
+
+    // Init
+    updatePlanInfo();
   </script>
 </body>
 </html>
