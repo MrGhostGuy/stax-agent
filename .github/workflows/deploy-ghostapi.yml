@@ -1,4 +1,4 @@
-name: Deploy GhostAPI
+name: Deploy NiceGuyAPI
 
 on:
   push:

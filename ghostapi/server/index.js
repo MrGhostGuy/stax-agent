@@ -30,19 +30,12 @@ const TIERS = {
   free: {
     name: 'Free',
     price: 0,
-    monthly_requests: 80, // 20/week — kept secret from users, we say "20 per week"
+    monthly_requests: 50,
     rate_limit_per_minute: 5,
     rate_limit_per_day: 20,
     max_tokens_per_request: 4096,
     allows_games_apps: false,
-    allows_website_creation: true,
-    allows_website_hosting: false,
-    allows_custom_domain: false,
-    allows_sub_agents: false,
-    allows_scheduled_tasks: false,
-    media_generations: { image: 1, song: 1, pdf: 1, podcast_seconds: 60 }, // one-time freebies
-    max_models: 5,
-    cost_per_extra_request: 0.05, // pay-as-you-go: $0.05 per extra request
+    cost_per_extra_request: 0.05,
   },
   pro: {
     name: 'Pro',
@@ -52,18 +45,6 @@ const TIERS = {
     rate_limit_per_day: 200,
     max_tokens_per_request: 32768,
     allows_games_apps: true,
-    allows_website_creation: true,
-    allows_website_hosting: false,
-    allows_custom_domain: false,
-    max_sub_agents: 1,
-    max_scheduled_tasks: 1,
-    media_generations: {
-      image: { total: 50, per_day: 10 },
-      song: { total: 20, per_week: 5, max_duration_seconds: 90 },
-      pdf: { total: 50, per_day: 10, max_pages: 20 },
-      podcast_seconds: { total: 600, per_week: 120 },
-    },
-    max_models: 17,
     cost_per_extra_request: 0.02,
   },
   premium: {
@@ -74,18 +55,6 @@ const TIERS = {
     rate_limit_per_day: 1000,
     max_tokens_per_request: 131072,
     allows_games_apps: true,
-    allows_website_creation: true,
-    allows_website_hosting: true,
-    allows_custom_domain: true,
-    max_sub_agents: -1, // unlimited
-    max_scheduled_tasks: -1, // unlimited
-    media_generations: {
-      image: { total: 500, per_day: 50 },
-      song: { total: 200, per_week: 20, max_duration_seconds: 90 },
-      pdf: { total: 500, per_day: 25, max_pages: 100 },
-      podcast_seconds: { total: 3600, per_week: 600 },
-    },
-    max_models: 28,
     cost_per_extra_request: 0.01,
   },
 };
@@ -134,57 +103,6 @@ function calculateRequestCost(messages, tier) {
   return 1; // standard
 }
 
-// ── Media Limit Check ────────────────────────────────────────────────────
-
-function checkMediaLimit(apiKeyId, type, tierConfig) {
-  const limits = tierConfig.media_generations[type];
-  if (!limits) return { allowed: false, reason: 'Not available on this tier' };
-
-  // Check total limit
-  const totalUsed = db.prepare('SELECT COUNT(*) as c FROM media_generations WHERE api_key_id = ? AND type = ? AND created_at > datetime("now", "-30 days")').get(apiKeyId, type).c;
-  if (totalUsed >= limits.total) {
-    return { allowed: false, reason: `Total ${type} generation limit reached (${limits.total}/month)`, upgrade_url: 'https://mrghostguy.github.io/stax-agent/#pricing' };
-  }
-
-  // Check per-day limit
-  if (limits.per_day !== undefined) {
-    const dayUsed = db.prepare('SELECT COUNT(*) as c FROM media_generations WHERE api_key_id = ? AND type = ? AND date(created_at) = date("now")').get(apiKeyId, type).c;
-    if (dayUsed >= limits.per_day) {
-      return { allowed: false, reason: `Daily ${type} limit reached (${limits.per_day}/day). Resets tomorrow.`, upgrade_url: 'https://mrghostguy.github.io/stax-agent/#pricing' };
-    }
-  }
-
-  // Check per-week limit
-  if (limits.per_week !== undefined) {
-    const weekUsed = db.prepare('SELECT COUNT(*) as c FROM media_generations WHERE api_key_id = ? AND type = ? AND created_at > datetime("now", "-7 days")').get(apiKeyId, type).c;
-    if (weekUsed >= limits.per_week) {
-      return { allowed: false, reason: `Weekly ${type} limit reached (${limits.per_week}/week). Resets in 7 days.`, upgrade_url: 'https://mrghostguy.github.io/stax-agent/#pricing' };
-    }
-  }
-
-  return { allowed: true, remaining_total: limits.total - totalUsed };
-}
-
-// ── Sub-Agent & Scheduled Task Limits ────────────────────────────────────
-
-function checkSubAgentLimit(apiKeyId, tierConfig) {
-  if (tierConfig.max_sub_agents === undefined) return { allowed: false, reason: 'Sub-agents require Pro or higher' };
-  if (tierConfig.max_sub_agents === -1) return { allowed: true }; // unlimited
-  const active = db.prepare('SELECT COUNT(*) as c FROM sub_agents WHERE api_key_id = ? AND active = 1').get(apiKeyId).c;
-  return active < tierConfig.max_sub_agents
-    ? { allowed: true, remaining: tierConfig.max_sub_agents - active }
-    : { allowed: false, reason: `Sub-agent limit reached (${tierConfig.max_sub_agents}). Upgrade to Premium for unlimited.`, upgrade_url: 'https://mrghostguy.github.io/stax-agent/#pricing' };
-}
-
-function checkScheduledTaskLimit(apiKeyId, tierConfig) {
-  if (tierConfig.max_scheduled_tasks === undefined) return { allowed: false, reason: 'Scheduled tasks require Pro or higher' };
-  if (tierConfig.max_scheduled_tasks === -1) return { allowed: true }; // unlimited
-  const active = db.prepare('SELECT COUNT(*) as c FROM scheduled_tasks WHERE api_key_id = ? AND active = 1').get(apiKeyId).c;
-  return active < tierConfig.max_scheduled_tasks
-    ? { allowed: true, remaining: tierConfig.max_scheduled_tasks - active }
-    : { allowed: false, reason: `Scheduled task limit reached (${tierConfig.max_scheduled_tasks}). Upgrade to Premium for unlimited.`, upgrade_url: 'https://mrghostguy.github.io/stax-agent/#pricing' };
-}
-
 // ── Database ──────────────────────────────────────────────────────────────
 
 const dbPath = path.join(__dirname, '..', 'data', 'niceguyapi.db');
@@ -201,8 +119,9 @@ db.exec(`
     name TEXT,
     email TEXT,
     tier TEXT DEFAULT 'free' CHECK(tier IN ('free', 'pro', 'premium')),
+    pending_tier TEXT CHECK(pending_tier IS NULL OR pending_tier IN ('free', 'pro', 'premium')),
     active INTEGER DEFAULT 1,
-    monthly_limit INTEGER DEFAULT 80,
+    monthly_limit INTEGER DEFAULT 50,
     monthly_used INTEGER DEFAULT 0,
     total_requests INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now')),
@@ -222,15 +141,6 @@ db.exec(`
     FOREIGN KEY (api_key_id) REFERENCES api_keys(id)
   );
 
-  CREATE TABLE IF NOT EXISTS media_generations (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    api_key_id TEXT NOT NULL,
-    type TEXT CHECK(type IN ('image', 'song', 'pdf', 'podcast')),
-    status TEXT DEFAULT 'completed',
-    created_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (api_key_id) REFERENCES api_keys(id)
-  );
-
   CREATE TABLE IF NOT EXISTS provider_config (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -241,40 +151,21 @@ db.exec(`
     models TEXT DEFAULT '[]'
   );
 
-  CREATE TABLE IF NOT EXISTS website_projects (
+  CREATE TABLE IF NOT EXISTS billing_sessions (
     id TEXT PRIMARY KEY,
-    api_key_id TEXT NOT NULL,
-    name TEXT,
-    status TEXT DEFAULT 'local',
-    custom_domain TEXT,
+    api_key_id TEXT,
+    email TEXT,
+    tier TEXT CHECK(tier IN ('free', 'pro', 'premium')),
+    price REAL NOT NULL,
+    status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'completed', 'cancelled')),
+    paypal_order_id TEXT,
     created_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (api_key_id) REFERENCES api_keys(id)
-  );
-
-  CREATE TABLE IF NOT EXISTS sub_agents (
-    id TEXT PRIMARY KEY,
-    api_key_id TEXT NOT NULL,
-    name TEXT,
-    task TEXT,
-    active INTEGER DEFAULT 1,
-    created_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (api_key_id) REFERENCES api_keys(id)
-  );
-
-  CREATE TABLE IF NOT EXISTS scheduled_tasks (
-    id TEXT PRIMARY KEY,
-    api_key_id TEXT NOT NULL,
-    name TEXT,
-    cron TEXT,
-    task TEXT,
-    active INTEGER DEFAULT 1,
-    created_at TEXT DEFAULT (datetime('now')),
+    completed_at TEXT,
     FOREIGN KEY (api_key_id) REFERENCES api_keys(id)
   );
 
   CREATE INDEX IF NOT EXISTS idx_usage_key ON usage_log(api_key_id);
   CREATE INDEX IF NOT EXISTS idx_usage_date ON usage_log(created_at);
-  CREATE INDEX IF NOT EXISTS idx_media_key ON media_generations(api_key_id);
 `);
 
 // Seed default provider configs
@@ -321,10 +212,7 @@ function getModelsForTier(tier) {
   const tierConfig = TIERS[tier] || TIERS.free;
   const models = [];
   for (const p of providers) {
-    const available = tierConfig.max_models >= p.models.length
-      ? p.models
-      : p.models.slice(0, tierConfig.max_models);
-    for (const m of available) {
+    for (const m of p.models) {
       models.push({ id: `${p.id}/${m}`, provider: p.id, model: m, name: m.split('/').pop() });
     }
   }
@@ -377,7 +265,6 @@ async function proxyToProvider(provider, model, messages, stream = false) {
 
 function resolveModel(modelName, tier) {
   const providers = getProviders();
-  const tierConfig = TIERS[tier] || TIERS.free;
   const allowedModels = getModelsForTier(tier);
 
   // Direct provider/model format
@@ -386,10 +273,8 @@ function resolveModel(modelName, tier) {
     const provider = providers.find(p => p.id === providerId);
     if (provider) {
       const fullModel = rest.join('/');
-      // Check if this model is available for this tier
       const available = allowedModels.find(m => m.id === `${providerId}/${fullModel}` || m.model === fullModel);
       if (available) return { provider, model: fullModel };
-      // Fall back to default model if not allowed
       return { provider, model: allowedModels[0]?.model || provider.models[0] };
     }
   }
@@ -431,6 +316,16 @@ const limiter = rateLimit({
   keyGenerator: (req) => req.headers['x-api-key'] || req.ip,
 });
 app.use(limiter);
+
+// Signup rate limiter: 5 per hour per IP
+const signupLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip,
+  message: { error: { message: 'Too many signups from this IP. Try again later.', type: 'rate_limit_error' } },
+});
 
 // Request logging
 app.use((req, res, next) => {
@@ -477,7 +372,6 @@ function authenticate(req, res, next) {
 
   // Check monthly limit
   if (keyRecord.monthly_used >= keyRecord.monthly_limit) {
-    // Offer pay-as-you-go
     return res.status(429).json({
       error: {
         message: `You've reached your ${isFree ? 'weekly' : 'monthly'} request limit. Upgrade your plan or purchase more requests.`,
@@ -494,27 +388,7 @@ function authenticate(req, res, next) {
   req.apiKey = keyRecord;
   req._tier = keyRecord.tier;
   req._tierConfig = tierConfig;
-  // Backwards compatibility for feature checks
-  req._tierConfig.allows_sub_agents = tierConfig.max_sub_agents !== undefined && tierConfig.max_sub_agents !== 0;
-  req._tierConfig.allows_scheduled_tasks = tierConfig.max_scheduled_tasks !== undefined && tierConfig.max_scheduled_tasks !== 0;
   next();
-}
-
-// Check feature access
-function requireFeature(feature) {
-  return (req, res, next) => {
-    if (!req._tierConfig || !req._tierConfig[feature]) {
-      return res.status(403).json({
-        error: {
-          message: `This feature requires an upgrade. Visit https://mrghostguy.github.io/stax-agent/#pricing`,
-          type: 'feature_locked',
-          feature,
-          upgrade_url: 'https://mrghostguy.github.io/stax-agent/#pricing',
-        }
-      });
-    }
-    next();
-  };
 }
 
 // ── API Routes ─────────────────────────────────────────────────────────────
@@ -538,9 +412,9 @@ app.get('/health', (req, res) => {
         rss_mb: Math.round(memUsage.rss / 1024 / 1024),
       },
       tiers: {
-        free: '$0/mo — 20 req/week',
-        pro: '$6/mo — increased limits, games, media',
-        premium: '$27/mo — hosting, custom domain, unlimited sub-agents',
+        free: '$0/mo — 50 req',
+        pro: '$6/mo — 5000 req',
+        premium: '$27/mo — 25000 req',
       },
     });
   } catch (err) {
@@ -548,7 +422,169 @@ app.get('/health', (req, res) => {
   }
 });
 
-// List available models for this tier
+// ── Public Signup ──────────────────────────────────────────────────────────
+
+app.post('/v1/signup', signupLimiter, (req, res) => {
+  const { email, tier = 'free' } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: { message: 'email is required', type: 'validation_error' } });
+  }
+
+  const validTiers = ['free', 'pro', 'premium'];
+  if (!validTiers.includes(tier)) {
+    return res.status(400).json({ error: { message: `tier must be one of: ${validTiers.join(', ')}`, type: 'validation_error' } });
+  }
+
+  // Check if email already exists
+  const existing = db.prepare('SELECT * FROM api_keys WHERE email = ?').get(email);
+  if (existing) {
+    return res.status(409).json({ error: { message: 'An account with this email already exists.', type: 'duplicate_error' } });
+  }
+
+  const id = uuidv4();
+  const rawKey = `gsk_live_${uuidv4().replace(/-/g, '')}${uuidv4().replace(/-/g, '').slice(0, 8)}`;
+  const keyHash = bcrypt.hashSync(rawKey, 10);
+  const keyPrefix = rawKey.slice(0, 12);
+
+  if (tier === 'free') {
+    // Free tier: activate immediately
+    const tierConfig = TIERS.free;
+    db.prepare('INSERT INTO api_keys (id, key_hash, key_prefix, email, tier, monthly_limit) VALUES (?, ?, ?, ?, ?, ?)')
+      .run(id, keyHash, keyPrefix, email, 'free', tierConfig.monthly_requests);
+
+    return res.status(201).json({
+      key: rawKey,
+      prefix: keyPrefix,
+      email,
+      tier: 'free',
+      tier_name: 'Free',
+      monthly_limit: tierConfig.monthly_requests,
+      payment_required: false,
+      created_at: new Date().toISOString(),
+    });
+  } else {
+    // Pro or Premium: create key at free tier with pending_tier set
+    const requestedTierConfig = TIERS[tier];
+    const price = requestedTierConfig.price;
+    db.prepare('INSERT INTO api_keys (id, key_hash, key_prefix, email, tier, pending_tier, monthly_limit) VALUES (?, ?, ?, ?, ?, ?, ?)')
+      .run(id, keyHash, keyPrefix, email, 'free', tier, TIERS.free.monthly_requests);
+
+    return res.status(201).json({
+      key: rawKey,
+      prefix: keyPrefix,
+      email,
+      tier: 'free',
+      pending_tier: tier,
+      tier_name: 'Free',
+      monthly_limit: TIERS.free.monthly_requests,
+      payment_required: true,
+      payment: {
+        price: price,
+        currency: 'USD',
+        paypal_url: `https://paypal.me/kencyrus3/${price}`,
+      },
+      created_at: new Date().toISOString(),
+    });
+  }
+});
+
+// ── Public Billing Checkout ────────────────────────────────────────────────
+
+app.post('/v1/billing/checkout', (req, res) => {
+  const { email, tier } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: { message: 'email is required', type: 'validation_error' } });
+  }
+  if (!tier || !['pro', 'premium'].includes(tier)) {
+    return res.status(400).json({ error: { message: 'tier must be pro or premium', type: 'validation_error' } });
+  }
+
+  // Find user by email
+  const user = db.prepare('SELECT * FROM api_keys WHERE email = ?').get(email);
+  if (!user) {
+    return res.status(404).json({ error: { message: 'No account found with this email. Sign up first.', type: 'not_found' } });
+  }
+
+  const tierConfig = TIERS[tier];
+  const price = tierConfig.price;
+  const checkoutId = uuidv4();
+
+  db.prepare('INSERT INTO billing_sessions (id, api_key_id, email, tier, price, status) VALUES (?, ?, ?, ?, ?, ?)')
+    .run(checkoutId, user.id, email, tier, price, 'pending');
+
+  res.json({
+    checkout_id: checkoutId,
+    paypal_url: `https://paypal.me/kencyrus3/${price}`,
+    price: price,
+    currency: 'USD',
+    tier,
+    email,
+    status: 'pending',
+  });
+});
+
+// ── Public Billing Confirm ─────────────────────────────────────────────────
+
+app.post('/v1/billing/confirm', (req, res) => {
+  const { api_key, paypal_order_id } = req.body;
+
+  if (!api_key) {
+    return res.status(400).json({ error: { message: 'api_key is required', type: 'validation_error' } });
+  }
+  if (!paypal_order_id) {
+    return res.status(400).json({ error: { message: 'paypal_order_id is required', type: 'validation_error' } });
+  }
+
+  // Validate paypal_order_id format
+  if (!paypal_order_id.startsWith('PAY-')) {
+    return res.status(400).json({ error: { message: 'Invalid paypal_order_id format. Must start with PAY-', type: 'validation_error' } });
+  }
+
+  // Find the key
+  const prefix = api_key.slice(0, 12);
+  const keyRecord = db.prepare('SELECT * FROM api_keys WHERE key_prefix = ? AND active = 1').get(prefix);
+  if (!keyRecord) {
+    return res.status(401).json({ error: { message: 'Invalid API key.', type: 'auth_error' } });
+  }
+
+  const valid = bcrypt.compareSync(api_key, keyRecord.key_hash);
+  if (!valid) {
+    return res.status(401).json({ error: { message: 'Invalid API key.', type: 'auth_error' } });
+  }
+
+  // Check there's a pending tier to upgrade to
+  if (!keyRecord.pending_tier) {
+    return res.status(400).json({ error: { message: 'No pending upgrade for this key.', type: 'validation_error' } });
+  }
+
+  const newTier = keyRecord.pending_tier;
+  const tierConfig = TIERS[newTier];
+
+  // Upgrade the key
+  db.prepare('UPDATE api_keys SET tier = ?, pending_tier = NULL, monthly_limit = ? WHERE id = ?')
+    .run(newTier, tierConfig.monthly_requests, keyRecord.id);
+
+  // Update billing session if one exists
+  const session = db.prepare('SELECT * FROM billing_sessions WHERE api_key_id = ? AND tier = ? AND status = ? ORDER BY created_at DESC LIMIT 1').get(keyRecord.id, newTier, 'pending');
+  if (session) {
+    db.prepare('UPDATE billing_sessions SET status = ?, paypal_order_id = ?, completed_at = datetime("now") WHERE id = ?')
+      .run('completed', paypal_order_id, session.id);
+  }
+
+  res.json({
+    status: 'activated',
+    tier: newTier,
+    tier_name: tierConfig.name,
+    monthly_limit: tierConfig.monthly_requests,
+    paypal_order_id,
+    activated_at: new Date().toISOString(),
+  });
+});
+
+// ── Models ─────────────────────────────────────────────────────────────────
+
 app.get('/v1/models', authenticate, (req, res) => {
   const models = getModelsForTier(req._tier);
   res.json({
@@ -563,35 +599,10 @@ app.get('/v1/models', authenticate, (req, res) => {
   });
 });
 
-// Get current usage and quota
+// ── Usage ──────────────────────────────────────────────────────────────────
+
 app.get('/v1/usage', authenticate, (req, res) => {
   const isFree = req._tier === 'free';
-  const mg = req._tierConfig.media_generations;
-
-  // Build media info with per-day/per-week details
-  const mediaInfo = {};
-  for (const [type, limits] of Object.entries(mg)) {
-    if (typeof limits === 'object') {
-      const totalUsed = db.prepare('SELECT COUNT(*) as c FROM media_generations WHERE api_key_id = ? AND type = ? AND created_at > datetime("now", "-30 days")').get(req.apiKey.id, type).c;
-      const dayUsed = limits.per_day !== undefined
-        ? db.prepare('SELECT COUNT(*) as c FROM media_generations WHERE api_key_id = ? AND type = ? AND date(created_at) = date("now")').get(req.apiKey.id, type).c
-        : null;
-      const weekUsed = limits.per_week !== undefined
-        ? db.prepare('SELECT COUNT(*) as c FROM media_generations WHERE api_key_id = ? AND type = ? AND created_at > datetime("now", "-7 days")').get(req.apiKey.id, type).c
-        : null;
-      mediaInfo[type] = {
-        total: limits.total,
-        used: totalUsed,
-        remaining: Math.max(0, limits.total - totalUsed),
-        per_day: limits.per_day !== undefined ? { limit: limits.per_day, used: dayUsed, remaining: Math.max(0, limits.per_day - dayUsed) } : null,
-        per_week: limits.per_week !== undefined ? { limit: limits.per_week, used: weekUsed, remaining: Math.max(0, limits.per_week - weekUsed) } : null,
-        max_duration_seconds: limits.max_duration_seconds || null,
-        max_pages: limits.max_pages || null,
-      };
-    } else {
-      mediaInfo[type] = { total: limits, used: 0, remaining: limits };
-    }
-  }
 
   res.json({
     tier: req._tier,
@@ -603,19 +614,14 @@ app.get('/v1/usage', authenticate, (req, res) => {
     period_resets: isFree ? 'Every week' : 'Every month',
     features: {
       games_apps: req._tierConfig.allows_games_apps,
-      website_creation: req._tierConfig.allows_website_creation,
-      website_hosting: req._tierConfig.allows_website_hosting,
-      custom_domain: req._tierConfig.allows_custom_domain,
-      sub_agents: { allowed: req._tierConfig.max_sub_agents !== undefined, max: req._tierConfig.max_sub_agents, unlimited: req._tierConfig.max_sub_agents === -1 },
-      scheduled_tasks: { allowed: req._tierConfig.max_scheduled_tasks !== undefined, max: req._tierConfig.max_scheduled_tasks, unlimited: req._tierConfig.max_scheduled_tasks === -1 },
-      media_generation: mediaInfo,
     },
     refill_price_per_request: req._tierConfig.cost_per_extra_request,
     upgrade_url: 'https://mrghostguy.github.io/stax-agent/#pricing',
   });
 });
 
-// Chat completions
+// ── Chat Completions ──────────────────────────────────────────────────────
+
 app.post('/v1/chat/completions', authenticate, async (req, res) => {
   const { model = 'openrouter/deepseek/deepseek-v4-flash:free', messages, stream = false } = req.body;
 
@@ -693,101 +699,34 @@ app.post('/v1/chat/completions', authenticate, async (req, res) => {
   }
 });
 
-// ── Media Generation Endpoints ─────────────────────────────────────────────
+// ── Stub Endpoints (Not Implemented) ──────────────────────────────────────
 
-// Generate image
-app.post('/v1/media/image', authenticate, async (req, res) => {
-  const { prompt, size = '1024x1024' } = req.body;
-  if (!prompt) return res.status(400).json({ error: { message: 'prompt is required' } });
-
-  const check = checkMediaLimit(req.apiKey.id, 'image', req._tierConfig);
-  if (!check.allowed) return res.status(429).json({ error: { message: check.reason, upgrade_url: check.upgrade_url } });
-
-  db.prepare('INSERT INTO media_generations (api_key_id, type) VALUES (?, ?)').run(req.apiKey.id, 'image');
-  res.json({ status: 'generated', message: `Image "${prompt.substring(0, 50)}..." generated.`, url: null, remaining: check.remaining_total });
+app.post('/v1/media/image', authenticate, (req, res) => {
+  res.status(501).json({ error: { message: 'Not implemented', type: 'not_implemented' } });
 });
 
-// Generate song (max 90 seconds per song)
-app.post('/v1/media/song', authenticate, async (req, res) => {
-  const { prompt, lyrics, duration_seconds = 60 } = req.body;
-  if (!prompt) return res.status(400).json({ error: { message: 'prompt is required' } });
-
-  const maxDuration = req._tierConfig.media_generations.song?.max_duration_seconds || 90;
-  const requestedDuration = Math.min(duration_seconds, maxDuration);
-
-  const check = checkMediaLimit(req.apiKey.id, 'song', req._tierConfig);
-  if (!check.allowed) return res.status(429).json({ error: { message: check.reason, upgrade_url: check.upgrade_url } });
-
-  db.prepare('INSERT INTO media_generations (api_key_id, type) VALUES (?, ?)').run(req.apiKey.id, 'song');
-  res.json({ status: 'generated', message: `Song "${prompt.substring(0, 50)}..." (${requestedDuration}s) generated.`, url: null, duration_seconds: requestedDuration, remaining: check.remaining_total });
+app.post('/v1/media/song', authenticate, (req, res) => {
+  res.status(501).json({ error: { message: 'Not implemented', type: 'not_implemented' } });
 });
 
-// Generate PDF (with max pages limit)
-app.post('/v1/media/pdf', authenticate, async (req, res) => {
-  const { title, content, pages } = req.body;
-  if (!title) return res.status(400).json({ error: { message: 'title is required' } });
-
-  const check = checkMediaLimit(req.apiKey.id, 'pdf', req._tierConfig);
-  if (!check.allowed) return res.status(429).json({ error: { message: check.reason, upgrade_url: check.upgrade_url } });
-
-  const maxPages = req._tierConfig.media_generations.pdf?.max_pages || 20;
-  const requestedPages = Math.min(pages || 1, maxPages);
-
-  db.prepare('INSERT INTO media_generations (api_key_id, type) VALUES (?, ?)').run(req.apiKey.id, 'pdf');
-  res.json({ status: 'generated', message: `PDF "${title}" (${requestedPages} pages) generated.`, url: null, pages: requestedPages, remaining: check.remaining_total });
+app.post('/v1/media/pdf', authenticate, (req, res) => {
+  res.status(501).json({ error: { message: 'Not implemented', type: 'not_implemented' } });
 });
 
-// Generate podcast
-app.post('/v1/media/podcast', authenticate, async (req, res) => {
-  const { topic, duration_seconds = 60 } = req.body;
-  if (!topic) return res.status(400).json({ error: { message: 'topic is required' } });
-
-  const check = checkMediaLimit(req.apiKey.id, 'podcast', req._tierConfig);
-  if (!check.allowed) return res.status(429).json({ error: { message: check.reason, upgrade_url: check.upgrade_url } });
-
-  db.prepare('INSERT INTO media_generations (api_key_id, type) VALUES (?, ?)').run(req.apiKey.id, 'podcast');
-  res.json({ status: 'generated', message: `Podcast "${topic.substring(0, 50)}..." (${duration_seconds}s) generated.`, url: null, remaining: check.remaining_total });
+app.post('/v1/media/podcast', authenticate, (req, res) => {
+  res.status(501).json({ error: { message: 'Not implemented', type: 'not_implemented' } });
 });
 
-// ── Sub-Agents & Scheduled Tasks ──────────────────────────────────────────
-
-// Create sub-agent
 app.post('/v1/agents', authenticate, (req, res) => {
-  const check = checkSubAgentLimit(req.apiKey.id, req._tierConfig);
-  if (!check.allowed) return res.status(403).json({ error: { message: check.reason, upgrade_url: check.upgrade_url } });
-
-  const { name, task } = req.body;
-  const agentId = uuidv4();
-  // In production, this would spawn an actual sub-agent
-  res.json({ id: agentId, name: name || 'Sub-Agent', status: 'created', task: task || 'General purpose', remaining_slots: check.remaining });
+  res.status(501).json({ error: { message: 'Not implemented', type: 'not_implemented' } });
 });
 
-// Create scheduled task
 app.post('/v1/tasks/schedule', authenticate, (req, res) => {
-  const check = checkScheduledTaskLimit(req.apiKey.id, req._tierConfig);
-  if (!check.allowed) return res.status(403).json({ error: { message: check.reason, upgrade_url: check.upgrade_url } });
-
-  const { name, cron, task } = req.body;
-  const taskId = uuidv4();
-  res.json({ id: taskId, name: name || 'Scheduled Task', cron: cron || '0 * * * *', status: 'scheduled', remaining_slots: check.remaining });
+  res.status(501).json({ error: { message: 'Not implemented', type: 'not_implemented' } });
 });
 
-// ── Website Creation ──────────────────────────────────────────────────────
-
-// Create website project (local testing for free+, hosting for premium)
 app.post('/v1/websites', authenticate, (req, res) => {
-  const { name } = req.body;
-  const id = uuidv4();
-  db.prepare('INSERT INTO website_projects (id, api_key_id, name, status) VALUES (?, ?, ?, ?)')
-    .run(id, req.apiKey.id, name || 'My Website', 'local');
-  res.json({
-    id, name: name || 'My Website', status: 'local',
-    url: req._tierConfig.allows_website_hosting ? `https://${id}.niceguyapi.dev` : null,
-    message: req._tierConfig.allows_website_hosting
-      ? 'Website created and hosted!'
-      : 'Website created for local testing. Upgrade to Premium for hosting with a custom domain.',
-    upgrade_url: 'https://mrghostguy.github.io/stax-agent/#pricing',
-  });
+  res.status(501).json({ error: { message: 'Not implemented', type: 'not_implemented' } });
 });
 
 // ── Pay-as-you-go Refill ──────────────────────────────────────────────────
@@ -807,6 +746,17 @@ app.post('/v1/billing/refill', authenticate, (req, res) => {
     new_limit: req.apiKey.monthly_limit + amount,
     paypal_url: `https://paypal.me/kencyrus3/${Math.ceil(cost)}`,
   });
+});
+
+// ── User Key Management ──────────────────────────────────────────────────
+
+// Rotate/regenerate API key
+app.post('/v1/keys/rotate', authenticate, (req, res) => {
+  const newRaw = `gsk_live_${uuidv4().replace(/-/g, '')}${uuidv4().replace(/-/g, '').slice(0, 8)}`;
+  const newHash = bcrypt.hashSync(newRaw, 10);
+  const newPrefix = newRaw.slice(0, 12);
+  db.prepare('UPDATE api_keys SET key_hash = ?, key_prefix = ? WHERE id = ?').run(newHash, newPrefix, req.apiKey.id);
+  res.json({ key: newRaw, prefix: newPrefix, message: 'Key rotated. Your old key is now invalid.' });
 });
 
 // ── Admin Routes ───────────────────────────────────────────────────────────
@@ -836,7 +786,7 @@ app.post('/admin/keys', adminAuth, (req, res) => {
 });
 
 app.get('/admin/keys', adminAuth, (req, res) => {
-  const keys = db.prepare('SELECT id, key_prefix, name, email, tier, active, monthly_limit, monthly_used, total_requests, created_at, last_used_at FROM api_keys ORDER BY created_at DESC').all();
+  const keys = db.prepare('SELECT id, key_prefix, name, email, tier, pending_tier, active, monthly_limit, monthly_used, total_requests, created_at, last_used_at FROM api_keys ORDER BY created_at DESC').all();
   res.json({ keys });
 });
 
@@ -856,63 +806,6 @@ app.get('/admin/stats', adminAuth, (req, res) => {
   res.json({ total_keys: totalKeys, active_keys: activeKeys, total_requests: totalRequests, tier_breakdown: byTier, daily_usage: recentUsage });
 });
 
-// ── Docs ───────────────────────────────────────────────────────────────────
-
-app.get('/', (req, res) => {
-  res.json({
-    name: 'NiceGuyAPI', version: '1.0.0',
-    description: 'One API for every AI provider. OpenAI-compatible interface.',
-    base_url: '/v1',
-    pricing: {
-      free: '$0/mo — 20 requests/week, resetting weekly. Website creation (local), 1 free image/PDF/song/podcast.',
-      pro: '$6/mo — increased request limits, all 17+ models, games & apps, website creation + local testing, sub agents, scheduled tasks, media generation (images, songs, PDFs, podcasts).',
-      premium: '$27/mo — everything in Pro + website hosting + custom domains + highest media generation limits.',
-      refill: 'Pay-as-you-go refills available when you hit your limit — cheaper than upgrading if you just need more requests.',
-    },
-    endpoints: {
-      'POST /v1/chat/completions': { description: 'Chat completions', auth: 'X-API-Key', body: '{ model, messages, stream? }' },
-      'GET /v1/models': { description: 'List models available for your tier', auth: 'X-API-Key' },
-      'GET /v1/usage': { description: 'Current usage, quota, and feature access', auth: 'X-API-Key' },
-      'POST /v1/media/image': { description: 'Generate an image', auth: 'X-API-Key' },
-      'POST /v1/media/song': { description: 'Generate a song', auth: 'X-API-Key' },
-      'POST /v1/media/pdf': { description: 'Generate a PDF', auth: 'X-API-Key' },
-      'POST /v1/media/podcast': { description: 'Generate a podcast/audio', auth: 'X-API-Key' },
-      'POST /v1/websites': { description: 'Create a website project', auth: 'X-API-Key' },
-      'POST /v1/billing/refill': { description: 'Buy more requests (pay-as-you-go)', auth: 'X-API-Key' },
-      'GET /health': { description: 'Health check (no auth)' },
-    },
-  });
-});
-
-// ── User Key Management ──────────────────────────────────────────────────
-
-// Rotate/regenerate API key
-app.post('/v1/keys/rotate', authenticate, (req, res) => {
-  const newRaw = `gsk_live_${uuidv4().replace(/-/g, '')}${uuidv4().replace(/-/g, '').slice(0, 8)}`;
-  const newHash = bcrypt.hashSync(newRaw, 10);
-  const newPrefix = newRaw.slice(0, 12);
-  db.prepare('UPDATE api_keys SET key_hash = ?, key_prefix = ? WHERE id = ?').run(newHash, newPrefix, req.apiKey.id);
-  res.json({ key: newRaw, prefix: newPrefix, message: 'Key rotated. Your old key is now invalid.' });
-});
-
-// PayPal IPN-style webhook for payment confirmation (simplified)
-app.post('/v1/webhook/paypal', (req, res) => {
-  const { payment_status, payer_email, item_name, mc_gross, custom } = req.body;
-  if (payment_status === 'Completed' && custom) {
-    // custom field should contain the user's email or key prefix
-    const tier = parseFloat(mc_gross) >= 27 ? 'premium' : parseFloat(mc_gross) >= 6 ? 'pro' : null;
-    if (tier) {
-      const keyRecord = db.prepare('SELECT * FROM api_keys WHERE email = ? OR key_prefix = ?').get(custom, custom);
-      if (keyRecord && keyRecord.tier !== tier) {
-        const tierConfig = TIERS[tier];
-        db.prepare('UPDATE api_keys SET tier = ?, monthly_limit = ? WHERE id = ?').run(tier, tierConfig.monthly_requests, keyRecord.id);
-        console.log(`[NiceGuyAPI] Upgraded ${custom} to ${tier} via PayPal ($${mc_gross})`);
-      }
-    }
-  }
-  res.json({ received: true });
-});
-
 // ── Root docs ─────────────────────────────────────────────────────────────
 
 app.get('/', (req, res) => {
@@ -921,27 +814,23 @@ app.get('/', (req, res) => {
     description: 'One API for every AI provider. OpenAI-compatible interface.',
     base_url: '/v1',
     pricing: {
-      free: '$0/mo — 20 requests/week, resetting weekly. Website creation (local), 1 free image/PDF/song/podcast.',
-      pro: '$6/mo — increased request limits, all 17+ models, games & apps, 1 sub-agent, 1 scheduled task, media generation.',
-      premium: '$27/mo — everything in Pro + unlimited sub-agents + scheduled tasks + hosting + custom domain + highest limits.',
+      free: '$0/mo — 50 requests',
+      pro: '$6/mo — 5000 requests',
+      premium: '$27/mo — 25000 requests',
       refill: 'Pay-as-you-go refills available. Buy extra requests without upgrading.',
     },
     endpoints: {
       'GET /health': 'Health check with uptime, memory, DB status',
+      'POST /v1/signup': 'Create a new account (public, rate-limited)',
+      'POST /v1/billing/checkout': 'Create a billing session for upgrade (public)',
+      'POST /v1/billing/confirm': 'Confirm payment and upgrade tier (public)',
       'GET /v1/models': 'List available models for your tier',
       'POST /v1/chat/completions': 'Chat with any AI model (OpenAI-compatible)',
       'GET /v1/usage': 'Current usage, quotas, and feature details',
-      'POST /v1/media/image': 'Generate an image (tier-limited)',
-      'POST /v1/media/song': 'Generate a song up to 90s (tier-limited)',
-      'POST /v1/media/pdf': 'Generate a PDF document (tier-limited)',
-      'POST /v1/media/podcast': 'Generate podcast audio (tier-limited)',
-      'POST /v1/agents': 'Create a sub-agent (Pro: 1, Premium: unlimited)',
-      'POST /v1/tasks/schedule': 'Schedule a recurring task (Pro: 1, Premium: unlimited)',
-      'POST /v1/websites': 'Create a website project',
       'POST /v1/billing/refill': 'Buy extra requests (pay-as-you-go)',
       'POST /v1/keys/rotate': 'Regenerate your API key',
     },
-    auth: 'Include X-API-Key header with all /v1 requests',
+    auth: 'Include X-API-Key header with all /v1 requests (except signup, billing/confirm, billing/checkout)',
   });
 });
 
