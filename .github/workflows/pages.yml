@@ -2,9 +2,9 @@ name: Deploy Landing Page to GitHub Pages
 
 on:
   push:
-    branches: [master]
+    branches: [gh-pages]
     paths:
-      - 'ghostapi/index.html'
+      - 'index.html'
   workflow_dispatch:
 
 permissions:
