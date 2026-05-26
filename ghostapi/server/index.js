@@ -19,6 +19,7 @@ const Database = require('better-sqlite3');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const PORT = parseInt(process.env.GHOSTAPI_PORT || '3000', 10);
 const ADMIN_SECRET = process.env.GHOSTAPI_SECRET || 'ghost-dev-secret-change-me';
@@ -88,6 +89,35 @@ const TIERS = {
     cost_per_extra_request: 0.01,
   },
 };
+
+// ── Error Helper ──────────────────────────────────────────────────────────
+
+function apiError(res, status, message, type, extra = {}) {
+  return res.status(status).json({ error: { message, type, ...extra } });
+}
+
+// ── Usage Reset Scheduler ─────────────────────────────────────────────────
+
+// Reset free tier weekly usage every Sunday at midnight
+// Reset paid tier monthly usage on the 1st of each month
+function scheduleUsageResets() {
+  function tryReset() {
+    const now = new Date();
+    // Weekly reset: Sunday midnight (day 0, hour 0)
+    if (now.getUTCDay() === 0 && now.getUTCHours() === 0) {
+      db.prepare("UPDATE api_keys SET monthly_used = 0, billing_period_start = datetime('now') WHERE tier = 'free'").run();
+      console.log('[GhostAPI] Weekly free-tier usage reset');
+    }
+    // Monthly reset: 1st of month
+    if (now.getUTCDate() === 1 && now.getUTCHours() === 0) {
+      db.prepare("UPDATE api_keys SET monthly_used = 0, billing_period_start = datetime('now') WHERE tier IN ('pro', 'premium')").run();
+      console.log('[GhostAPI] Monthly paid-tier usage reset');
+    }
+  }
+  // Check every minute
+  setInterval(tryReset, 60 * 1000);
+  console.log('[GhostAPI] Usage reset scheduler active');
+}
 
 // Count tokens roughly (4 chars ≈ 1 token)
 function estimateTokens(text) {
@@ -489,9 +519,33 @@ function requireFeature(feature) {
 
 // ── API Routes ─────────────────────────────────────────────────────────────
 
-// Health check
+// Health check — detailed
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', version: '1.0.0', timestamp: new Date().toISOString() });
+  try {
+    const dbOk = db.prepare('SELECT 1').get() !== undefined;
+    const uptime = process.uptime();
+    const memUsage = process.memoryUsage();
+    res.json({
+      status: 'ok',
+      version: '1.0.0',
+      timestamp: new Date().toISOString(),
+      uptime_seconds: Math.floor(uptime),
+      uptime_human: `${Math.floor(uptime / 3600)}h ${Math.floor((uptime % 3600) / 60)}m ${Math.floor(uptime % 60)}s`,
+      database: dbOk ? 'connected' : 'error',
+      memory: {
+        heap_used_mb: Math.round(memUsage.heapUsed / 1024 / 1024),
+        heap_total_mb: Math.round(memUsage.heapTotal / 1024 / 1024),
+        rss_mb: Math.round(memUsage.rss / 1024 / 1024),
+      },
+      tiers: {
+        free: '$0/mo — 20 req/week',
+        pro: '$6/mo — increased limits, games, media',
+        premium: '$27/mo — hosting, custom domain, unlimited sub-agents',
+      },
+    });
+  } catch (err) {
+    res.status(503).json({ status: 'degraded', error: err.message });
+  }
 });
 
 // List available models for this tier
@@ -830,15 +884,120 @@ app.get('/', (req, res) => {
   });
 });
 
+// ── User Key Management ──────────────────────────────────────────────────
+
+// Rotate/regenerate API key
+app.post('/v1/keys/rotate', authenticate, (req, res) => {
+  const newRaw = `gsk_live_${uuidv4().replace(/-/g, '')}${uuidv4().replace(/-/g, '').slice(0, 8)}`;
+  const newHash = bcrypt.hashSync(newRaw, 10);
+  const newPrefix = newRaw.slice(0, 12);
+  db.prepare('UPDATE api_keys SET key_hash = ?, key_prefix = ? WHERE id = ?').run(newHash, newPrefix, req.apiKey.id);
+  res.json({ key: newRaw, prefix: newPrefix, message: 'Key rotated. Your old key is now invalid.' });
+});
+
+// PayPal IPN-style webhook for payment confirmation (simplified)
+app.post('/v1/webhook/paypal', (req, res) => {
+  const { payment_status, payer_email, item_name, mc_gross, custom } = req.body;
+  if (payment_status === 'Completed' && custom) {
+    // custom field should contain the user's email or key prefix
+    const tier = parseFloat(mc_gross) >= 27 ? 'premium' : parseFloat(mc_gross) >= 6 ? 'pro' : null;
+    if (tier) {
+      const keyRecord = db.prepare('SELECT * FROM api_keys WHERE email = ? OR key_prefix = ?').get(custom, custom);
+      if (keyRecord && keyRecord.tier !== tier) {
+        const tierConfig = TIERS[tier];
+        db.prepare('UPDATE api_keys SET tier = ?, monthly_limit = ? WHERE id = ?').run(tier, tierConfig.monthly_requests, keyRecord.id);
+        console.log(`[GhostAPI] Upgraded ${custom} to ${tier} via PayPal ($${mc_gross})`);
+      }
+    }
+  }
+  res.json({ received: true });
+});
+
+// ── Root docs ─────────────────────────────────────────────────────────────
+
+app.get('/', (req, res) => {
+  res.json({
+    name: 'GhostAPI', version: '1.0.0',
+    description: 'One API for every AI provider. OpenAI-compatible interface.',
+    base_url: '/v1',
+    pricing: {
+      free: '$0/mo — 20 requests/week, resetting weekly. Website creation (local), 1 free image/PDF/song/podcast.',
+      pro: '$6/mo — increased request limits, all 17+ models, games & apps, 1 sub-agent, 1 scheduled task, media generation.',
+      premium: '$27/mo — everything in Pro + unlimited sub-agents + scheduled tasks + hosting + custom domain + highest limits.',
+      refill: 'Pay-as-you-go refills available. Buy extra requests without upgrading.',
+    },
+    endpoints: {
+      'GET /health': 'Health check with uptime, memory, DB status',
+      'GET /v1/models': 'List available models for your tier',
+      'POST /v1/chat/completions': 'Chat with any AI model (OpenAI-compatible)',
+      'GET /v1/usage': 'Current usage, quotas, and feature details',
+      'POST /v1/media/image': 'Generate an image (tier-limited)',
+      'POST /v1/media/song': 'Generate a song up to 90s (tier-limited)',
+      'POST /v1/media/pdf': 'Generate a PDF document (tier-limited)',
+      'POST /v1/media/podcast': 'Generate podcast audio (tier-limited)',
+      'POST /v1/agents': 'Create a sub-agent (Pro: 1, Premium: unlimited)',
+      'POST /v1/tasks/schedule': 'Schedule a recurring task (Pro: 1, Premium: unlimited)',
+      'POST /v1/websites': 'Create a website project',
+      'POST /v1/billing/refill': 'Buy extra requests (pay-as-you-go)',
+      'POST /v1/keys/rotate': 'Regenerate your API key',
+    },
+    auth: 'Include X-API-Key header with all /v1 requests',
+  });
+});
+
+// ── 404 Handler ───────────────────────────────────────────────────────────
+
+app.use((req, res) => {
+  apiError(res, 404, `Route ${req.method} ${req.path} not found`, 'not_found', {
+    docs: 'https://ghostapi-1v1f.onrender.com/',
+  });
+});
+
+// ── Global Error Handler ──────────────────────────────────────────────────
+
+app.use((err, req, res, next) => {
+  console.error('[GhostAPI] Unhandled error:', err);
+  apiError(res, 500, 'An unexpected error occurred', 'server_error', {
+    request_id: uuidv4().slice(0, 8),
+  });
+});
+
+// ── Graceful Shutdown ─────────────────────────────────────────────────────
+
+let server;
+function gracefulShutdown(signal) {
+  console.log(`\n[GhostAPI] ${signal} received. Shutting down gracefully...`);
+  if (server) {
+    server.close(() => {
+      console.log('[GhostAPI] Server closed');
+      try { db.close(); } catch (e) {}
+      process.exit(0);
+    });
+    // Force close after 10s
+    setTimeout(() => { process.exit(1); }, 10000);
+  } else {
+    process.exit(0);
+  }
+}
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('unhandledRejection', (err) => {
+  console.error('[GhostAPI] Unhandled rejection:', err);
+});
+
 // ── Start ──────────────────────────────────────────────────────────────────
 
-app.listen(PORT, () => {
+const startTime = Date.now();
+server = app.listen(PORT, () => {
+  scheduleUsageResets();
+  const bootTime = Date.now() - startTime;
   console.log(`
-  ╔══════════════════════════════════════════╗
-  ║  🏗️  GhostAPI v1.0 — AI Model Gateway   ║
-  ║  Running on port ${PORT}                    ║
-  ║  Endpoint: http://localhost:${PORT}/v1      ║
-  ╚══════════════════════════════════════════╝
+  ╔══════════════════════════════════════════════╗
+  ║  🏗️  GhostAPI v1.0 — AI Model Gateway         ║
+  ║  Running on port ${PORT}${' '.repeat(Math.max(0, 19 - String(PORT).length))}║
+  ║  Endpoint: http://localhost:${PORT}/v1${' '.repeat(Math.max(0, 8 - String(PORT).length))}║
+  ║  Boot: ${bootTime}ms${' '.repeat(Math.max(0, 29 - String(bootTime).length))}║
+  ╚══════════════════════════════════════════════╝
   `);
 });
 
