@@ -1,13 +1,11 @@
 services:
   - type: web
     name: niceguyapi-1v1f
-    runtime: node
+    runtime: docker
     repo: https://github.com/MrGhostGuy/stax-agent
     branch: master
     rootDir: ghostapi/server
     plan: free
-    buildCommand: npm install
-    startCommand: node index.js
     envVars:
       - key: NICEGUYAPI_PORT
         value: "3000"
