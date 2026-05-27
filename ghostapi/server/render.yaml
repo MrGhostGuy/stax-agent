@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: niceguyapi
+    name: ghostapi
     runtime: docker
     repo: https://github.com/MrGhostGuy/stax-agent
     branch: master
