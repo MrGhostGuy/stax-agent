@@ -21,17 +21,18 @@ Remember:
 
 ### NiceGuyAPI — Premium AI Model Gateway
 - Landing page: `niceguyapi/index.html` + root `index.html` on gh-pages → https://mrghostguy.github.io/stax-agent/
-- API server: https://ghostapi-1v1f.onrender.com (Render.com, free tier)
+- API server: https://niceguyapi.onrender.com (Render.com, free tier)
 - GitHub Pages (landing, gh-pages branch) + Render (API, master branch) with auto-deploy
 - Status: **LIVE** — Server running ✅, landing page v2 deployed ✅
 - **Zero-cost operation** — uses OpenRouter free models (no credits needed)
 - PayPal: paypal.me/kencyrus3 (for Pro/Premium subscription payments)
 - NICEGUYAPI_SECRET: stored in Render env (NOT in frontend code)
-- Render service name: `niceguyapi`
+- Render service name: `niceguyapi` (URL: `niceguyapi.onrender.com`)
 - Env vars on Render: NICEGUYAPI_PORT=3000, NICEGUYAPI_SECRET, OPENROUTER_API_KEY
 - Landing page v2 (2026-05-26): removed fake features, added features section, fixed branding/URLs
 - Renamed `ghostapi/` → `niceguyapi/` directory (2026-05-26)
 - All URLs updated: `ghostapi-1v1f.onrender.com` → `niceguyapi.onrender.com`
+- Fixed landing page URLs (2026-05-27): replaced remaining `ghostapi-1v1f.onrender.com` references in index.html with `niceguyapi.onrender.com` on both master and gh-pages branches
 
 #### Pricing (Launch Sale — Limited Time)
 | Plan | Price | Original | Requests | Models |
@@ -51,6 +52,7 @@ Remember:
 - Rate limiting on signup: 5/hour per IP
 - Fake feature endpoints return 501 (media, sub-agents, websites)
 - Paid tiers created at 'free' until PayPal payment confirmed
+- Refill endpoint requires `paypal_order_id` (was broken: gave free requests)
 - bcrypt key hashing, key prefix lookup for auth
 
 ### GitHub
