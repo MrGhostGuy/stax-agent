@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NiceGuyAPI — One API for Every AI Model</title>
-  <meta name="description" content="Access 17+ AI models through a single API. Fast, reliable, affordable. Free tier available — no credit card required.">
+  <title>NiceGuyAPI - One API for Every AI Model</title>
+  <meta name="description" content="Access 17+ AI models through a single API. Fast, reliable, affordable. Free tier available - no credit card required.">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; background: #0a0a0f; color: #e8e8ec; line-height: 1.6; }
@@ -26,6 +26,12 @@
     .section { padding: 60px 0; border-top: 1px solid rgba(255,255,255,0.06); }
     .section h2 { font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 12px; }
     .section-sub { text-align: center; color: #9ca3af; margin-bottom: 40px; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 32px 0; }
+    .feature-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 28px; transition: all 0.2s; }
+    .feature-card:hover { border-color: rgba(99,102,241,0.3); }
+    .feature-card .icon { font-size: 28px; margin-bottom: 12px; }
+    .feature-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .feature-card p { font-size: 13px; color: #9ca3af; line-height: 1.5; }
     .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .pricing-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 32px; text-align: center; transition: all 0.2s; }
     .pricing-card:hover { border-color: rgba(99,102,241,0.3); }
@@ -91,7 +97,7 @@
     <!-- HERO -->
     <div class="hero">
       <div class="badge badge-green">● Live &amp; Running</div>
-      <h1>One API for Every AI Model</h1>
+      <h1>NiceGuyAPI - One API for Every AI Model</h1>
       <p>Access DeepSeek, Llama, Qwen, GPT, Claude, Gemini, and more through a single OpenAI-compatible endpoint. Free tier available.</p>
       <a href="#signup" class="btn btn-primary">Get Your Free API Key</a>
       <a href="#pricing" class="btn btn-secondary">View Pricing</a>
@@ -108,6 +114,44 @@
       </div>
     </div>
 
+    <!-- FEATURES -->
+    <div class="section" id="features">
+      <h2>What You Get</h2>
+      <p class="section-sub">Everything you need to build with AI. No fake features, no bait-and-switch.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="icon">💬</div>
+          <h3>AI Chat</h3>
+          <p>17+ models including DeepSeek, Llama, Qwen, GPT, Gemma. OpenAI-compatible interface.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔑</div>
+          <h3>Simple Auth</h3>
+          <p>One API key. X-API-Key header. That's it. Works with any HTTP client.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">📊</div>
+          <h3>Usage Tracking</h3>
+          <p>Real-time usage endpoint. Know exactly how many requests you have left.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🔄</div>
+          <h3>Key Rotation</h3>
+          <p>Compromised key? Rotate it instantly. Your old key stops working immediately.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">💳</div>
+          <h3>Flexible Billing</h3>
+          <p>PayPal payments. Pay-as-you-go refills if you hit your limit before the month ends.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🛡️</div>
+          <h3>Rate Limiting</h3>
+          <p>Tier-based limits that scale with your plan. 5/min free, 20/min Pro, 60/min Premium.</p>
+        </div>
+      </div>
+    </div>
+
     <!-- PRICING -->
     <div class="section" id="pricing">
       <h2>Simple, Transparent Pricing</h2>
@@ -117,7 +161,7 @@
         <div class="pricing-card">
           <h3>Free</h3>
           <div class="price">$0<span>/mo</span></div>
-          <div class="tagline">Try it out — no credit card</div>
+          <div class="tagline">Try it out - no credit card</div>
           <ul>
             <li>50 AI requests per month</li>
             <li>5 AI models</li>
@@ -137,11 +181,10 @@
             <li>All 17+ free models</li>
             <li>Up to 32K tokens per request</li>
             <li>20 requests per minute</li>
-            <li>Build games &amp; apps</li>
             <li>Pay-as-you-go refills available</li>
             <li>Email support</li>
           </ul>
-          <a href="#signup" class="btn btn-primary btn-small" style="width:100%">Subscribe — $6/mo</a>
+          <a href="#signup" class="btn btn-primary btn-small" style="width:100%">Subscribe - $6/mo</a>
         </div>
         <!-- PREMIUM -->
         <div class="pricing-card">
@@ -157,7 +200,7 @@
             <li>Cheapest refill rates</li>
             <li>Priority support</li>
           </ul>
-          <a href="#signup" class="btn btn-secondary btn-small" style="width:100%">Subscribe — $27/mo</a>
+          <a href="#signup" class="btn btn-secondary btn-small" style="width:100%">Subscribe - $27/mo</a>
         </div>
       </div>
 
@@ -196,12 +239,6 @@
             <td>5/min</td>
             <td>20/min</td>
             <td>60/min</td>
-          </tr>
-          <tr>
-            <td>Build Games &amp; Apps</td>
-            <td class="cross">✗</td>
-            <td class="check">✓</td>
-            <td class="check">✓</td>
           </tr>
           <tr>
             <td>Premium Models (Claude, GPT-4o, Gemini)</td>
@@ -246,9 +283,9 @@
           <div class="form-group">
             <label>Plan</label>
             <select id="plan" onchange="updatePlanInfo()">
-              <option value="free">Free — $0/mo — 50 requests/month</option>
-              <option value="pro">Pro — $6/mo — 5,000 requests/month</option>
-              <option value="premium">Premium — $27/mo — 25,000 requests/month</option>
+              <option value="free">Free - $0/mo - 50 requests/month</option>
+              <option value="pro">Pro - $6/mo - 5,000 requests/month</option>
+              <option value="premium">Premium - $27/mo - 25,000 requests/month</option>
             </select>
           </div>
           <div id="plan-info"></div>
@@ -279,7 +316,7 @@
             </div>
             <div id="payment-message"></div>
             <button class="btn btn-success" style="width:100%" id="activate-btn" onclick="handleActivate()">
-              ✓ I've Paid — Activate My Account
+              ✓ I've Paid - Activate My Account
             </button>
             <button class="btn btn-secondary" style="width:100%; margin-top:8px;" onclick="goBack()">← Go Back</button>
           </div>
@@ -291,7 +328,7 @@
             <div class="alert" style="text-align:center;">
               <div style="font-size:32px; margin-bottom:8px;">🎉</div>
               <strong style="font-size:18px;">You're All Set!</strong>
-              <p style="margin-top:8px;">Your API key is ready. Save it below — it won't be shown again.</p>
+              <p style="margin-top:8px;">Your API key is ready. Save it below - it won't be shown again.</p>
             </div>
             <div class="key-box" id="final-key"></div>
             <div class="alert info" style="font-size:13px;">
@@ -311,7 +348,7 @@
       <p class="section-sub">Make your first API call in under a minute.</p>
       <h3 style="margin: 32px 0 12px; font-size: 18px;">cURL</h3>
       <div class="code-block">
-<span class="comment"># Chat with any model — just swap the model name</span>
+<span class="comment"># Chat with any model - just swap the model name</span>
 curl -X POST <span class="url">https://niceguyapi-1v1f.onrender.com/v1/chat/completions</span> \
   -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
   -H <span class="string">"Content-Type: application/json"</span> \
@@ -345,7 +382,7 @@ curl -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
     </div>
 
     <footer>
-      <p>NiceGuyAPI v1.0 — Built by <a href="https://github.com/MrGhostGuy" style="color:#818cf8">MrGhostGuy</a></p>
+      <p>NiceGuyAPI v2.0 — Built by <a href="https://github.com/MrGhostGuy" style="color:#818cf8">MrGhostGuy</a></p>
       <p style="margin-top:8px">PayPal: <a href="https://paypal.me/kencyrus3" style="color:#818cf8">paypal.me/kencyrus3</a></p>
     </footer>
   </div>
@@ -362,7 +399,7 @@ curl -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
       const limits = { free: '50', pro: '5,000', premium: '25,000' };
       const names = { free: 'Free', pro: 'Pro', premium: 'Premium' };
       if (plan === 'free') {
-        document.getElementById('plan-info').innerHTML = '<div class="alert info" style="font-size:13px;">Free tier — no payment required. Get your API key instantly.</div>';
+        document.getElementById('plan-info').innerHTML = '<div class="alert info" style="font-size:13px;">Free tier - no payment required. Get your API key instantly.</div>';
       } else {
         document.getElementById('plan-info').innerHTML = `<div class="alert info" style="font-size:13px;"><strong>${names[plan]}:</strong> $${prices[plan]}/mo for ${limits[plan]} requests. You'll pay via PayPal after signup.</div>`;
       }
@@ -418,14 +455,14 @@ curl -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
           currentTier = data.tier;
 
           if (data.payment_required) {
-            // Paid tier — show payment step
+            // Paid tier - show payment step
             setStep(2);
             document.getElementById('pay-tier-name').textContent = data.pending_tier.charAt(0).toUpperCase() + data.pending_tier.slice(1);
             document.getElementById('pay-amount').textContent = '$' + (data.pending_tier === 'pro' ? '6' : '27') + '/mo';
             document.getElementById('paypal-link').href = data.paypal_url;
             document.getElementById('payment-message').innerHTML = '';
           } else {
-            // Free tier — show success immediately
+            // Free tier - show success immediately
             showSuccess(data);
           }
         } else {
@@ -477,12 +514,12 @@ curl -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
         } else {
           msg.innerHTML = `<div class="alert error">Activation failed: ${data.error?.message || 'Unknown error'}</div>`;
           btn.disabled = false;
-          btn.textContent = "✓ I've Paid — Activate My Account";
+          btn.textContent = "✓ I've Paid - Activate My Account";
         }
       } catch (err) {
         msg.innerHTML = '<div class="alert error">Connection error. Please try again.</div>';
         btn.disabled = false;
-        btn.textContent = "✓ I've Paid — Activate My Account";
+        btn.textContent = "✓ I've Paid - Activate My Account";
       }
     }
 
@@ -506,7 +543,7 @@ curl -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
       document.getElementById('signup-btn').disabled = false;
       document.getElementById('signup-btn').textContent = 'Continue →';
       document.getElementById('activate-btn').disabled = false;
-      document.getElementById('activate-btn').textContent = "✓ I've Paid — Activate My Account";
+      document.getElementById('activate-btn').textContent = "✓ I've Paid - Activate My Account";
       setStep(1);
       updatePlanInfo();
     }
