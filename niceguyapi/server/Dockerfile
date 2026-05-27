@@ -2,7 +2,7 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# Install build tools for native modules
+# Install build tools (kept for compatibility)
 RUN apk add --no-cache python3 make g++
 
 COPY package.json package-lock.json ./

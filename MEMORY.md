@@ -20,16 +20,18 @@ Remember:
 - DB: SQLite at `stax/data/stax.db` (gitignored)
 
 ### NiceGuyAPI — Premium AI Model Gateway
-- Landing page: `ghostapi/index.html` + root `index.html` on gh-pages → https://mrghostguy.github.io/stax-agent/
-- API server: https://niceguyapi-1v1f.onrender.com (Render.com, free tier)
+- Landing page: `niceguyapi/index.html` + root `index.html` on gh-pages → https://mrghostguy.github.io/stax-agent/
+- API server: https://niceguyapi.onrender.com (Render.com, free tier)
 - GitHub Pages (landing, gh-pages branch) + Render (API, master branch) with auto-deploy
-- Status: **LIVE** — Landing page v2 deployed, server code pushed (Render auto-deploy may need manual trigger)
+- Status: **LIVE** — Server running ✅, landing page v2 deployed ✅
 - **Zero-cost operation** — uses OpenRouter free models (no credits needed)
 - PayPal: paypal.me/kencyrus3 (for Pro/Premium subscription payments)
 - NICEGUYAPI_SECRET: stored in Render env (NOT in frontend code)
-- Render service name: `niceguyapi-1v1f`
+- Render service name: `niceguyapi`
 - Env vars on Render: NICEGUYAPI_PORT=3000, NICEGUYAPI_SECRET, OPENROUTER_API_KEY
 - Landing page v2 (2026-05-26): removed fake features, added features section, fixed branding/URLs
+- Renamed `ghostapi/` → `niceguyapi/` directory (2026-05-26)
+- All URLs updated: `ghostapi-1v1f.onrender.com` → `niceguyapi.onrender.com`
 
 #### Pricing
 | Plan | Price | Requests | Models |

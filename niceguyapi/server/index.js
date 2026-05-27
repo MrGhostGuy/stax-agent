@@ -123,6 +123,95 @@ async function initDb() {
   db = database;
   db.run('PRAGMA journal_mode = WAL');
   db.run('PRAGMA foreign_keys = ON');
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id TEXT PRIMARY KEY,
+      key_hash TEXT UNIQUE NOT NULL,
+      key_prefix TEXT NOT NULL,
+      name TEXT,
+      email TEXT,
+      tier TEXT DEFAULT 'free' CHECK(tier IN ('free', 'pro', 'premium')),
+      pending_tier TEXT CHECK(pending_tier IS NULL OR pending_tier IN ('free', 'pro', 'premium')),
+      active INTEGER DEFAULT 1,
+      monthly_limit INTEGER DEFAULT 50,
+      monthly_used INTEGER DEFAULT 0,
+      total_requests INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now')),
+      last_used_at TEXT,
+      billing_period_start TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS usage_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      api_key_id TEXT NOT NULL,
+      model TEXT,
+      provider TEXT,
+      status INTEGER DEFAULT 200,
+      latency_ms INTEGER DEFAULT 0,
+      request_cost INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (api_key_id) REFERENCES api_keys(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS provider_config (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      base_url TEXT NOT NULL,
+      api_key TEXT,
+      active INTEGER DEFAULT 1,
+      priority INTEGER DEFAULT 0,
+      models TEXT DEFAULT '[]'
+    );
+
+    CREATE TABLE IF NOT EXISTS billing_sessions (
+      id TEXT PRIMARY KEY,
+      api_key_id TEXT,
+      email TEXT,
+      tier TEXT CHECK(tier IN ('free', 'pro', 'premium')),
+      price REAL NOT NULL,
+      status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'completed', 'cancelled')),
+      paypal_order_id TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      completed_at TEXT,
+      FOREIGN KEY (api_key_id) REFERENCES api_keys(id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_usage_key ON usage_log(api_key_id);
+    CREATE INDEX IF NOT EXISTS idx_usage_date ON usage_log(created_at);
+  `);
+
+  const providerCount = db.prepare('SELECT COUNT(*) as c FROM provider_config').get();
+  if (providerCount.c === 0) {
+    const insert = db.prepare('INSERT INTO provider_config (id, name, base_url, priority, models) VALUES (?, ?, ?, ?, ?)');
+    const freeModels = [
+      'deepseek/deepseek-v4-flash:free',
+      'meta-llama/llama-3.3-70b-instruct:free',
+      'qwen/qwen3-coder:free',
+      'openai/gpt-oss-120b:free',
+      'google/gemma-4-31b-it:free',
+      'minimax/minimax-m2.5:free',
+      'nvidia/nemotron-3-super-120b-a12b:free',
+      'openai/gpt-oss-20b:free',
+      'qwen/qwen3-next-80b-a3b-instruct:free',
+      'z-ai/glm-4.5-air:free',
+      'nvidia/nemotron-3-nano-30b-a3b:free',
+      'meta-llama/llama-3.2-3b-instruct:free',
+      'nousresearch/hermes-3-llama-3.1-405b:free',
+      'arcee-ai/trinity-large-thinking:free',
+      'nvidia/nemotron-nano-9b-v2:free',
+      'google/gemma-4-26b-a4b-it:free',
+      'nvidia/nemotron-nano-12b-v2-vl:free',
+    ];
+    const premiumModels = [
+      'anthropic/claude-sonnet-4-20250514',
+      'openai/gpt-4o',
+      'google/gemini-2.0-flash',
+    ];
+    const allModels = [...freeModels, ...premiumModels];
+    insert.run('openrouter', 'OpenRouter', 'https://openrouter.ai/api/v1', 1, JSON.stringify(allModels));
+  }
+
   persistDb();
 }
 

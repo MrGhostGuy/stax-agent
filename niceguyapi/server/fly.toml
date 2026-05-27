@@ -1,11 +1,11 @@
-app = "ghostapi"
+app = "niceguyapi"
 primary_region = "ord"
 
 [build]
   dockerfile = "Dockerfile"
 
 [env]
-  GHOSTAPI_PORT = "3000"
+  NICEGUYAPI_PORT = "3000"
   NODE_ENV = "production"
 
 [http_service]

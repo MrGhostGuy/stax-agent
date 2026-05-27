@@ -4,7 +4,7 @@ services:
     runtime: docker
     repo: https://github.com/MrGhostGuy/stax-agent
     branch: master
-    rootDir: ghostapi/server
+    rootDir: niceguyapi/server
     plan: free
     envVars:
       - key: NICEGUYAPI_PORT
