@@ -32,10 +32,11 @@ const TIERS = {
     price: 0,
     monthly_requests: 50,
     rate_limit_per_minute: 5,
-    rate_limit_per_day: 20,
+    rate_limit_per_day: 10,
     max_tokens_per_request: 4096,
     allows_games_apps: false,
     cost_per_extra_request: 0.05,
+    period: 'monthly',
   },
   pro: {
     name: 'Pro',
@@ -67,20 +68,14 @@ function apiError(res, status, message, type, extra = {}) {
 
 // ── Usage Reset Scheduler ─────────────────────────────────────────────────
 
-// Reset free tier weekly usage every Sunday at midnight
-// Reset paid tier monthly usage on the 1st of each month
+// Monthly reset for all tiers (1st of month at midnight UTC)
 function scheduleUsageResets() {
   function tryReset() {
     const now = new Date();
-    // Weekly reset: Sunday midnight (day 0, hour 0)
-    if (now.getUTCDay() === 0 && now.getUTCHours() === 0) {
-      db.prepare("UPDATE api_keys SET monthly_used = 0, billing_period_start = datetime('now') WHERE tier = 'free'").run();
-      console.log('[NiceGuyAPI] Weekly free-tier usage reset');
-    }
-    // Monthly reset: 1st of month
+    // Monthly reset: 1st of month at midnight UTC for all tiers
     if (now.getUTCDate() === 1 && now.getUTCHours() === 0) {
-      db.prepare("UPDATE api_keys SET monthly_used = 0, billing_period_start = datetime('now') WHERE tier IN ('pro', 'premium')").run();
-      console.log('[NiceGuyAPI] Monthly paid-tier usage reset');
+      db.prepare("UPDATE api_keys SET monthly_used = 0, billing_period_start = datetime('now') WHERE tier IN ('free', 'pro', 'premium')").run();
+      console.log('[NiceGuyAPI] Monthly usage reset for all tiers');
     }
   }
   // Check every minute
@@ -516,12 +511,12 @@ function authenticate(req, res, next) {
     return res.status(401).json({ error: { message: 'Invalid API key.', type: 'auth_error' } });
   }
 
-  // Check billing period reset (weekly for free, monthly for paid)
+  // Check billing period reset
   const now = new Date();
   const periodStart = new Date(keyRecord.billing_period_start);
   const tierConfig = TIERS[keyRecord.tier] || TIERS.free;
-  const isFree = keyRecord.tier === 'free';
-  const periodMs = isFree ? 7 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000;
+  const isMonthly = tierConfig.period !== 'weekly';
+  const periodMs = isMonthly ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
 
   if (now - periodStart > periodMs) {
     db.prepare(`UPDATE api_keys SET monthly_used = 0, billing_period_start = datetime('now') WHERE id = ?`).run(keyRecord.id);
@@ -532,13 +527,13 @@ function authenticate(req, res, next) {
   if (keyRecord.monthly_used >= keyRecord.monthly_limit) {
     return res.status(429).json({
       error: {
-        message: `You've reached your ${isFree ? 'weekly' : 'monthly'} request limit. Upgrade your plan or purchase more requests.`,
+        message: `You've reached your ${isMonthly ? 'monthly' : 'weekly'} request limit. Upgrade your plan or purchase more requests.`,
         type: 'limit_reached',
         upgrade_url: 'https://mrghostguy.github.io/stax-agent/#pricing',
         refill_price: tierConfig.cost_per_extra_request,
         refill_url: `/v1/billing/refill`,
         current_tier: keyRecord.tier,
-        period_resets: isFree ? 'weekly' : 'monthly',
+        period_resets: isMonthly ? 'monthly' : 'weekly',
       }
     });
   }
@@ -760,7 +755,7 @@ app.get('/v1/models', authenticate, (req, res) => {
 // ── Usage ──────────────────────────────────────────────────────────────────
 
 app.get('/v1/usage', authenticate, (req, res) => {
-  const isFree = req._tier === 'free';
+  const isMonthly = req._tierConfig.period !== 'weekly';
 
   res.json({
     tier: req._tier,
@@ -768,8 +763,8 @@ app.get('/v1/usage', authenticate, (req, res) => {
     requests_used: req.apiKey.monthly_used,
     requests_total: req.apiKey.monthly_limit,
     requests_remaining: Math.max(0, req._tierConfig.monthly_requests - req.apiKey.monthly_used),
-    period: isFree ? 'weekly' : 'monthly',
-    period_resets: isFree ? 'Every week' : 'Every month',
+    period: isMonthly ? 'monthly' : 'weekly',
+    period_resets: isMonthly ? 'Every month' : 'Every week',
     features: {
       games_apps: req._tierConfig.allows_games_apps,
     },
@@ -890,19 +885,37 @@ app.post('/v1/websites', authenticate, (req, res) => {
 // ── Pay-as-you-go Refill ──────────────────────────────────────────────────
 
 app.post('/v1/billing/refill', authenticate, (req, res) => {
-  const { amount = 10 } = req.body; // number of requests to buy
+  const { amount = 10, paypal_order_id } = req.body; // number of requests to buy + proof of payment
   const cost = amount * req._tierConfig.cost_per_extra_request;
 
-  // In production, this would process PayPal payment
-  // For now, add requests to their limit
+  if (!paypal_order_id) {
+    return res.status(400).json({
+      error: {
+        message: 'paypal_order_id is required. Complete PayPal purchase first, then provide the order ID.',
+        type: 'validation_error',
+        paypal_url: `https://paypal.me/kencyrus3/${Math.ceil(cost)}`,
+      }
+    });
+  }
+
+  if (!paypal_order_id.startsWith('PAY-') && !paypal_order_id.startsWith('PAYID-')) {
+    return res.status(400).json({ error: { message: 'Invalid paypal_order_id format.', type: 'validation_error' } });
+  }
+
+  // Add requests to their limit
   db.prepare('UPDATE api_keys SET monthly_limit = monthly_limit + ? WHERE id = ?').run(amount, req.apiKey.id);
+
+  // Log the refill
+  const sessionId = uuidv4();
+  db.prepare('INSERT INTO billing_sessions (id, api_key_id, email, tier, price, status, paypal_order_id, completed_at) VALUES (?, ?, ?, ?, ?, ?, ?, datetime("now"))')
+    .run(sessionId, req.apiKey.id, req.apiKey.email, req.apiKey.tier, cost, 'completed', paypal_order_id);
 
   res.json({
     message: `Added ${amount} requests for $${cost.toFixed(2)}.`,
     requests_added: amount,
     cost: cost,
     new_limit: req.apiKey.monthly_limit + amount,
-    paypal_url: `https://paypal.me/kencyrus3/${Math.ceil(cost)}`,
+    paypal_order_id,
   });
 });
 
@@ -996,7 +1009,7 @@ app.get('/', (req, res) => {
 
 app.use((req, res) => {
   apiError(res, 404, `Route ${req.method} ${req.path} not found`, 'not_found', {
-    docs: 'https://niceguyapi-1v1f.onrender.com/',
+    docs: 'https://niceguyapi.onrender.com/',
   });
 });
 
