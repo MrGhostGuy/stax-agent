@@ -21,7 +21,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
-const PORT = parseInt(process.env.NICEGUYAPI_PORT || '3000', 10);
+const PORT = parseInt(process.env.PORT || process.env.NICEGUYAPI_PORT || '3000', 10);
 const ADMIN_SECRET = process.env.NICEGUYAPI_SECRET || 'niceguy-dev-secret-change-me';
 
 // ── Tier Configuration ────────────────────────────────────────────────────
