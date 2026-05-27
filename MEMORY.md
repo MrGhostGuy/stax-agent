@@ -33,14 +33,14 @@ Remember:
 - Renamed `ghostapi/` → `niceguyapi/` directory (2026-05-26)
 - All URLs updated: `ghostapi-1v1f.onrender.com` → `niceguyapi.onrender.com`
 
-#### Pricing
-| Plan | Price | Requests | Models |
-|------|-------|----------|--------|
-| Free | $0/mo | 50/mo | 5 free models (DeepSeek, Llama, Qwen, GPT-OSS, Gemma) |
-| Pro | $6/mo | 5,000/mo | All 17+ free models |
-| Premium | $27/mo | 25,000/mo | All models including premium (Claude, GPT-4o, Gemini) |
+#### Pricing (Launch Sale — Limited Time)
+| Plan | Price | Original | Requests | Models |
+|------|-------|----------|----------|--------|
+| Free | $0/mo | — | 50/mo | 5 free models (DeepSeek, Llama, Qwen, GPT-OSS, Gemma) |
+| Pro | $6/mo | ~~$12~~ (50% off) | 5,000/mo | All 17+ free models |
+| Premium | $27/mo | ~~$49~~ (45% off) | 25,000/mo | All models including premium (Claude, GPT-4o, Gemini) |
 
-#### Revenue math
+#### Revenue math (at launch sale prices)
 - 50 Pro users × $6 = $300/mo
 - 20 Premium users × $27 = $540/mo
 - Combined: $840/mo recurring with just 70 paying users
