@@ -21,7 +21,7 @@ Remember:
 
 ### NiceGuyAPI — Premium AI Model Gateway
 - Landing page: `niceguyapi/index.html` + root `index.html` on gh-pages → https://mrghostguy.github.io/stax-agent/
-- API server: https://niceguyapi.onrender.com (Render.com, free tier)
+- API server: https://ghostapi-1v1f.onrender.com (Render.com, free tier)
 - GitHub Pages (landing, gh-pages branch) + Render (API, master branch) with auto-deploy
 - Status: **LIVE** — Server running ✅, landing page v2 deployed ✅
 - **Zero-cost operation** — uses OpenRouter free models (no credits needed)
