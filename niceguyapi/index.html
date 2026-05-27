@@ -354,7 +354,7 @@
       <h3 style="margin: 32px 0 12px; font-size: 18px;">cURL</h3>
       <div class="code-block">
 <span class="comment"># Chat with any model - just swap the model name</span>
-curl -X POST <span class="url">https://niceguyapi.onrender.com/v1/chat/completions</span> \
+curl -X POST <span class="url">https://ghostapi-1v1f.onrender.com/v1/chat/completions</span> \
   -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
   -H <span class="string">"Content-Type: application/json"</span> \
   -d <span class="string">'{
@@ -363,7 +363,7 @@ curl -X POST <span class="url">https://niceguyapi.onrender.com/v1/chat/completio
   }'</span></div>
       <h3 style="margin: 32px 0 12px; font-size: 18px;">JavaScript</h3>
       <div class="code-block">
-<span class="keyword">const</span> res = <span class="keyword">await</span> fetch(<span class="string">"https://niceguyapi.onrender.com/v1/chat/completions"</span>, {
+<span class="keyword">const</span> res = <span class="keyword">await</span> fetch(<span class="string">"https://ghostapi-1v1f.onrender.com/v1/chat/completions"</span>, {
   method: <span class="string">"POST"</span>,
   headers: {
     <span class="string">"X-API-Key"</span>: <span class="string">"gsk_live_YOUR_KEY_HERE"</span>,
@@ -379,11 +379,11 @@ console.log(data.choices[0].message.content);</div>
       <h3 style="margin: 32px 0 12px; font-size: 18px;">Check Your Usage</h3>
       <div class="code-block">
 curl -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
-  <span class="url">https://niceguyapi.onrender.com/v1/usage</span></div>
+  <span class="url">https://ghostapi-1v1f.onrender.com/v1/usage</span></div>
       <h3 style="margin: 32px 0 12px; font-size: 18px;">List Available Models</h3>
       <div class="code-block">
 curl -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
-  <span class="url">https://niceguyapi.onrender.com/v1/models</span></div>
+  <span class="url">https://ghostapi-1v1f.onrender.com/v1/models</span></div>
     </div>
 
     <footer>
@@ -393,7 +393,7 @@ curl -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
   </div>
 
   <script>
-    const API_BASE = 'https://niceguyapi.onrender.com';
+    const API_BASE = 'https://ghostapi-1v1f.onrender.com';
     let currentApiKey = '';
     let currentTier = '';
     let paypalClicked = false;
