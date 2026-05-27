@@ -15,7 +15,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { v4: uuidv4 } = require('uuid');
-const Database = require('better-sqlite3');
+const initSqlJs = require('sql.js');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
@@ -103,13 +103,69 @@ function calculateRequestCost(messages, tier) {
   return 1; // standard
 }
 
-// ── Database ──────────────────────────────────────────────────────────────
+// ── Database (sql.js — pure JS, no native compilation) ───────────────────
 
 const dbPath = path.join(__dirname, '..', 'data', 'niceguyapi.db');
 fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-const db = new Database(dbPath);
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+
+let db;
+let SQL;
+
+async function initDb() {
+  SQL = await initSqlJs();
+  let database;
+  if (fs.existsSync(dbPath)) {
+    const buffer = fs.readFileSync(dbPath);
+    database = new SQL.Database(buffer);
+  } else {
+    database = new SQL.Database();
+  }
+  db = database;
+  db.run('PRAGMA journal_mode = WAL');
+  db.run('PRAGMA foreign_keys = ON');
+  persistDb();
+}
+
+function persistDb() {
+  const data = db.export();
+  const buffer = Buffer.from(data);
+  fs.writeFileSync(dbPath, buffer);
+}
+
+// Wrapper: sql.js prepare/bind/step API matching better-sqlite3
+function prepare(sql) {
+  return {
+    get: (...args) => {
+      const stmt = db.prepare(sql);
+      if (args.length) stmt.bind(args);
+      let result = null;
+      if (stmt.step()) result = stmt.getAsObject();
+      stmt.free();
+      return result;
+    },
+    all: (...args) => {
+      const stmt = db.prepare(sql);
+      if (args.length) stmt.bind(args);
+      const results = [];
+      while (stmt.step()) results.push(stmt.getAsObject());
+      stmt.free();
+      return results;
+    },
+    run: (...args) => {
+      const stmt = db.prepare(sql);
+      if (args.length) stmt.bind(args);
+      stmt.step();
+      stmt.free();
+      persistDb();
+      return { changes: db.getRowsModified() };
+    },
+  };
+}
+
+function exec(sql) {
+  db.run(sql);
+  persistDb();
+}
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS api_keys (
@@ -872,7 +928,7 @@ function gracefulShutdown(signal) {
   if (server) {
     server.close(() => {
       console.log('[NiceGuyAPI] Server closed');
-      try { db.close(); } catch (e) {}
+      try { persistDb(); } catch (e) {}
       process.exit(0);
     });
     // Force close after 10s
@@ -890,17 +946,22 @@ process.on('unhandledRejection', (err) => {
 // ── Start ──────────────────────────────────────────────────────────────────
 
 const startTime = Date.now();
-server = app.listen(PORT, () => {
+initDb().then(() => {
   scheduleUsageResets();
-  const bootTime = Date.now() - startTime;
-  console.log(`
+  server = app.listen(PORT, () => {
+    const bootTime = Date.now() - startTime;
+    console.log(`
   ╔══════════════════════════════════════════════╗
-  ║  🏗️  NiceGuyAPI v1.0 — AI Model Gateway         ║
+  ║  🏗️  NiceGuyAPI v2.0 — AI Model Gateway         ║
   ║  Running on port ${PORT}${' '.repeat(Math.max(0, 19 - String(PORT).length))}║
   ║  Endpoint: http://localhost:${PORT}/v1${' '.repeat(Math.max(0, 8 - String(PORT).length))}║
   ║  Boot: ${bootTime}ms${' '.repeat(Math.max(0, 29 - String(bootTime).length))}║
   ╚══════════════════════════════════════════════╝
   `);
+  });
+}).catch(err => {
+  console.error('[NiceGuyAPI] Failed to initialize database:', err);
+  process.exit(1);
 });
 
 module.exports = app;
