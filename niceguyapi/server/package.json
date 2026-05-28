@@ -1,6 +1,6 @@
 {
   "name": "niceguyapi",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Premium AI Model Gateway — One API for every AI provider",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,7 @@
     "express-rate-limit": "^7.4.0",
     "helmet": "^7.1.0",
     "sql.js": "^1.14.1",
+    "stripe": "^16.0.0",
     "uuid": "^10.0.0"
   }
 }

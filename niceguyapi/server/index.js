@@ -1,13 +1,17 @@
 /**
- * NiceGuyAPI — Premium AI Model Gateway
+ * NiceGuyAPI v3 — Premium AI Model Gateway
  *
- * One API endpoint for Claude, GPT, Gemini, Grok, and 17+ more.
+ * One API endpoint for Claude, GPT, Gemini, and 17+ more.
  * OpenAI-compatible /v1/chat/completions interface.
  *
+ * Payments via Stripe Checkout — automatic, hands-off, no manual work.
+ *
  * Environment variables:
- *   NICEGUYAPI_PORT — server port (default 3000)
- *   NICEGUYAPI_SECRET — admin secret for key management
- *   OPENROUTER_API_KEY — OpenRouter API key (free tier ok)
+ *   NICEGUYAPI_PORT     — server port (default 3000)
+ *   NICEGUYAPI_SECRET   — admin secret for key management
+ *   OPENROUTER_API_KEY  — OpenRouter API key
+ *   STRIPE_SECRET_KEY   — Stripe secret key (sk_live_xxx or sk_test_xxx)
+ *   STRIPE_WEBHOOK_SECRET — Stripe webhook endpoint secret
  */
 
 const express = require('express');
@@ -23,6 +27,12 @@ const crypto = require('crypto');
 
 const PORT = parseInt(process.env.PORT || process.env.NICEGUYAPI_PORT || '3000', 10);
 const ADMIN_SECRET = process.env.NICEGUYAPI_SECRET || 'niceguy-dev-secret-change-me';
+
+let stripe = null;
+if (process.env.STRIPE_SECRET_KEY) {
+  const Stripe = require('stripe');
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+}
 
 // ── Tier Configuration ────────────────────────────────────────────────────
 
@@ -68,34 +78,31 @@ function apiError(res, status, message, type, extra = {}) {
 
 // ── Usage Reset Scheduler ─────────────────────────────────────────────────
 
-// Monthly reset for all tiers (1st of month at midnight UTC)
 function scheduleUsageResets() {
   function tryReset() {
     const now = new Date();
-    // Monthly reset: 1st of month at midnight UTC for all tiers
     if (now.getUTCDate() === 1 && now.getUTCHours() === 0) {
       db.prepare("UPDATE api_keys SET monthly_used = 0, billing_period_start = datetime('now') WHERE tier IN ('free', 'pro', 'premium')").run();
       console.log('[NiceGuyAPI] Monthly usage reset for all tiers');
     }
   }
-  // Check every minute
   setInterval(tryReset, 60 * 1000);
   console.log('[NiceGuyAPI] Usage reset scheduler active');
 }
 
-// Count tokens roughly (4 chars ≈ 1 token)
+// ── Token & Request Cost Estimation ───────────────────────────────────────
+
 function estimateTokens(text) {
   if (!text) return 0;
   return Math.ceil(text.length / 4);
 }
 
-// Multiplier for complex tasks (longer context = more request cost)
 function calculateRequestCost(messages, tier) {
   const totalChars = messages.reduce((sum, m) => sum + (m.content?.length || 0), 0);
   const estimatedTokens = totalChars / 4;
-  if (estimatedTokens > 20000) return 3; // very complex
-  if (estimatedTokens > 8000) return 2;  // moderately complex
-  return 1; // standard
+  if (estimatedTokens > 20000) return 3;
+  if (estimatedTokens > 8000) return 2;
+  return 1;
 }
 
 // ── Database (sql.js — pure JS, no native compilation) ───────────────────
@@ -165,7 +172,8 @@ async function initDb() {
       email TEXT,
       tier TEXT CHECK(tier IN ('free', 'pro', 'premium')),
       price REAL NOT NULL,
-      status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'completed', 'cancelled')),
+      status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'completed', 'cancelled', 'failed')),
+      stripe_session_id TEXT,
       paypal_order_id TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       completed_at TEXT,
@@ -174,6 +182,7 @@ async function initDb() {
 
     CREATE INDEX IF NOT EXISTS idx_usage_key ON usage_log(api_key_id);
     CREATE INDEX IF NOT EXISTS idx_usage_date ON usage_log(created_at);
+    CREATE INDEX IF NOT EXISTS idx_billing_session ON billing_sessions(stripe_session_id);
   `);
 
   const providerCount = db.prepare('SELECT COUNT(*) as c FROM provider_config').get();
@@ -246,100 +255,6 @@ function prepare(sql) {
   };
 }
 
-function exec(sql) {
-  db.run(sql);
-  persistDb();
-}
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS api_keys (
-    id TEXT PRIMARY KEY,
-    key_hash TEXT UNIQUE NOT NULL,
-    key_prefix TEXT NOT NULL,
-    name TEXT,
-    email TEXT,
-    tier TEXT DEFAULT 'free' CHECK(tier IN ('free', 'pro', 'premium')),
-    pending_tier TEXT CHECK(pending_tier IS NULL OR pending_tier IN ('free', 'pro', 'premium')),
-    active INTEGER DEFAULT 1,
-    monthly_limit INTEGER DEFAULT 50,
-    monthly_used INTEGER DEFAULT 0,
-    total_requests INTEGER DEFAULT 0,
-    created_at TEXT DEFAULT (datetime('now')),
-    last_used_at TEXT,
-    billing_period_start TEXT DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS usage_log (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    api_key_id TEXT NOT NULL,
-    model TEXT,
-    provider TEXT,
-    status INTEGER DEFAULT 200,
-    latency_ms INTEGER DEFAULT 0,
-    request_cost INTEGER DEFAULT 1,
-    created_at TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (api_key_id) REFERENCES api_keys(id)
-  );
-
-  CREATE TABLE IF NOT EXISTS provider_config (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    base_url TEXT NOT NULL,
-    api_key TEXT,
-    active INTEGER DEFAULT 1,
-    priority INTEGER DEFAULT 0,
-    models TEXT DEFAULT '[]'
-  );
-
-  CREATE TABLE IF NOT EXISTS billing_sessions (
-    id TEXT PRIMARY KEY,
-    api_key_id TEXT,
-    email TEXT,
-    tier TEXT CHECK(tier IN ('free', 'pro', 'premium')),
-    price REAL NOT NULL,
-    status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'completed', 'cancelled')),
-    paypal_order_id TEXT,
-    created_at TEXT DEFAULT (datetime('now')),
-    completed_at TEXT,
-    FOREIGN KEY (api_key_id) REFERENCES api_keys(id)
-  );
-
-  CREATE INDEX IF NOT EXISTS idx_usage_key ON usage_log(api_key_id);
-  CREATE INDEX IF NOT EXISTS idx_usage_date ON usage_log(created_at);
-`);
-
-// Seed default provider configs
-const providerCount = db.prepare('SELECT COUNT(*) as c FROM provider_config').get();
-if (providerCount.c === 0) {
-  const insert = db.prepare('INSERT INTO provider_config (id, name, base_url, priority, models) VALUES (?, ?, ?, ?, ?)');
-  const freeModels = [
-    'deepseek/deepseek-v4-flash:free',
-    'meta-llama/llama-3.3-70b-instruct:free',
-    'qwen/qwen3-coder:free',
-    'openai/gpt-oss-120b:free',
-    'google/gemma-4-31b-it:free',
-    'minimax/minimax-m2.5:free',
-    'nvidia/nemotron-3-super-120b-a12b:free',
-    'openai/gpt-oss-20b:free',
-    'qwen/qwen3-next-80b-a3b-instruct:free',
-    'z-ai/glm-4.5-air:free',
-    'nvidia/nemotron-3-nano-30b-a3b:free',
-    'meta-llama/llama-3.2-3b-instruct:free',
-    'nousresearch/hermes-3-llama-3.1-405b:free',
-    'arcee-ai/trinity-large-thinking:free',
-    'nvidia/nemotron-nano-9b-v2:free',
-    'google/gemma-4-26b-a4b-it:free',
-    'nvidia/nemotron-nano-12b-v2-vl:free',
-  ];
-  const premiumModels = [
-    'anthropic/claude-sonnet-4-20250514',
-    'openai/gpt-4o',
-    'google/gemini-2.0-flash',
-  ];
-  const allModels = [...freeModels, ...premiumModels];
-  insert.run('openrouter', 'OpenRouter', 'https://openrouter.ai/api/v1', 1, JSON.stringify(allModels));
-}
-
 // ── Provider Router ────────────────────────────────────────────────────────
 
 function getProviders() {
@@ -349,159 +264,131 @@ function getProviders() {
 
 function getModelsForTier(tier) {
   const providers = getProviders();
-  const tierConfig = TIERS[tier] || TIERS.free;
   const models = [];
   for (const p of providers) {
     for (const m of p.models) {
-      models.push({ id: `${p.id}/${m}`, provider: p.id, model: m, name: m.split('/').pop() });
+      const isFree = m.includes(':free');
+      if (tier === 'free' && !isFree) continue;
+      models.push({
+        id: `${p.id}/${m}`,
+        provider: p.id,
+        model: m,
+        name: m.split('/').pop().replace(':free', ''),
+        free: isFree,
+      });
     }
   }
   return models;
 }
 
-async function proxyToProvider(provider, model, messages, stream = false) {
-  const startTime = Date.now();
-  const headers = { 'Content-Type': 'application/json' };
-  let url, body;
-
-  if (provider.id === 'openrouter') {
-    url = `${provider.base_url}/chat/completions`;
-    headers['Authorization'] = `Bearer ${provider.api_key || process.env.OPENROUTER_API_KEY || ''}`;
-    headers['HTTP-Referer'] = 'https://mrghostguy.github.io/stax-agent/';
-    headers['X-Title'] = 'NiceGuyAPI';
-    // Model name should be the OpenRouter model ID (e.g., deepseek/deepseek-v4-flash:free)
-    const openRouterModel = model.includes('/') && model.split('/').length >= 3
-      ? model.split('/').slice(1).join('/')  // strip leading provider prefix
-      : model;
-    body = { model: openRouterModel, messages, stream, max_tokens: 8192 };
-  } else {
-    throw new Error(`Unknown provider: ${provider.id}`);
-  }
-
-  const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
-  const latency = Date.now() - startTime;
-
-  if (!res.ok) {
-    const errText = await res.text();
-    return { ok: false, status: res.status, error: errText, latency };
-  }
-
-  if (stream) {
-    return { ok: true, status: res.status, stream: res.body, latency };
-  }
-
-  const data = await res.json();
-  const content = data.choices?.[0]?.message?.content || '';
-
-  return {
-    ok: true, status: res.status,
-    data: {
-      id: data.id || `ghost-${uuidv4().slice(0, 8)}`,
-      object: 'chat.completion',
-      created: Math.floor(Date.now() / 1000),
-      model,
-      choices: [{ message: { role: 'assistant', content }, finish_reason: 'stop' }],
-      usage: data.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
-    },
-    latency,
-  };
-}
-
-function resolveModel(modelName, tier) {
+function resolveModel(modelId) {
   const providers = getProviders();
-  const allowedModels = getModelsForTier(tier);
-
-  // Direct provider/model format: "provider/model" or "provider/model:variant"
-  if (modelName.includes('/')) {
-    const [providerId, ...rest] = modelName.split('/');
-    const provider = providers.find(p => p.id === providerId);
-    if (provider) {
-      const fullModel = rest.join('/');
-      // Check exact match or model name match
-      const available = allowedModels.find(
-        m => m.model === fullModel || m.id === `${providerId}/${fullModel}` ||
-             m.model.toLowerCase() === fullModel.toLowerCase()
-      );
-      if (available) return { provider, model: available.model };
-      // Fallback to first model for this provider
-      const fallback = allowedModels.find(m => m.provider === providerId);
-      if (fallback) return { provider, model: fallback.model };
-      return { provider, model: allowedModels[0]?.model || provider.models[0] };
-    }
-  }
-
-  // Short name search (e.g. "deepseek" matches "deepseek/deepseek-v4-flash:free")
-  const searchLower = modelName.toLowerCase();
-  for (const am of allowedModels) {
-    if (am.model.toLowerCase().includes(searchLower) ||
-        am.name.toLowerCase().includes(searchLower)) {
-      const provider = providers.find(p => p.id === am.provider);
-      if (provider) return { provider, model: am.model };
-    }
-  }
-
-  // Default to first allowed model
-  if (allowedModels.length > 0) {
-    const first = allowedModels[0];
-    const provider = providers.find(p => p.id === first.provider);
-    if (provider) return { provider, model: first.model };
-  }
-
-  return null;
+  const parts = modelId.split('/');
+  const providerId = parts[0];
+  const modelName = parts.slice(1).join('/');
+  const provider = providers.find(p => p.id === providerId);
+  if (!provider) return null;
+  return { provider, model: modelName, fullId: modelName };
 }
 
-// ── Express App ────────────────────────────────────────────────────────────
+// ── App Setup ──────────────────────────────────────────────────────────────
 
 const app = express();
-app.use(helmet({ contentSecurityPolicy: false }));
+
+// Stripe webhook needs raw body — mount BEFORE json parser
+app.post('/v1/stripe/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    if (process.env.STRIPE_WEBHOOK_SECRET && stripe) {
+      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    } else {
+      // In dev without webhook secret, parse directly
+      event = JSON.parse(req.body);
+    }
+  } catch (err) {
+    console.error('[NiceGuyAPI] Webhook signature verification failed:', err.message);
+    return res.status(400).json({ error: 'Webhook signature verification failed' });
+  }
+
+  // Handle the event
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    console.log('[NiceGuyAPI] Stripe checkout completed:', session.id);
+
+    // Find billing session by stripe session ID
+    const billingSession = db.prepare('SELECT * FROM billing_sessions WHERE stripe_session_id = ?').get(session.id);
+
+    if (billingSession && billingSession.status === 'pending') {
+      const keyRecord = db.prepare('SELECT * FROM api_keys WHERE id = ?').get(billingSession.api_key_id);
+
+      if (keyRecord && keyRecord.pending_tier) {
+        const newTier = keyRecord.pending_tier;
+        const tierConfig = TIERS[newTier];
+
+        // Upgrade the key
+        db.prepare('UPDATE api_keys SET tier = ?, pending_tier = NULL, monthly_limit = ? WHERE id = ?')
+          .run(newTier, tierConfig.monthly_requests, keyRecord.id);
+
+        // Mark billing session completed
+        db.prepare('UPDATE billing_sessions SET status = ?, completed_at = datetime("now") WHERE id = ?')
+          .run('completed', billingSession.id);
+
+        console.log(`[NiceGuyAPI] Upgraded ${keyRecord.email} to ${newTier} via Stripe`);
+      } else {
+        // No pending tier — maybe already upgraded. Still mark session completed.
+        db.prepare('UPDATE billing_sessions SET status = ?, completed_at = datetime("now") WHERE id = ?')
+          .run('completed', billingSession.id);
+        console.log('[NiceGuyAPI] Billing session completed but no pending tier for key:', billingSession.api_key_id);
+      }
+    } else {
+      console.log('[NiceGuyAPI] No pending billing session found for stripe session:', session.id);
+    }
+  }
+
+  res.json({ received: true });
+});
+
+// Now apply JSON/URL parsing for all other routes
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ type: ['application/json', 'application/json; charset=utf-8'] }));
+app.use(express.urlencoded({ extended: true }));
 
-// Tier-based rate limiting
-const limiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: (req) => {
-    const tier = req._tier || 'free';
-    return (TIERS[tier] || TIERS.free).rate_limit_per_minute;
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: (req) => req.headers['x-api-key'] || req.ip,
-});
-app.use(limiter);
+// ── Security ───────────────────────────────────────────────────────────────
 
-// Signup rate limiter: 5 per hour per IP
-const signupLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 5,
-  standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: (req) => req.ip,
-  message: { error: { message: 'Too many signups from this IP. Try again later.', type: 'rate_limit_error' } },
-});
-
-// Request logging
 app.use((req, res, next) => {
-  req._startTime = Date.now();
-  const originalEnd = res.end;
-  res.end = function (...args) {
-    const duration = Date.now() - req._startTime;
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} ${res.statusCode} ${duration}ms`);
-    originalEnd.apply(this, args);
-  };
+  res.removeHeader('X-Powered-By');
   next();
 });
 
-// ── Auth Middleware ────────────────────────────────────────────────────────
+// ── Rate Limiting ──────────────────────────────────────────────────────────
+
+const signupLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  message: { error: { message: 'Too many signup attempts. Try again later.', type: 'rate_limit' } },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  message: { error: { message: 'Too many requests. Slow down.', type: 'rate_limit' } },
+});
+
+// ── API Key Authentication Middleware ──────────────────────────────────────
 
 function authenticate(req, res, next) {
-  const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
+  const apiKey = req.headers['x-api-key'] || req.headers['X-API-Key'];
   if (!apiKey) {
-    return res.status(401).json({ error: { message: 'Missing API key. Provide X-API-Key header.', type: 'auth_error' } });
+    return res.status(401).json({ error: { message: 'Missing X-API-Key header.', type: 'auth_error' } });
   }
 
   const prefix = apiKey.slice(0, 12);
   const keyRecord = db.prepare('SELECT * FROM api_keys WHERE key_prefix = ? AND active = 1').get(prefix);
+
   if (!keyRecord) {
     return res.status(401).json({ error: { message: 'Invalid API key.', type: 'auth_error' } });
   }
@@ -519,21 +406,21 @@ function authenticate(req, res, next) {
   const periodMs = isMonthly ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
 
   if (now - periodStart > periodMs) {
-    db.prepare(`UPDATE api_keys SET monthly_used = 0, billing_period_start = datetime('now') WHERE id = ?`).run(keyRecord.id);
+    db.prepare("UPDATE api_keys SET monthly_used = 0, billing_period_start = datetime('now') WHERE id = ?").run(keyRecord.id);
     keyRecord.monthly_used = 0;
   }
 
-  // Check monthly limit
+  // Check limit
   if (keyRecord.monthly_used >= keyRecord.monthly_limit) {
     return res.status(429).json({
       error: {
-        message: `You've reached your ${isMonthly ? 'monthly' : 'weekly'} request limit. Upgrade your plan or purchase more requests.`,
+        message: `You've reached your monthly request limit. Upgrade your plan or purchase more requests.`,
         type: 'limit_reached',
-        upgrade_url: 'https://mrghostguy.github.io/stax-agent/#pricing',
+        upgrade_url: 'https://niceguyapi.onrender.com/',
         refill_price: tierConfig.cost_per_extra_request,
-        refill_url: `/v1/billing/refill`,
+        refill_url: '/v1/billing/refill',
         current_tier: keyRecord.tier,
-        period_resets: isMonthly ? 'monthly' : 'weekly',
+        period_resets: 'monthly',
       }
     });
   }
@@ -541,47 +428,34 @@ function authenticate(req, res, next) {
   req.apiKey = keyRecord;
   req._tier = keyRecord.tier;
   req._tierConfig = tierConfig;
+
+  // Update last used
+  db.prepare("UPDATE api_keys SET last_used_at = datetime('now') WHERE id = ?").run(keyRecord.id);
+
   next();
 }
 
-// ── API Routes ─────────────────────────────────────────────────────────────
+// ── Admin Auth ─────────────────────────────────────────────────────────────
 
-// Health check — detailed
-app.get('/health', (req, res) => {
-  try {
-    const dbOk = db.prepare('SELECT 1').get() !== undefined;
-    const uptime = process.uptime();
-    const memUsage = process.memoryUsage();
-    res.json({
-      status: 'ok',
-      version: '1.0.0',
-      timestamp: new Date().toISOString(),
-      uptime_seconds: Math.floor(uptime),
-      uptime_human: `${Math.floor(uptime / 3600)}h ${Math.floor((uptime % 3600) / 60)}m ${Math.floor(uptime % 60)}s`,
-      database: dbOk ? 'connected' : 'error',
-      memory: {
-        heap_used_mb: Math.round(memUsage.heapUsed / 1024 / 1024),
-        heap_total_mb: Math.round(memUsage.heapTotal / 1024 / 1024),
-        rss_mb: Math.round(memUsage.rss / 1024 / 1024),
-      },
-      tiers: {
-        free: '$0/mo — 50 req',
-        pro: '$6/mo — 5000 req',
-        premium: '$27/mo — 25000 req',
-      },
-    });
-  } catch (err) {
-    res.status(503).json({ status: 'degraded', error: err.message });
+function adminAuth(req, res, next) {
+  const secret = req.headers['x-admin-secret'];
+  if (!secret || secret !== ADMIN_SECRET) {
+    return res.status(401).json({ error: { message: 'Unauthorized.', type: 'auth_error' } });
   }
-});
+  next();
+}
 
-// ── Public Signup ──────────────────────────────────────────────────────────
+// ── Signup ─────────────────────────────────────────────────────────────────
 
-app.post('/v1/signup', signupLimiter, (req, res) => {
+app.post('/v1/signup', signupLimiter, async (req, res) => {
   const { email, tier = 'free' } = req.body;
 
   if (!email) {
     return res.status(400).json({ error: { message: 'email is required', type: 'validation_error' } });
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: { message: 'Please enter a valid email address.', type: 'validation_error' } });
   }
 
   const validTiers = ['free', 'pro', 'premium'];
@@ -590,9 +464,9 @@ app.post('/v1/signup', signupLimiter, (req, res) => {
   }
 
   // Check if email already exists
-  const existing = db.prepare('SELECT * FROM api_keys WHERE email = ?').get(email);
+  const existing = db.prepare('SELECT id, tier FROM api_keys WHERE email = ?').get(email);
   if (existing) {
-    return res.status(409).json({ error: { message: 'An account with this email already exists.', type: 'duplicate_error' } });
+    return res.status(409).json({ error: { message: 'An account with this email already exists. Use your existing key or rotate it.', type: 'duplicate_error' } });
   }
 
   const id = uuidv4();
@@ -601,7 +475,6 @@ app.post('/v1/signup', signupLimiter, (req, res) => {
   const keyPrefix = rawKey.slice(0, 12);
 
   if (tier === 'free') {
-    // Free tier: activate immediately
     const tierConfig = TIERS.free;
     db.prepare('INSERT INTO api_keys (id, key_hash, key_prefix, email, tier, monthly_limit) VALUES (?, ?, ?, ?, ?, ?)')
       .run(id, keyHash, keyPrefix, email, 'free', tierConfig.monthly_requests);
@@ -617,11 +490,58 @@ app.post('/v1/signup', signupLimiter, (req, res) => {
       created_at: new Date().toISOString(),
     });
   } else {
-    // Pro or Premium: create key at free tier with pending_tier set
+    // Pro or Premium: create at free tier, pending upgrade
     const requestedTierConfig = TIERS[tier];
     const price = requestedTierConfig.price;
+
     db.prepare('INSERT INTO api_keys (id, key_hash, key_prefix, email, tier, pending_tier, monthly_limit) VALUES (?, ?, ?, ?, ?, ?, ?)')
       .run(id, keyHash, keyPrefix, email, 'free', tier, TIERS.free.monthly_requests);
+
+    // Create billing session
+    const billingSessionId = uuidv4();
+    db.prepare('INSERT INTO billing_sessions (id, api_key_id, email, tier, price, status) VALUES (?, ?, ?, ?, ?, ?)')
+      .run(billingSessionId, id, email, tier, price, 'pending');
+
+    // Create Stripe Checkout Session if Stripe is configured
+    let stripeUrl = null;
+
+    if (stripe) {
+      try {
+        const session = await stripe.checkout.sessions.create({
+          mode: 'payment',
+          line_items: [{
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: `NiceGuyAPI ${requestedTierConfig.name} Plan`,
+                description: `${requestedTierConfig.monthly_requests.toLocaleString()} requests/month. Launch sale price.`,
+              },
+              unit_amount: price * 100,
+            },
+            quantity: 1,
+          }],
+          success_url: 'https://mrghostguy.github.io/stax-agent/#success',
+          cancel_url: 'https://mrghostguy.github.io/stax-agent/#pricing',
+          customer_email: email,
+          metadata: {
+            api_key_id: id,
+            billing_session_id: billingSessionId,
+            tier: tier,
+          },
+        });
+
+        stripeUrl = session.url;
+
+        // Store Stripe session ID
+        db.prepare('UPDATE billing_sessions SET stripe_session_id = ? WHERE id = ?')
+          .run(session.id, billingSessionId);
+
+        console.log(`[NiceGuyAPI] Created Stripe session for ${email} ($${price})`);
+      } catch (stripeErr) {
+        console.error('[NiceGuyAPI] Stripe error:', stripeErr.message);
+        // Fall back to Stripe hosted page or fail gracefully
+      }
+    }
 
     return res.status(201).json({
       key: rawKey,
@@ -629,111 +549,17 @@ app.post('/v1/signup', signupLimiter, (req, res) => {
       email,
       tier: 'free',
       pending_tier: tier,
-      tier_name: 'Free',
+      tier_name: 'Free (pending upgrade)',
       monthly_limit: TIERS.free.monthly_requests,
       payment_required: true,
       payment: {
         price: price,
         currency: 'USD',
-        paypal_url: `https://paypal.me/kencyrus3/${price}`,
+        stripe_url: stripeUrl,
       },
       created_at: new Date().toISOString(),
     });
   }
-});
-
-// ── Public Billing Checkout ────────────────────────────────────────────────
-
-app.post('/v1/billing/checkout', (req, res) => {
-  const { email, tier } = req.body;
-
-  if (!email) {
-    return res.status(400).json({ error: { message: 'email is required', type: 'validation_error' } });
-  }
-  if (!tier || !['pro', 'premium'].includes(tier)) {
-    return res.status(400).json({ error: { message: 'tier must be pro or premium', type: 'validation_error' } });
-  }
-
-  // Find user by email
-  const user = db.prepare('SELECT * FROM api_keys WHERE email = ?').get(email);
-  if (!user) {
-    return res.status(404).json({ error: { message: 'No account found with this email. Sign up first.', type: 'not_found' } });
-  }
-
-  const tierConfig = TIERS[tier];
-  const price = tierConfig.price;
-  const checkoutId = uuidv4();
-
-  db.prepare('INSERT INTO billing_sessions (id, api_key_id, email, tier, price, status) VALUES (?, ?, ?, ?, ?, ?)')
-    .run(checkoutId, user.id, email, tier, price, 'pending');
-
-  res.json({
-    checkout_id: checkoutId,
-    paypal_url: `https://paypal.me/kencyrus3/${price}`,
-    price: price,
-    currency: 'USD',
-    tier,
-    email,
-    status: 'pending',
-  });
-});
-
-// ── Public Billing Confirm ─────────────────────────────────────────────────
-
-app.post('/v1/billing/confirm', (req, res) => {
-  const { api_key, paypal_order_id } = req.body;
-
-  if (!api_key) {
-    return res.status(400).json({ error: { message: 'api_key is required', type: 'validation_error' } });
-  }
-  if (!paypal_order_id) {
-    return res.status(400).json({ error: { message: 'paypal_order_id is required', type: 'validation_error' } });
-  }
-
-  // Validate paypal_order_id format
-  if (!paypal_order_id.startsWith('PAY-')) {
-    return res.status(400).json({ error: { message: 'Invalid paypal_order_id format. Must start with PAY-', type: 'validation_error' } });
-  }
-
-  // Find the key
-  const prefix = api_key.slice(0, 12);
-  const keyRecord = db.prepare('SELECT * FROM api_keys WHERE key_prefix = ? AND active = 1').get(prefix);
-  if (!keyRecord) {
-    return res.status(401).json({ error: { message: 'Invalid API key.', type: 'auth_error' } });
-  }
-
-  const valid = bcrypt.compareSync(api_key, keyRecord.key_hash);
-  if (!valid) {
-    return res.status(401).json({ error: { message: 'Invalid API key.', type: 'auth_error' } });
-  }
-
-  // Check there's a pending tier to upgrade to
-  if (!keyRecord.pending_tier) {
-    return res.status(400).json({ error: { message: 'No pending upgrade for this key.', type: 'validation_error' } });
-  }
-
-  const newTier = keyRecord.pending_tier;
-  const tierConfig = TIERS[newTier];
-
-  // Upgrade the key
-  db.prepare('UPDATE api_keys SET tier = ?, pending_tier = NULL, monthly_limit = ? WHERE id = ?')
-    .run(newTier, tierConfig.monthly_requests, keyRecord.id);
-
-  // Update billing session if one exists
-  const session = db.prepare('SELECT * FROM billing_sessions WHERE api_key_id = ? AND tier = ? AND status = ? ORDER BY created_at DESC LIMIT 1').get(keyRecord.id, newTier, 'pending');
-  if (session) {
-    db.prepare('UPDATE billing_sessions SET status = ?, paypal_order_id = ?, completed_at = datetime("now") WHERE id = ?')
-      .run('completed', paypal_order_id, session.id);
-  }
-
-  res.json({
-    status: 'activated',
-    tier: newTier,
-    tier_name: tierConfig.name,
-    monthly_limit: tierConfig.monthly_requests,
-    paypal_order_id,
-    activated_at: new Date().toISOString(),
-  });
 });
 
 // ── Models ─────────────────────────────────────────────────────────────────
@@ -747,7 +573,6 @@ app.get('/v1/models', authenticate, (req, res) => {
       object: 'model',
       created: Math.floor(Date.now() / 1000),
       owned_by: m.provider,
-      name: m.name,
     })),
   });
 });
@@ -755,6 +580,7 @@ app.get('/v1/models', authenticate, (req, res) => {
 // ── Usage ──────────────────────────────────────────────────────────────────
 
 app.get('/v1/usage', authenticate, (req, res) => {
+  const remaining = req.apiKey.monthly_limit - req.apiKey.monthly_used;
   const isMonthly = req._tierConfig.period !== 'weekly';
 
   res.json({
@@ -762,111 +588,193 @@ app.get('/v1/usage', authenticate, (req, res) => {
     tier_name: req._tierConfig.name,
     requests_used: req.apiKey.monthly_used,
     requests_total: req.apiKey.monthly_limit,
-    requests_remaining: Math.max(0, req._tierConfig.monthly_requests - req.apiKey.monthly_used),
+    requests_remaining: Math.max(0, remaining),
     period: isMonthly ? 'monthly' : 'weekly',
     period_resets: isMonthly ? 'Every month' : 'Every week',
     features: {
       games_apps: req._tierConfig.allows_games_apps,
     },
     refill_price_per_request: req._tierConfig.cost_per_extra_request,
-    upgrade_url: 'https://mrghostguy.github.io/stax-agent/#pricing',
+    upgrade_url: 'https://mrghostguy.github.io/stax-agent/',
   });
 });
 
 // ── Chat Completions ──────────────────────────────────────────────────────
 
 app.post('/v1/chat/completions', authenticate, async (req, res) => {
-  const { model = 'deepseek/deepseek-v4-flash:free', messages, stream = false } = req.body;
+  const { model = 'openrouter/deepseek/deepseek-v4-flash:free', messages, stream = false } = req.body;
 
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: { message: 'messages array is required', type: 'validation_error' } });
   }
 
-  // Determine request cost based on complexity
   const requestCost = calculateRequestCost(messages, req._tier);
-
-  // Check if user has enough remaining requests
-  const remaining = req._tierConfig.monthly_requests - req.apiKey.monthly_used;
+  const remaining = req.apiKey.monthly_limit - req.apiKey.monthly_used;
   if (remaining < requestCost) {
     return res.status(429).json({
       error: {
-        message: `Not enough requests remaining. This task requires ${requestCost} request(s). You have ${remaining} left.`,
+        message: `Not enough requests remaining. You have ${remaining} left. Upgrade or buy refills.`,
         type: 'limit_reached',
-        requests_needed: requestCost,
-        requests_remaining: remaining,
+        upgrade_url: 'https://mrghostguy.github.io/stax-agent/',
         refill_price: req._tierConfig.cost_per_extra_request,
-        upgrade_url: 'https://mrghostguy.github.io/stax-agent/#pricing',
       }
     });
   }
 
-  const resolved = resolveModel(model, req._tier);
-  if (!resolved) {
-    return res.status(400).json({ error: { message: `No provider available for model: ${model}`, type: 'model_error' } });
+  if (stream) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
   }
 
-  const { provider, model: resolvedModel } = resolved;
+  const startTime = Date.now();
+  const resolved = resolveModel(model);
+  if (!resolved) {
+    db.prepare('UPDATE api_keys SET monthly_used = monthly_used + ? WHERE id = ?').run(requestCost, req.apiKey.id);
+    return res.status(400).json({ error: { message: `Model "${model}" not found.`, type: 'model_not_found' } });
+  }
+
+  const providerApiKey = resolved.provider.api_key || process.env.OPENROUTER_API_KEY;
+  if (!providerApiKey) {
+    db.prepare('UPDATE api_keys SET monthly_used = monthly_used + ? WHERE id = ?').run(requestCost, req.apiKey.id);
+    return res.status(500).json({ error: { message: 'Server API key not configured. Contact support.', type: 'server_error' } });
+  }
 
   try {
-    const result = await proxyToProvider(provider, resolvedModel, messages, stream);
+    const url = `${resolved.provider.base_url}/chat/completions`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${providerApiKey}`,
+        'HTTP-Referer': 'https://niceguyapi.onrender.com',
+        'X-Title': 'NiceGuyAPI',
+      },
+      body: JSON.stringify({
+        model: resolved.model,
+        messages,
+        stream: !!stream,
+      }),
+    });
 
-    // Update usage with request cost
-    db.prepare(`UPDATE api_keys SET monthly_used = monthly_used + ?, total_requests = total_requests + 1, last_used_at = datetime('now') WHERE id = ?`)
+    const latency = Date.now() - startTime;
+
+    // Log usage
+    try {
+      db.prepare('INSERT INTO usage_log (api_key_id, model, provider, status, latency_ms, request_cost) VALUES (?, ?, ?, ?, ?, ?)')
+        .run(req.apiKey.id, model, resolved.provider.id, response.status, latency, requestCost);
+    } catch (e) {}
+
+    // Update usage count
+    db.prepare('UPDATE api_keys SET monthly_used = monthly_used + ?, total_requests = total_requests + 1 WHERE id = ?')
       .run(requestCost, req.apiKey.id);
 
-    db.prepare('INSERT INTO usage_log (api_key_id, model, provider, status, latency_ms, request_cost) VALUES (?, ?, ?, ?, ?, ?)')
-      .run(req.apiKey.id, resolvedModel, provider.id, result.status, result.latency, requestCost);
-
-    if (!result.ok) {
-      return res.status(result.status).json({ error: { message: result.error, type: 'provider_error' } });
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('[NiceGuyAPI] Provider error:', response.status, errText.slice(0, 200));
+      return res.status(response.status).json({
+        error: { message: `Provider error (${response.status}). Try again or use a different model.`, type: 'provider_error' }
+      });
     }
 
     if (stream) {
-      res.setHeader('Content-Type', 'text/event-stream');
-      res.setHeader('Cache-Control', 'no-cache');
-      res.setHeader('Connection', 'keep-alive');
-      const reader = result.stream.getReader();
-      const decoder = new TextDecoder();
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          res.write(decoder.decode(value));
+      const reader = response.body;
+      reader.on('data', (chunk) => {
+        const text = chunk.toString();
+        const lines = text.split('\n').filter(l => l.trim());
+        for (const line of lines) {
+          if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+            try {
+              const parsed = JSON.parse(line.slice(6));
+              const content = parsed.choices?.[0]?.delta?.content;
+              if (content) res.write(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`);
+            } catch (e) {}
+          }
         }
-      } catch (e) {}
-      res.end();
+      });
+      reader.on('end', () => {
+        res.write('data: [DONE]\n\n');
+        res.end();
+      });
+      reader.on('error', () => res.end());
       return;
     }
 
-    // Add usage info to response
-    const responseData = { ...result.data };
-    responseData.usage.requests_used = req.apiKey.monthly_used + requestCost;
-    responseData.usage.requests_remaining = req._tierConfig.monthly_requests - req.apiKey.monthly_used - requestCost;
-    responseData.usage.request_cost = requestCost;
-    responseData.usage.tier = req._tier;
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || '';
 
-    res.json(responseData);
+    res.json({
+      id: data.id || `chatcmpl-${uuidv4().slice(0, 8)}`,
+      object: 'chat.completion',
+      created: Math.floor(Date.now() / 1000),
+      model,
+      choices: [{ message: { role: 'assistant', content }, finish_reason: data.choices?.[0]?.finish_reason || 'stop' }],
+      usage: data.usage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+    });
+
   } catch (err) {
-    console.error('[NiceGuyAPI] Proxy error:', err.message);
-    res.status(502).json({ error: { message: 'Provider request failed: ' + err.message, type: 'proxy_error' } });
+    console.error('[NiceGuyAPI] Chat error:', err.message);
+    db.prepare('UPDATE api_keys SET monthly_used = monthly_used + ? WHERE id = ?').run(requestCost, req.apiKey.id);
+    return res.status(500).json({ error: { message: 'Request failed. Please try again.', type: 'server_error' } });
   }
 });
 
-// ── Stub Endpoints (Not Implemented) ──────────────────────────────────────
+// ── Key Rotation ───────────────────────────────────────────────────────────
 
-app.post('/v1/media/image', authenticate, (req, res) => {
-  res.status(501).json({ error: { message: 'Not implemented', type: 'not_implemented' } });
+app.post('/v1/keys/rotate', authenticate, (req, res) => {
+  const newRawKey = `gsk_live_${uuidv4().replace(/-/g, '')}${uuidv4().replace(/-/g, '').slice(0, 8)}`;
+  const newHash = bcrypt.hashSync(newRawKey, 10);
+  const newPrefix = newRawKey.slice(0, 12);
+
+  db.prepare('UPDATE api_keys SET key_hash = ?, key_prefix = ? WHERE id = ?')
+    .run(newHash, newPrefix, req.apiKey.id);
+
+  res.json({
+    key: newRawKey,
+    prefix: newPrefix,
+    message: 'Key rotated. Your old key is now invalid.',
+    rotated_at: new Date().toISOString(),
+  });
 });
 
-app.post('/v1/media/song', authenticate, (req, res) => {
-  res.status(501).json({ error: { message: 'Not implemented', type: 'not_implemented' } });
+// ── Refill ─────────────────────────────────────────────────────────────────
+
+app.post('/v1/billing/refill', authenticate, (req, res) => {
+  const { amount = 10, paypal_order_id } = req.body;
+  const cost = amount * req._tierConfig.cost_per_extra_request;
+
+  if (!paypal_order_id) {
+    return res.status(400).json({
+      error: {
+        message: 'paypal_order_id is required. Complete PayPal purchase first.',
+        type: 'validation_error',
+        paypal_url: `https://paypal.me/kencyrus3/${Math.ceil(cost)}`,
+      }
+    });
+  }
+
+  if (!paypal_order_id.startsWith('PAY-') && !paypal_order_id.startsWith('PAYID-')) {
+    return res.status(400).json({ error: { message: 'Invalid paypal_order_id format.', type: 'validation_error' } });
+  }
+
+  db.prepare('UPDATE api_keys SET monthly_limit = monthly_limit + ? WHERE id = ?').run(amount, req.apiKey.id);
+
+  const sessionId = uuidv4();
+  db.prepare('INSERT INTO billing_sessions (id, api_key_id, email, tier, price, status, paypal_order_id, completed_at) VALUES (?, ?, ?, ?, ?, ?, ?, datetime("now"))')
+    .run(sessionId, req.apiKey.id, req.apiKey.email, req.apiKey.tier, cost, 'completed', paypal_order_id);
+
+  res.json({
+    message: `Added ${amount} requests for $${cost.toFixed(2)}.`,
+    requests_added: amount,
+    cost: cost,
+    new_limit: req.apiKey.monthly_limit + amount,
+    paypal_order_id,
+  });
 });
 
-app.post('/v1/media/pdf', authenticate, (req, res) => {
-  res.status(501).json({ error: { message: 'Not implemented', type: 'not_implemented' } });
-});
+// ── Fake endpoints (return 501) ───────────────────────────────────────────
 
-app.post('/v1/media/podcast', authenticate, (req, res) => {
+app.post('/v1/media', authenticate, (req, res) => {
   res.status(501).json({ error: { message: 'Not implemented', type: 'not_implemented' } });
 });
 
@@ -882,79 +790,7 @@ app.post('/v1/websites', authenticate, (req, res) => {
   res.status(501).json({ error: { message: 'Not implemented', type: 'not_implemented' } });
 });
 
-// ── Pay-as-you-go Refill ──────────────────────────────────────────────────
-
-app.post('/v1/billing/refill', authenticate, (req, res) => {
-  const { amount = 10, paypal_order_id } = req.body; // number of requests to buy + proof of payment
-  const cost = amount * req._tierConfig.cost_per_extra_request;
-
-  if (!paypal_order_id) {
-    return res.status(400).json({
-      error: {
-        message: 'paypal_order_id is required. Complete PayPal purchase first, then provide the order ID.',
-        type: 'validation_error',
-        paypal_url: `https://paypal.me/kencyrus3/${Math.ceil(cost)}`,
-      }
-    });
-  }
-
-  if (!paypal_order_id.startsWith('PAY-') && !paypal_order_id.startsWith('PAYID-')) {
-    return res.status(400).json({ error: { message: 'Invalid paypal_order_id format.', type: 'validation_error' } });
-  }
-
-  // Add requests to their limit
-  db.prepare('UPDATE api_keys SET monthly_limit = monthly_limit + ? WHERE id = ?').run(amount, req.apiKey.id);
-
-  // Log the refill
-  const sessionId = uuidv4();
-  db.prepare('INSERT INTO billing_sessions (id, api_key_id, email, tier, price, status, paypal_order_id, completed_at) VALUES (?, ?, ?, ?, ?, ?, ?, datetime("now"))')
-    .run(sessionId, req.apiKey.id, req.apiKey.email, req.apiKey.tier, cost, 'completed', paypal_order_id);
-
-  res.json({
-    message: `Added ${amount} requests for $${cost.toFixed(2)}.`,
-    requests_added: amount,
-    cost: cost,
-    new_limit: req.apiKey.monthly_limit + amount,
-    paypal_order_id,
-  });
-});
-
-// ── User Key Management ──────────────────────────────────────────────────
-
-// Rotate/regenerate API key
-app.post('/v1/keys/rotate', authenticate, (req, res) => {
-  const newRaw = `gsk_live_${uuidv4().replace(/-/g, '')}${uuidv4().replace(/-/g, '').slice(0, 8)}`;
-  const newHash = bcrypt.hashSync(newRaw, 10);
-  const newPrefix = newRaw.slice(0, 12);
-  db.prepare('UPDATE api_keys SET key_hash = ?, key_prefix = ? WHERE id = ?').run(newHash, newPrefix, req.apiKey.id);
-  res.json({ key: newRaw, prefix: newPrefix, message: 'Key rotated. Your old key is now invalid.' });
-});
-
-// ── Admin Routes ───────────────────────────────────────────────────────────
-
-function adminAuth(req, res, next) {
-  const secret = req.headers['x-admin-secret'];
-  if (secret !== ADMIN_SECRET) return res.status(403).json({ error: 'Forbidden' });
-  next();
-}
-
-app.post('/admin/keys', adminAuth, (req, res) => {
-  const { name, email, tier = 'free' } = req.body;
-  const id = uuidv4();
-  const rawKey = `gsk_live_${uuidv4().replace(/-/g, '')}${uuidv4().replace(/-/g, '').slice(0, 8)}`;
-  const keyHash = bcrypt.hashSync(rawKey, 10);
-  const keyPrefix = rawKey.slice(0, 12);
-  const tierConfig = TIERS[tier] || TIERS.free;
-
-  db.prepare('INSERT INTO api_keys (id, key_hash, key_prefix, name, email, tier, monthly_limit) VALUES (?, ?, ?, ?, ?, ?, ?)')
-    .run(id, keyHash, keyPrefix, name || 'Default', email || '', tier, tierConfig.monthly_requests);
-
-  res.json({
-    id, key: rawKey, prefix: keyPrefix, name, email, tier,
-    monthly_limit: tierConfig.monthly_requests,
-    created_at: new Date().toISOString(),
-  });
-});
+// ── Admin ──────────────────────────────────────────────────────────────────
 
 app.get('/admin/keys', adminAuth, (req, res) => {
   const keys = db.prepare('SELECT id, key_prefix, name, email, tier, pending_tier, active, monthly_limit, monthly_used, total_requests, created_at, last_used_at FROM api_keys ORDER BY created_at DESC').all();
@@ -981,27 +817,27 @@ app.get('/admin/stats', adminAuth, (req, res) => {
 
 app.get('/', (req, res) => {
   res.json({
-    name: 'NiceGuyAPI', version: '1.0.0',
+    name: 'NiceGuyAPI',
+    version: '3.0.0',
     description: 'One API for every AI provider. OpenAI-compatible interface.',
     base_url: '/v1',
     pricing: {
       free: '$0/mo — 50 requests',
-      pro: '$6/mo — 5000 requests',
-      premium: '$27/mo — 25000 requests',
-      refill: 'Pay-as-you-go refills available. Buy extra requests without upgrading.',
+      pro: '$6/mo — 5,000 requests',
+      premium: '$27/mo — 25,000 requests',
+      refill: 'Pay-as-you-go refills available.',
     },
     endpoints: {
-      'GET /health': 'Health check with uptime, memory, DB status',
+      'GET /health': 'Health check',
       'POST /v1/signup': 'Create a new account (public, rate-limited)',
-      'POST /v1/billing/checkout': 'Create a billing session for upgrade (public)',
-      'POST /v1/billing/confirm': 'Confirm payment and upgrade tier (public)',
       'GET /v1/models': 'List available models for your tier',
       'POST /v1/chat/completions': 'Chat with any AI model (OpenAI-compatible)',
       'GET /v1/usage': 'Current usage, quotas, and feature details',
       'POST /v1/billing/refill': 'Buy extra requests (pay-as-you-go)',
       'POST /v1/keys/rotate': 'Regenerate your API key',
+      'POST /v1/stripe/webhook': 'Stripe webhook (Stripe only)',
     },
-    auth: 'Include X-API-Key header with all /v1 requests (except signup, billing/confirm, billing/checkout)',
+    auth: 'Include X-API-Key header with all /v1 requests (except signup)',
   });
 });
 
@@ -1033,7 +869,6 @@ function gracefulShutdown(signal) {
       try { persistDb(); } catch (e) {}
       process.exit(0);
     });
-    // Force close after 10s
     setTimeout(() => { process.exit(1); }, 10000);
   } else {
     process.exit(0);
@@ -1054,9 +889,10 @@ initDb().then(() => {
     const bootTime = Date.now() - startTime;
     console.log(`
   ╔══════════════════════════════════════════════╗
-  ║  🏗️  NiceGuyAPI v2.0 — AI Model Gateway         ║
+  ║  🏗️  NiceGuyAPI v3.0 — AI Model Gateway         ║
   ║  Running on port ${PORT}${' '.repeat(Math.max(0, 19 - String(PORT).length))}║
   ║  Endpoint: http://localhost:${PORT}/v1${' '.repeat(Math.max(0, 8 - String(PORT).length))}║
+  ║  Stripe: ${stripe ? 'ENABLED ✅' : 'DISABLED ⚠️'}${' '.repeat(Math.max(0, 29 - (stripe ? 11 : 14)))}║
   ║  Boot: ${bootTime}ms${' '.repeat(Math.max(0, 29 - String(bootTime).length))}║
   ╚══════════════════════════════════════════════╝
   `);
