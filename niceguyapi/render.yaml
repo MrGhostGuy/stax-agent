@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: niceguyapi
+    env: node
+    plan: free
+    repo: https://github.com/MrGhostGuy/niceguyapi
+    branch: main
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node index.js
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NICEGUYAPI_PORT
+        value: "3000"
+      - key: NICEGUYAPI_SECRET
+        generateValue: true
+      - key: NODE_ENV
+        value: "production"
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false

@@ -36,12 +36,21 @@ Remember:
 - All URLs updated: `ghostapi-1v1f.onrender.com` → `niceguyapi.onrender.com`
 - Fixed landing page URLs (2026-05-27): replaced remaining `ghostapi-1v1f.onrender.com` references in index.html with `niceguyapi.onrender.com` on both master and gh-pages branches
 
-#### Pricing (Launch Sale — Limited Time)
-| Plan | Price | Original | Requests | Models |
-|------|-------|----------|----------|--------|
-| Free | $0/mo | — | 50/mo | 5 free models (DeepSeek, Llama, Qwen, GPT-OSS, Gemma) |
-| Pro | $6/mo | ~~$12~~ (50% off) | 5,000/mo | All 17+ free models |
-| Premium | $27/mo | ~~$49~~ (45% off) | 25,000/mo | All models including premium (Claude, GPT-4o, Gemini) |
+#### Pricing (v3.5 — Updated 2026-05-28)
+| Plan | Price | Original | Requests | Models & Features |
+|------|-------|----------|----------|-------------------|
+| Free | $0/mo | — | 14/mo | 5 free models (DeepSeek, Llama, Qwen, GPT-OSS, Gemma) |
+| Pro | $6/mo | ~~$12~~ (50% off) | 40/mo | All 17+ free models + custom image generation + custom song generation |
+| Premium | $27/mo | ~~$49~~ (45% off) | 500/mo | All models including premium (Claude, GPT-4o, Gemini) + custom game + app + website creation + hosting |
+
+#### Landing page v3 (2026-05-28)
+- Enhanced landing page with Use Cases section (9 use cases for non-technical users)
+- Improved OpenClaw integration guide (7-step beginner-friendly guide)
+- Chat tab is the primary conversion mechanism (try before you buy)
+- Features section redesigned with benefit-focused copy
+- Pricing section highlights Premium 500 req/mo value proposition
+- FAQ includes "Why 500 requests?" question
+- GitHub Pages auto-deploys from main branch via Actions
 
 #### Revenue math (at launch sale prices)
 - 50 Pro users × $6 = $300/mo
