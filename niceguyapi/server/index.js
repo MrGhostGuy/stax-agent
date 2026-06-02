@@ -1,5 +1,5 @@
 /**
- * NiceGuyAPI v3.5 — Premium AI Model Gateway
+ * NiceGuyAPI v5.3 — Premium AI Model Gateway
  *
  * One API endpoint for Claude, GPT, Gemini, and 17+ more.
  * OpenAI-compatible /v1/chat/completions interface.

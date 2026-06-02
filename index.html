@@ -311,8 +311,7 @@
   </style>
 
 <style>
-/* MOBILE MENU + PREMIUM TRANSITIONS */
-@media (max-width: 768px) {
+/* HAMBURGER + PREMIUM TRANSITIONS — ALL SCREENS */
   .hamburger-btn {
     display: flex !important; flex-direction: column; justify-content: center;
     align-items: center; gap: 5px; width: 44px; height: 44px;
@@ -332,6 +331,7 @@
   .hamburger-btn.active .bar:nth-child(2) { opacity: 0; transform: scaleX(0); }
   .hamburger-btn.active .bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
   .hamburger-btn.active { background: rgba(0,240,255,0.15); border-color: #00f0ff; box-shadow: 0 0 16px rgba(0,240,255,0.4); }
+
   .mobile-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
@@ -420,8 +420,8 @@
   .tab-content.active > *:nth-child(5) { animation-delay: 0.25s; }
   .tab-content.active > *:nth-child(6) { animation-delay: 0.30s; }
 }
+
 @media (min-width: 769px) {
-  .hamburger-btn, .mobile-overlay, .mobile-nav-panel { display: none !important; }
   .tab-content {
     transition: opacity 0.45s cubic-bezier(0.22,1,0.36,1),
                 transform 0.45s cubic-bezier(0.22,1,0.36,1),
@@ -1170,7 +1170,7 @@ Premium Models (requires Premium plan — top-tier AI):
       </div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:30px;">
 
-        <div class="guide-card" style="cursor:pointer;" onclick="window.open('https://mrghostguy.github.io/niceguyapi/niceguyapi-blog.html?p=getting-started-with-niceguyapi','_blank')">
+        <div class="guide-card" style="cursor:pointer;" onclick="window.open('https://bit.ly/NiceGuyAPIniceguyapi-blog.html?p=getting-started-with-niceguyapi','_blank')">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
             <span class="badge" style="background:rgba(99,102,241,0.15);color:#818cf8;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">Tutorial</span>
             <span style="font-size:12px;color:#4b5563;">5 min</span>
@@ -1179,7 +1179,7 @@ Premium Models (requires Premium plan — top-tier AI):
           <p style="font-size:13px;color:#6b7280;">Sign up, get your free API key, and make your first request. Works with cURL, Python, and JavaScript.</p>
         </div>
 
-        <div class="guide-card" style="cursor:pointer;" onclick="window.open('https://mrghostguy.github.io/niceguyapi/niceguyapi-blog.html?p=best-free-ai-apis-2026','_blank')">
+        <div class="guide-card" style="cursor:pointer;" onclick="window.open('https://bit.ly/NiceGuyAPIniceguyapi-blog.html?p=best-free-ai-apis-2026','_blank')">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
             <span class="badge" style="background:rgba(52,211,153,0.15);color:#34d399;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">Guide</span>
             <span style="font-size:12px;color:#4b5563;">8 min</span>
@@ -1188,7 +1188,7 @@ Premium Models (requires Premium plan — top-tier AI):
           <p style="font-size:13px;color:#6b7280;">We compared OpenRouter, OpenAI, Anthropic, and more. See why developers are switching to unified gateways.</p>
         </div>
 
-        <div class="guide-card" style="cursor:pointer;" onclick="window.open('https://mrghostguy.github.io/niceguyapi/niceguyapi-blog.html?p=build-ai-agent-niceguyapi','_blank')">
+        <div class="guide-card" style="cursor:pointer;" onclick="window.open('https://bit.ly/NiceGuyAPIniceguyapi-blog.html?p=build-ai-agent-niceguyapi','_blank')">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
             <span class="badge" style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">Advanced</span>
             <span style="font-size:12px;color:#4b5563;">12 min</span>
@@ -1197,7 +1197,7 @@ Premium Models (requires Premium plan — top-tier AI):
           <p style="font-size:13px;color:#6b7280;">Step-by-step tutorial: Build a ReAct-style agent that searches the web, reads pages, and solves multi-step tasks.</p>
         </div>
 
-        <div class="guide-card" style="cursor:pointer;" onclick="window.open('https://mrghostguy.github.io/niceguyapi/niceguyapi-blog.html?p=openai-compatible-api-guide','_blank')">
+        <div class="guide-card" style="cursor:pointer;" onclick="window.open('https://bit.ly/NiceGuyAPIniceguyapi-blog.html?p=openai-compatible-api-guide','_blank')">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
             <span class="badge" style="background:rgba(99,102,241,0.15);color:#818cf8;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">Tutorial</span>
             <span style="font-size:12px;color:#4b5563;">6 min</span>
@@ -1208,7 +1208,7 @@ Premium Models (requires Premium plan — top-tier AI):
 
       </div>
       <div style="text-align:center;margin-top:20px;">
-        <a href="https://mrghostguy.github.io/niceguyapi/niceguyapi-socials.html" class="btn btn-secondary" style="background:rgba(255,255,255,0.06);color:#9ca3af;border:1px solid rgba(255,255,255,0.12);padding:12px 28px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;display:inline-block;">🌐 View All Social Posts →</a>
+        <a href="https://bit.ly/NiceGuyAPIniceguyapi-socials.html" class="btn btn-secondary" style="background:rgba(255,255,255,0.06);color:#9ca3af;border:1px solid rgba(255,255,255,0.12);padding:12px 28px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;display:inline-block;">🌐 View All Social Posts →</a>
       </div>
     </div>
   </div>

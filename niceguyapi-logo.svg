@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6485FF"/>
+      <stop offset="100%" style="stop-color:#A855F7"/>
+    </linearGradient>
+    <linearGradient id="faceGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#e0e7ff"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="200" cy="200" r="195" fill="url(#bg)"/>
+  
+  <!-- Inner ring -->
+  <circle cx="200" cy="200" r="175" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+  
+  <!-- API brackets -->
+  <text x="200" y="155" text-anchor="middle" font-family="monospace" font-size="48" font-weight="bold" fill="rgba(255,255,255,0.9)" opacity="0.6">&lt;/&gt;</text>
+  
+  <!-- Face - eyes -->
+  <ellipse cx="165" cy="195" rx="12" ry="14" fill="#1e1b4b"/>
+  <ellipse cx="235" cy="195" rx="12" ry="14" fill="#1e1b4b"/>
+  <!-- Eye shine -->
+  <circle cx="169" cy="191" r="4" fill="white"/>
+  <circle cx="239" cy="191" r="4" fill="white"/>
+  
+  <!-- Smile -->
+  <path d="M 155 235 Q 200 275 245 235" fill="none" stroke="#1e1b4b" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- Cheek blush -->
+  <ellipse cx="140" cy="225" rx="18" ry="10" fill="rgba(255,150,200,0.25)"/>
+  <ellipse cx="260" cy="225" rx="18" ry="10" fill="rgba(255,150,200,0.25)"/>
+  
+  <!-- Circuit lines connecting to face -->
+  <line x1="80" y1="200" x2="130" y2="200" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  <line x1="270" y1="200" x2="320" y2="200" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  <line x1="200" y1="80" x2="200" y2="130" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  <line x1="200" y1="270" x2="200" y2="320" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  
+  <!-- Circuit dots -->
+  <circle cx="80" cy="200" r="5" fill="rgba(255,255,255,0.4)"/>
+  <circle cx="320" cy="200" r="5" fill="rgba(255,255,255,0.4)"/>
+  <circle cx="200" cy="80" r="5" fill="rgba(255,255,255,0.4)"/>
+  <circle cx="200" cy="320" r="5" fill="rgba(255,255,255,0.4)"/>
+  
+  <!-- Text -->
+  <text x="200" y="365" text-anchor="middle" font-family="'Segoe UI', system-ui, sans-serif" font-size="32" font-weight="700" fill="white" letter-spacing="2">NiceGuyAPI</text>
+</svg>

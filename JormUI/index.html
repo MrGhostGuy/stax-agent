@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JormUI — Stream Dashboard</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0e0e12;
+    --surface:#16161e;
+    --surface2:#1e1e2a;
+    --border:#2a2a3a;
+    --text:#e0e0ec;
+    --text-dim:#8888a8;
+    --accent:#9146ff;
+    --accent-glow:#9146ff66;
+    --green:#00e676;
+    --red:#ff5252;
+    --yellow:#ffd740;
+    --blue:#448aff;
+    --radius:12px;
+    --tab-height:48px;
+  }
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif;overflow:hidden}
+
+  /* ── Top Bar ── */
+  #topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    height:52px;padding:0 20px;
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    flex-shrink:0;
+  }
+  #topbar .logo{font-size:20px;font-weight:700;display:flex;align-items:center;gap:8px}
+  #topbar .logo span{font-size:22px}
+  #topbar .version{font-size:11px;color:var(--text-dim);background:var(--surface2);padding:2px 8px;border-radius:20px}
+  .topbar-right{display:flex;align-items:center;gap:12px}
+  #stream-status{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-dim)}
+  #stream-status .dot{width:8px;height:8px;border-radius:50%;background:var(--text-dim)}
+  #stream-status.live .dot{background:var(--red);animation:pulse-dot 1.5s infinite}
+  #stream-status.live{color:var(--red)}
+
+  /* ── Tabs ── */
+  #tabs{
+    display:flex;gap:2px;padding:0 16px;
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    flex-shrink:0;
+    overflow-x:auto;
+  }
+  #tabs::-webkit-scrollbar{display:none}
+  .tab{
+    display:flex;align-items:center;gap:6px;
+    height:var(--tab-height);
+    padding:0 18px;
+    font-size:14px;font-weight:500;
+    color:var(--text-dim);
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    transition:color .2s,border-color .2s,background .2s;
+    white-space:nowrap;
+    user-select:none;
+  }
+  .tab:hover{color:var(--text);background:var(--surface2)}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .tab .tab-icon{font-size:16px}
+  .tab .badge{
+    font-size:10px;padding:1px 6px;border-radius:10px;
+    background:var(--accent);color:#fff;font-weight:700;
+    min-width:18px;text-align:center;
+  }
+
+  /* ── Panels ── */
+  #panel-container{flex:1;overflow:hidden;position:relative}
+  .panel{
+    position:absolute;inset:0;
+    display:none;flex-direction:column;
+    overflow:hidden;
+  }
+  .panel.active{display:flex}
+
+  /* ── Twitch Tab ── */
+  .twitch-layout{display:flex;flex:1;min-height:0}
+  .twitch-main{display:flex;flex-direction:column;flex:1;min-width:0}
+  .twitch-main-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 16px;
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    flex-shrink:0;
+  }
+  .twitch-main-header h2{font-size:15px;display:flex;align-items:center;gap:8px}
+  .twitch-stream-wrap{flex:1;position:relative;background:#000;min-height:0}
+  .twitch-stream-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+
+  .live-badge{
+    display:inline-flex;align-items:center;gap:4px;
+    background:var(--red);color:#fff;
+    font-size:11px;font-weight:700;
+    padding:2px 8px;border-radius:4px;
+    text-transform:uppercase;letter-spacing:.5px;
+    animation:pulse-dot 1.5s infinite;
+  }
+  .offline-badge{
+    display:inline-flex;align-items:center;gap:4px;
+    background:var(--surface2);color:var(--text-dim);
+    font-size:11px;font-weight:600;
+    padding:2px 8px;border-radius:4px;
+    text-transform:uppercase;letter-spacing:.5px;
+  }
+
+  .viewer-count{
+    display:flex;align-items:center;gap:5px;
+    font-size:13px;color:var(--text-dim);
+  }
+  .viewer-count strong{color:var(--text)}
+
+  .twitch-sidebar{
+    width:340px;min-width:280px;
+    display:flex;flex-direction:column;
+    background:var(--surface);
+    border-left:1px solid var(--border);
+  }
+  .chat-header{
+    padding:12px 16px;
+    border-bottom:1px solid var(--border);
+    font-size:14px;font-weight:600;
+    display:flex;align-items:center;justify-content:space-between;
+    flex-shrink:0;
+  }
+  .chat-header .chat-title{display:flex;align-items:center;gap:6px}
+  .chat-messages{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:2px}
+  .chat-messages::-webkit-scrollbar{width:4px}
+  .chat-messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+  .chat-msg{font-size:13px;line-height:1.4;word-wrap:break-word;padding:2px 8px;border-radius:4px;transition:background .15s}
+  .chat-msg:hover{background:var(--surface2)}
+  .chat-msg .user{font-weight:600}
+  .chat-msg .user:hover{cursor:pointer;text-decoration:underline}
+  .chat-msg .text{color:var(--text)}
+  .chat-msg.system{color:var(--text-dim);font-style:italic;font-size:12px;padding:4px 8px}
+  .chat-msg .emote{vertical-align:middle;height:18px}
+
+  .chat-input-wrap{
+    padding:8px;border-top:1px solid var(--border);flex-shrink:0
+  }
+  .chat-input-wrap input{
+    width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;
+    background:var(--surface2);color:var(--text);font-size:13px;outline:none;
+    transition:border-color .2s;
+  }
+  .chat-input-wrap input:focus{border-color:var(--accent)}
+
+  /* ── Dashboard Tab ── */
+  .dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:20px;overflow-y:auto}
+  .stat-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:20px;display:flex;flex-direction:column;gap:6px;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .stat-card:hover{border-color:var(--accent);box-shadow:0 0 20px -8px var(--accent-glow)}
+  .stat-card .label{font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px}
+  .stat-card .value{font-size:28px;font-weight:700}
+  .stat-card .sub{font-size:12px;color:var(--text-dim)}
+
+  .recent-activity{margin:0 20px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+  .recent-activity h3{font-size:15px;margin-bottom:12px}
+
+  /* ── Settings Tab ── */
+  .settings-wrap{padding:20px;overflow-y:auto;max-width:600px}
+  .settings-wrap h3{font-size:18px;margin-bottom:16px}
+  .setting-row{
+    display:flex;flex-direction:column;gap:6px;margin-bottom:16px;
+  }
+  .setting-row label{font-size:13px;color:var(--text-dim)}
+  .setting-row input{
+    padding:10px 14px;border:1px solid var(--border);border-radius:8px;
+    background:var(--surface2);color:var(--text);font-size:14px;outline:none;
+    transition:border-color .2s;
+  }
+  .setting-row input:focus{border-color:var(--accent)}
+  .save-btn{
+    padding:10px 24px;border:none;border-radius:8px;
+    background:var(--accent);color:#fff;font-size:14px;font-weight:600;
+    cursor:pointer;transition:background .2s,box-shadow .2s;
+  }
+  .save-btn:hover{background:#7c3ae0;box-shadow:0 0 16px -4px var(--accent-glow)}
+  .save-msg{font-size:13px;color:var(--green);opacity:0;transition:opacity .3s;padding-left:12px}
+
+  /* ── Chat Tab ── */
+  .full-chat-layout{display:flex;flex:1;min-height:0}
+  .full-chat-left{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border)}
+  .full-chat-right{width:300px;display:flex;flex-direction:column;background:var(--surface)}
+  .user-list{padding:12px 16px;border-bottom:1px solid var(--border)}
+  .user-list h4{font-size:13px;color:var(--text-dim);margin-bottom:8px}
+  .user-list-item{padding:4px 8px;font-size:13px;border-radius:4px;cursor:pointer}
+  .user-list-item:hover{background:var(--surface2)}
+
+  /* Animations */
+  @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+  .fade-in{animation:fadeIn .3s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+  /* Responsive */
+  @media(max-width:768px){
+    .twitch-sidebar{display:none}
+    .full-chat-right{display:none}
+    .twitch-main-header{flex-wrap:wrap;gap:8px}
+  }
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div id="topbar">
+  <div class="logo"><span>🦑</span> JormUI <span class="version">v1.0</span></div>
+  <div class="topbar-right">
+    <div id="stream-status"><span class="dot"></span><span id="status-text">Checking…</span></div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div id="tabs">
+  <div class="tab active" data-tab="twitch"><span class="tab-icon">📺</span> Stream</div>
+  <div class="tab" data-tab="dashboard"><span class="tab-icon">📊</span> Dashboard</div>
+  <div class="tab" data-tab="chat"><span class="tab-icon">💬</span> Chat <span class="badge" id="chat-badge" style="display:none">0</span></div>
+  <div class="tab" data-tab="settings"><span class="tab-icon">⚙️</span> Settings</div>
+</div>
+
+<!-- Panels -->
+<div id="panel-container">
+
+  <!-- ═══ STREAM Tab ═══ -->
+  <div class="panel active" id="panel-twitch">
+    <div class="twitch-layout">
+      <div class="twitch-main">
+        <div class="twitch-main-header">
+          <h2>
+            <span id="live-indicator" class="offline-badge">● Offline</span>
+            <span id="stream-title-text">Stream</span>
+          </h2>
+          <div class="viewer-count">
+            <span>👁</span>
+            <span><strong id="viewer-count-val">–</strong> viewers</span>
+          </div>
+        </div>
+        <div class="twitch-stream-wrap" id="stream-wrap">
+          <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);flex-direction:column;gap:12px" id="stream-placeholder">
+            <span style="font-size:48px">📺</span>
+            <span>Set your Twitch channel in Settings</span>
+            <span style="font-size:13px;color:var(--text-dim)">Your live stream will appear here</span>
+          </div>
+        </div>
+      </div>
+      <div class="twitch-sidebar">
+        <div class="chat-header">
+          <span class="chat-title">💬 Stream Chat</span>
+          <span id="chat-line-count" style="font-size:12px;color:var(--text-dim)">0 msgs</span>
+        </div>
+        <div class="chat-messages" id="twitch-chat"></div>
+        <div class="chat-input-wrap">
+          <input type="text" id="twitch-chat-input" placeholder="Read-only chat preview…" disabled title="Sending requires Twitch auth">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DASHBOARD Tab ═══ -->
+  <div class="panel" id="panel-dashboard">
+    <div class="dash-grid">
+      <div class="stat-card">
+        <div class="label">Stream Status</div>
+        <div class="value" id="dash-status" style="color:var(--text-dim)">—</div>
+        <div class="sub" id="dash-status-sub">Checking…</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Viewers</div>
+        <div class="value" id="dash-viewers" style="color:var(--text-dim)">—</div>
+        <div class="sub" id="dash-viewers-sub">Current viewer count</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Uptime</div>
+        <div class="value" id="dash-uptime" style="color:var(--text-dim)">—</div>
+        <div class="sub" id="dash-uptime-sub">Stream duration</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Chat Messages</div>
+        <div class="value" id="dash-chat-count">0</div>
+        <div class="sub">Messages captured this session</div>
+      </div>
+    </div>
+    <div class="recent-activity">
+      <h3>💡 Quick Stats</h3>
+      <div id="quick-stats">Configure your Twitch channel in Settings to see stats.</div>
+    </div>
+  </div>
+
+  <!-- ═══ FULL CHAT Tab ═══ -->
+  <div class="panel" id="panel-chat">
+    <div class="full-chat-layout">
+      <div class="full-chat-left">
+        <div class="chat-header">
+          <span class="chat-title">💬 Full Chat View</span>
+          <span id="full-chat-count" style="font-size:12px;color:var(--text-dim)">0 msgs</span>
+        </div>
+        <div class="chat-messages" id="full-chat-messages" style="flex:1"></div>
+        <div class="chat-input-wrap">
+          <input type="text" id="full-chat-input" placeholder="Read-only chat…" disabled>
+        </div>
+      </div>
+      <div class="full-chat-right">
+        <div class="user-list">
+          <h4>Active Chatters</h4>
+          <div id="user-list-items" style="font-size:13px;color:var(--text-dim)">Waiting for chat…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SETTINGS Tab ═══ -->
+  <div class="panel" id="panel-settings">
+    <div class="settings-wrap">
+      <h3>⚙️ Settings</h3>
+      <div class="setting-row">
+        <label for="setting-channel">Twitch Channel Name</label>
+        <input type="text" id="setting-channel" placeholder="e.g. your_twitch_name" spellcheck="false">
+      </div>
+      <div class="setting-row">
+        <label for="setting-client-id">Twitch Client ID <span style="color:var(--text-dim)">(optional — for higher rate limits)</span></label>
+        <input type="text" id="setting-client-id" placeholder="Your Twitch App Client ID" spellcheck="false">
+      </div>
+      <div class="setting-row">
+        <label for="setting-token">Twitch Access Token <span style="color:var(--text-dim)">(optional — for chat reading)</span></label>
+        <input type="text" id="setting-token" placeholder="oauth:xxxxxxxxxxxx" spellcheck="false">
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="save-btn" id="save-btn">Save & Connect</button>
+        <span class="save-msg" id="save-msg">✓ Saved</span>
+      </div>
+      <div style="margin-top:24px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;color:var(--text-dim);line-height:1.6">
+        <strong style="color:var(--text)">💡 Tips</strong><br>
+        • Client ID & Token are optional — the UI uses public endpoints for stream status and viewer count.<br>
+        • For chat reading, a Twitch token with <code>chat:read</code> scope is needed.<br>
+        • Get a token from <a href="https://twitchapps.com/tmi/" target="_blank" style="color:var(--accent)">twitchapps.com/tmi</a> or the <a href="https://dev.twitch.tv/console" target="_blank" style="color:var(--accent)">Twitch Developer Console</a>.<br>
+        • The embed stream works for any public channel — no auth needed.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ═══════════════ STATE ═══════════════ */
+  const state = {
+    channel: localStorage.getItem('jormui_channel') || '',
+    clientId: localStorage.getItem('jormui_clientId') || '',
+    token: localStorage.getItem('jormui_token') || '',
+    isLive: false,
+    viewerCount: 0,
+    streamTitle: '',
+    startedAt: null,
+    chatMessages: [],
+    unreadChat: 0,
+    activeTab: 'twitch',
+    pollTimer: null,
+    uptimeTimer: null,
+    ws: null,
+  };
+
+  /* ═══════════════ REFS ═══════════════ */
+  const $ = id => document.getElementById(id);
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+
+  /* ═══════════════ TAB SWITCHING ═══════════════ */
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      if (!target || target === state.activeTab) return;
+
+      // deactivate old
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+
+      // activate new
+      tab.classList.add('active');
+      const panel = document.getElementById('panel-' + target);
+      if (panel) panel.classList.add('active');
+
+      state.activeTab = target;
+      state.unreadChat = 0;
+      updateChatBadge();
+
+      // Refresh uptime display if dashboard
+      if (target === 'dashboard') updateDashboard();
+      if (target === 'chat') syncFullChat();
+    });
+  });
+
+  /* ═══════════════ CHAT BADGE ═══════════════ */
+  function updateChatBadge() {
+    const badge = $('chat-badge');
+    if (state.activeTab === 'chat') { badge.style.display = 'none'; return; }
+    if (state.unreadChat > 0) {
+      badge.style.display = '';
+      badge.textContent = state.unreadChat > 99 ? '99+' : state.unreadChat;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  /* ═══════════════ SETTINGS ═══════════════ */
+  $('setting-channel').value = state.channel;
+  $('setting-client-id').value = state.clientId;
+  $('setting-token').value = state.token;
+
+  $('save-btn').addEventListener('click', () => {
+    state.channel = $('setting-channel').value.trim().toLowerCase();
+    state.clientId = $('setting-client-id').value.trim();
+    state.token = $('setting-token').value.trim();
+
+    localStorage.setItem('jormui_channel', state.channel);
+    localStorage.setItem('jormui_clientId', state.clientId);
+    localStorage.setItem('jormui_token', state.token);
+
+    const msg = $('save-msg');
+    msg.style.opacity = '1';
+    setTimeout(() => msg.style.opacity = '0', 2000);
+
+    // Reset and re-init
+    if (state.pollTimer) clearInterval(state.pollTimer);
+    if (state.uptimeTimer) clearInterval(state.uptimeTimer);
+    if (state.ws) { state.ws.close(); state.ws = null; }
+    state.chatMessages = [];
+    state.unreadChat = 0;
+
+    if (state.channel) {
+      injectStreamEmbed();
+      startPolling();
+      connectChat();
+    } else {
+      resetStreamUI();
+    }
+  });
+
+  /* ═══════════════ STREAM EMBED ═══════════════ */
+  function injectStreamEmbed() {
+    if (!state.channel) return;
+    const wrap = $('stream-wrap');
+    wrap.innerHTML = `
+      <iframe
+        src="https://player.twitch.tv/?channel=${encodeURIComponent(state.channel)}&parent=${location.hostname}&autoplay=true&muted=false"
+        allowfullscreen
+        allow="autoplay; encrypted-media"
+        loading="lazy">
+      </iframe>
+      <iframe
+        src="https://www.twitch.tv/embed/${encodeURIComponent(state.channel)}/chat?parent=${location.hostname}&darkpopout"
+        style="left:0;right:0;bottom:0;height:0;border:none;"
+        id="twitch-chat-embed">
+      </iframe>`;
+    // Show chat embed only in sidebar
+    const chatEmbed = wrap.querySelector('#twitch-chat-embed');
+    if (chatEmbed) chatEmbed.style.display = 'none';
+  }
+
+  /* ═══════════════ POLLING (Stream Status + Viewers) ═══════════════ */
+  async function fetchStreamStatus() {
+    if (!state.channel) return;
+
+    try {
+      // Use Twitch GQL with inline query (no auth needed, works with public Client-Id)
+      const clientId = state.clientId || 'kimne78kx3ncx6brgo4mv6wki5h1ko';
+      const gqlQuery = 'query { user(login: "' + state.channel + '") { login displayName stream { title viewersCount game { name } createdAt } } }';
+      const resp = await fetch('https://gql.twitch.tv/gql', {
+        method: 'POST',
+        headers: {
+          'Client-Id': clientId,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query: gqlQuery })
+      });
+
+      if (!resp.ok) throw new Error('API error ' + resp.status);
+      const json = await resp.json();
+      const user = json?.data?.user;
+
+      if (user && user.stream) {
+        state.isLive = true;
+        state.viewerCount = user.stream.viewersCount || 0;
+        state.streamTitle = user.stream.title || 'Untitled Stream';
+        state.startedAt = user.stream.createdAt ? new Date(user.stream.createdAt) : null;
+        updateLiveUI(true);
+      } else {
+        state.isLive = false;
+        state.viewerCount = 0;
+        state.streamTitle = '';
+        state.startedAt = null;
+        updateLiveUI(false);
+      }
+    } catch (e) {
+      // Fallback: check if channel page returns live indicators
+      console.warn('Status fetch failed:', e);
+      updateLiveUI(state.isLive, true);
+    }
+  }
+
+  function updateLiveUI(live, isError) {
+    const indicator = $('live-indicator');
+    const statusEl = $('stream-status');
+    const statusText = $('status-text');
+    const titleText = $('stream-title-text');
+    const viewerEl = $('viewer-count-val');
+    const dashStatusText = $('quick-stats');
+
+    if (live) {
+      indicator.className = 'live-badge';
+      indicator.textContent = '● LIVE';
+      statusEl.classList.add('live');
+      statusText.textContent = 'Live now';
+      titleText.textContent = state.streamTitle || 'Stream';
+      viewerEl.textContent = state.viewerCount.toLocaleString();
+
+      if (dashStatusText) {
+        dashStatusText.innerHTML =
+          '<span style="color:var(--green)">🟢 Live</strong> — <strong>' + state.viewerCount.toLocaleString() +
+          '</strong> viewers — ' + escapeHtml(state.streamTitle);
+      }
+    } else {
+      indicator.className = 'offline-badge';
+      indicator.textContent = '● Offline';
+      statusEl.classList.remove('live');
+      statusText.textContent = isError ? 'Check error' : 'Not live';
+      titleText.textContent = 'Stream';
+      viewerEl.textContent = '–';
+
+      if (dashStatusText) {
+        dashStatusText.textContent = state.channel
+          ? state.channel + ' is currently offline.'
+          : 'Configure your Twitch channel in Settings.';
+      }
+    }
+
+    // Dashboard cards
+    const dashStatus = $('dash-status');
+    const dashStatusSub = $('dash-status-sub');
+    const dashViewers = $('dash-viewers');
+    const dashViewersSub = $('dash-viewers-sub');
+
+    if (dashStatus) {
+      dashStatus.textContent = live ? 'LIVE' : 'OFFLINE';
+      dashStatus.style.color = live ? 'var(--green)' : 'var(--text-dim)';
+    }
+    if (dashStatusSub) dashStatusSub.textContent = live
+      ? (state.startedAt ? 'Since ' + state.startedAt.toLocaleTimeString() : 'Stream active')
+      : (state.channel ? state.channel + ' is offline' : 'No channel set');
+    if (dashViewers) {
+      dashViewers.textContent = live ? state.viewerCount.toLocaleString() : '—';
+      dashViewers.style.color = live ? 'var(--text)' : 'var(--text-dim)';
+    }
+  }
+
+  function updateDashboard() {
+    $('dash-chat-count').textContent = state.chatMessages.length;
+    updateLiveUI(state.isLive);
+    updateUptime();
+  }
+
+  function updateUptime() {
+    const el = $('dash-uptime');
+    const sub = $('dash-uptime-sub');
+    if (!state.isLive || !state.startedAt) {
+      el.textContent = '—';
+      el.style.color = 'var(--text-dim)';
+      if (sub) sub.textContent = 'Stream duration';
+      return;
+    }
+    const diff = Math.floor((Date.now() - state.startedAt.getTime()) / 1000);
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
+    const label = h > 0
+      ? `${h}h ${m}m ${s}s`
+      : `${m}m ${s}s`;
+    el.textContent = label;
+    if (sub) sub.textContent = 'Started ' + state.startedAt.toLocaleTimeString();
+  }
+
+  function startPolling() {
+    fetchStreamStatus();
+    state.pollTimer = setInterval(fetchStreamStatus, 30000); // 30s
+    state.uptimeTimer = setInterval(updateUptime, 1000); // 1s
+  }
+
+  function resetStreamUI() {
+    $('stream-wrap').innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);flex-direction:column;gap:12px">
+        <span style="font-size:48px">📺</span>
+        <span>Set your Twitch channel in Settings</span>
+        <span style="font-size:13px;color:var(--text-dim)">Your live stream will appear here</span>
+      </div>`;
+    updateLiveUI(false);
+  }
+
+  /* ═══════════════ CHAT (WebSocket via tmi-compatible) ═══════════════ */
+  const chatContainer = $('twitch-chat');
+  const fullChatContainer = $('full-chat-messages');
+  let chatters = new Map();
+  let chatLines = 0;
+
+  function addChatMessage(user, text, color, isSystem, emotes) {
+    const msg = { user, text, color: color || '#fff', time: Date.now(), isSystem: !!isSystem };
+    state.chatMessages.push(msg);
+
+    // Trim to 500
+    if (state.chatMessages.length > 500) state.chatMessages.splice(0, state.chatMessages.length - 500);
+
+    // Render to both chat views
+    renderChatMsg(user, text, color, isSystem, emotes, chatContainer);
+    renderChatMsg(user, text, color, isSystem, emotes, fullChatContainer);
+
+    chatLines++;
+    $('chat-line-count').textContent = chatLines + ' msgs';
+    $('full-chat-count').textContent = chatLines + ' msgs';
+
+    if (state.activeTab !== 'chat' && !isSystem) {
+      state.unreadChat++;
+      updateChatBadge();
+    }
+  }
+
+  function renderChatMsg(user, text, color, isSystem, emotes, container) {
+    const div = document.createElement('div');
+    div.className = 'chat-msg' + (isSystem ? ' system' : '') + ' fade-in';
+
+    if (isSystem) {
+      div.textContent = text;
+    } else {
+      const userSpan = document.createElement('span');
+      userSpan.className = 'user';
+      userSpan.style.color = color;
+      userSpan.textContent = `${user}: `;
+      userSpan.addEventListener('click', () => {
+        window.open(`https://www.twitch.tv/${encodeURIComponent(user)}`, '_blank');
+      });
+
+      const textSpan = document.createElement('span');
+      textSpan.className = 'text';
+
+      // Process emotes if present
+      let html = escapeHtml(text);
+      if (emotes) {
+        // Twitch emote format: emoteId:start-end,start-end/emoteId:start-end
+        const emoteRe = /(\d+):([\d\-,]+)/g;
+        let match;
+        const replacements = [];
+        while ((match = emoteRe.exec(emotes)) !== null) {
+          const emoteId = match[1];
+          const positions = match[2].split(',');
+          positions.forEach(pos => {
+            const [start, end] = pos.split('-').map(Number);
+            replacements.push({
+              start, end,
+              img: `<img class="emote" src="https://static-cdn.jtvnw.net/emoticons/v2/${emoteId}/default/dark/1.0" alt="${text.substring(start, end + 1)}" title="${text.substring(start, end + 1)}">`
+            });
+          });
+        }
+        replacements.sort((a, b) => b.start - a.start);
+        for (const r of replacements) {
+          html = html.substring(0, r.start) + r.img + html.substring(r.end + 1);
+        }
+      }
+
+      textSpan.innerHTML = html.replace(/\n/g, ' ');
+      div.appendChild(userSpan);
+      div.appendChild(textSpan);
+    }
+
+    container.appendChild(div);
+    // Auto-scroll
+    if (container.scrollHeight - container.scrollTop - container.clientHeight < 120) {
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // Keep only last 200 per container
+    while (container.children.length > 200) container.removeChild(container.firstChild);
+  }
+
+  function syncFullChat() {
+    fullChatContainer.innerHTML = '';
+    state.chatMessages.forEach(m => {
+      renderChatMsg(m.user, m.text, m.color, m.isSystem, null, fullChatContainer);
+    });
+  }
+
+  function connectChat() {
+    if (!state.channel) return;
+
+    // Use IRC WebSocket (anonymous join doesn't work for reading chat on modern Twitch)
+    // Instead, use the Twitch GQL endpoint to poll recent messages, or use event-based approach
+    // Best approach without auth: embed Twitch chat and use postMessage, or use a polling endpoint
+
+    // We'll use the Chatty/TMI approach via WebSocket with anonymous credentials
+    // Anonymous credentials from Twitch (no auth needed for reading chat)
+    const nick = 'justinfan' + Math.floor(Math.random() * 999999);
+
+    if (state.ws) { state.ws.close(); state.ws = null; }
+
+    try {
+      const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+
+      ws.onopen = () => {
+        ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership');
+        ws.send(`PASS oauth:anything`);
+        ws.send(`NICK ${nick}`);
+        ws.send(`USER ${nick} 8 * :JormUI`);
+        addChatMessage('', 'Connected to chat…', null, true);
+
+        setTimeout(() => {
+          ws.send(`JOIN #${state.channel}`);
+        }, 500);
+      };
+
+      ws.onmessage = (event) => {
+        const lines = event.data.split('\r\n').filter(l => l.trim());
+        for (const line of lines) {
+          if (line.startsWith('PING')) {
+            ws.send('PONG :tmi.twitch.tv');
+            continue;
+          }
+
+          // Parse USERNOTICE, PRIVMSG, etc.
+          const msg = parseIRCMessage(line);
+          if (!msg) continue;
+
+          if (msg.command === 'USERNOTICE') {
+            const sysMsg = msg.tags?.['system-msg'] || '';
+            if (sysMsg) {
+              addChatMessage('', sysMsg.replace(/\\s/g, ' '), null, true);
+            }
+            continue;
+          }
+
+          if (msg.command === 'PRIVMSG') {
+            const user = msg.prefix?.split('!')[0] || 'unknown';
+            const color = msg.tags?.color || twitchNickColor(user);
+            const emotes = msg.tags?.emotes || null;
+            chatters.set(user, Date.now());
+            updateUserList();
+            addChatMessage(user, msg.params[1], color, false, emotes);
+          }
+
+          if (msg.command === 'NOTICE' || msg.command === 'CAP') {
+            // ignore CAP ACK notices
+          }
+        }
+      };
+
+      ws.onerror = () => {
+        addChatMessage('', '⚠️ Chat connection error', null, true);
+      };
+
+      ws.onclose = () => {
+        addChatMessage('', 'Chat disconnected — reconnecting in 10s…', null, true);
+        setTimeout(() => {
+          if (state.channel && state.activeTab) connectChat();
+        }, 10000);
+      };
+
+      state.ws = ws;
+    } catch (e) {
+      console.error('Chat WS error:', e);
+      addChatMessage('', '⚠️ Could not connect to chat', null, true);
+    }
+  }
+
+  function parseIRCMessage(line) {
+    const msg = { tags: {}, prefix: '', command: '', params: [] };
+
+    let idx = 0;
+    if (line.startsWith('@')) {
+      const spaceIdx = line.indexOf(' ');
+      if (spaceIdx === -1) return null;
+      const tagStr = line.substring(1, spaceIdx);
+      tagStr.split(';').forEach(pair => {
+        const [key, val] = pair.split('=');
+        msg.tags[key] = val ? val.replace(/\\s/g, ' ') : '';
+      });
+      idx = spaceIdx + 1;
+    }
+
+    if (line.startsWith(':', idx)) {
+      const spaceIdx = line.indexOf(' ', idx);
+      if (spaceIdx === -1) return null;
+      msg.prefix = line.substring(idx + 1, spaceIdx);
+      idx = spaceIdx + 1;
+    }
+
+    const rest = line.substring(idx).trim();
+    const colonIdx = rest.indexOf(' :');
+    if (colonIdx !== -1) {
+      msg.params = rest.substring(0, colonIdx).split(' ');
+      msg.params.push(rest.substring(colonIdx + 2));
+    } else {
+      msg.params = rest.split(' ');
+    }
+
+    msg.command = msg.params.shift();
+    return msg;
+  }
+
+  function twitchNickColor(nick) {
+    let hash = 0;
+    for (let i = 0; i < nick.length; i++) hash = nick.charCodeAt(i) + ((hash << 5) - hash);
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 70%, 65%)`;
+  }
+
+  function updateUserList() {
+    const el = $('user-list-items');
+    if (!el) return;
+    const sorted = [...chatters.entries()].sort((a, b) => b[1] - a[1]);
+    const recent = sorted.slice(0, 30);
+    el.innerHTML = recent.map(([name]) =>
+      `<div class="user-list-item" style="color:${twitchNickColor(name)}">${escapeHtml(name)}</div>`
+    ).join('');
+  }
+
+  /* ═══════════════ UTILS ═══════════════ */
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  /* ═══════════════ INIT ═══════════════ */
+  if (state.channel) {
+    injectStreamEmbed();
+    startPolling();
+    connectChat();
+  }
+
+})();
+</script>
+</body>
+</html>
