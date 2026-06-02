@@ -3,559 +3,1593 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NiceGuyAPI - One API for Every AI Model</title>
-  <meta name="description" content="Access 17+ AI models through a single API. Fast, reliable, affordable. Free tier available - no credit card required.">
+  <title>NiceGuyAPI — One API for Every AI Model</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta name="description" content="Access 23+ AI models through a single API. Autonomous AI Agent with web search, fetch, calculator. Stripe billing, key management. Try free.">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif; background: #0a0a0f; color: #e8e8ec; line-height: 1.6; }
-    .container { max-width: 960px; margin: 0 auto; padding: 60px 24px; }
-    .hero { text-align: center; padding: 80px 0 60px; }
-    .hero h1 { font-size: 52px; font-weight: 800; background: linear-gradient(135deg, #a78bfa, #818cf8, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px; }
-    .hero p { font-size: 20px; color: #9ca3af; max-width: 600px; margin: 0 auto 32px; }
-    .badge { display: inline-block; background: rgba(99,102,241,0.15); color: #818cf8; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 24px; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; background: #08080c; color: #d4d4de; line-height: 1.6; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 60px 24px; }
+
+    /* ── AURORA BOREALIS TOP GLOW ── */
+    body::before {
+      content: '';
+      position: fixed; top: 0; left: -50%; right: -50%; height: 3px;
+      background: linear-gradient(90deg, #ff0040, #ff4500, #ffaa00, #00ff88, #00bfff, #5b5bff, #a855f7, #ff00aa, #ff0040);
+      background-size: 200% 100%;
+      animation: auroraShift 6s linear infinite;
+      z-index: 9999; filter: blur(1px); pointer-events: none;
+    }
+    body::after {
+      content: '';
+      position: fixed; top: 0; left: 0; right: 0; height: 60px;
+      z-index: 9998; pointer-events: none; mix-blend-mode: screen;
+      animation: auroraPulse 8s ease-in-out infinite alternate;
+      background: linear-gradient(180deg, rgba(99,102,241,0.12) 0%, rgba(168,85,247,0.06) 40%, transparent 100%);
+    }
+    @keyframes auroraShift {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 200% 0%; }
+    }
+    @keyframes auroraPulse {
+      0%   { opacity: 0.6; background: linear-gradient(180deg, rgba(99,102,241,0.15) 0%, rgba(52,211,153,0.06) 50%, transparent 100%); }
+      25%  { opacity: 0.8; background: linear-gradient(180deg, rgba(52,211,153,0.12) 0%, rgba(59,130,246,0.08) 50%, transparent 100%); }
+      50%  { opacity: 0.7; background: linear-gradient(180deg, rgba(59,130,246,0.14) 0%, rgba(168,85,247,0.08) 50%, transparent 100%); }
+      75%  { opacity: 0.9; background-gradient(180deg, rgba(168,85,247,0.12) 0%, rgba(236,72,153,0.06) 50%, transparent 100%); }
+      100% { opacity: 0.6; background: linear-gradient(180deg, rgba(99,102,241,0.15) 0%, rgba(52,211,153,0.06) 50%, transparent 100%); }
+    }
+
+    /* ── NAV ── */
+    .nav { position: sticky; top: 0; z-index: 100; background: rgba(8,8,12,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 0 24px; }
+    .nav-inner { max-width: 1000px; margin: 0 auto; display: flex; align-items: center; height: 56px; gap: 12px; }
+    .nav-spacer { flex: 1; }
+    .nav-logo { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 15px; letter-spacing: 1px; background: linear-gradient(135deg, #00f0ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; }
+    .nav-tabs { display: none !important; }
+    .nav-tab { display: none !important; }
+    .nav-cta { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+
+    /* ── HERO ── */
+    .hero { text-align: center; padding: 60px 0 40px; }
+    .badge { display: inline-block; background: rgba(99,102,241,0.15); color: #818cf8; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
     .badge-green { background: rgba(52,211,153,0.15); color: #34d399; }
-    .btn { display: inline-block; padding: 14px 32px; border-radius: 12px; font-size: 16px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s; }
-    .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.3); }
-    .btn-secondary { background: rgba(255,255,255,0.08); color: #e8e8ec; margin-left: 12px; }
-    .btn-secondary:hover { background: rgba(255,255,255,0.12); }
-    .btn-success { background: linear-gradient(135deg, #059669, #10b981); color: white; }
-    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(16,185,129,0.3); }
-    .btn-small { padding: 10px 20px; font-size: 14px; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
-    .section { padding: 60px 0; border-top: 1px solid rgba(255,255,255,0.06); }
-    .section h2 { font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 12px; }
-    .section-sub { text-align: center; color: #9ca3af; margin-bottom: 40px; }
-    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 32px 0; }
-    .feature-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 28px; transition: all 0.2s; }
-    .feature-card:hover { border-color: rgba(99,102,241,0.3); }
-    .feature-card .icon { font-size: 28px; margin-bottom: 12px; }
-    .feature-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-    .feature-card p { font-size: 13px; color: #9ca3af; line-height: 1.5; }
-    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .pricing-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 32px; text-align: center; transition: all 0.2s; }
-    .pricing-card:hover { border-color: rgba(99,102,241,0.3); }
-    .pricing-card.popular { border-color: #6366f1; position: relative; }
-    .pricing-card.popular::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #6366f1; color: white; padding: 4px 16px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-    .pricing-card h3 { font-size: 18px; margin-bottom: 8px; }
-    .pricing-card .price { font-size: 42px; font-weight: 800; margin: 16px 0 4px; }
-    .pricing-card .price span { font-size: 16px; color: #9ca3af; font-weight: 400; }
-    .pricing-card .price .original { font-size: 24px; color: #6b7280; text-decoration: line-through; margin-right: 8px; font-weight: 500; }
-    .pricing-card .discount-badge { display: inline-block; background: rgba(239,68,68,0.2); color: #f87171; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; margin-bottom: 8px; }
-    .pricing-card .tagline { font-size: 13px; color: #818cf8; font-weight: 600; margin-bottom: 16px; }
-    .pricing-card ul { list-style: none; margin: 20px 0; text-align: left; }
-    .pricing-card ul li { padding: 6px 0; color: #9ca3af; font-size: 13px; }
-    .pricing-card ul li::before { content: '✓ '; color: #34d399; }
-    .pricing-card ul li.locked { color: #4b5563; }
-    .pricing-card ul li.locked::before { content: '✗ '; color: #4b5563; }
-    .pricing-card ul li.highlight::before { content: '★ '; color: #fbbf24; }
-    .code-block { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; overflow-x: auto; margin: 24px 0; white-space: pre-wrap; word-break: break-all; }
-    .code-block .comment { color: #6b7280; }
-    .code-block .string { color: #34d399; }
-    .code-block .keyword { color: #a78bfa; }
-    .code-block .url { color: #60a5fa; }
-    .alert { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.2); border-radius: 10px; padding: 16px 20px; margin: 16px 0; font-size: 14px; color: #34d399; }
-    .alert.info { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.2); color: #818cf8; }
-    .alert.error { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2); color: #f87171; }
-    .alert.warning { background: rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.2); color: #fbbf24; }
-    .signup-form { max-width: 480px; margin: 0 auto; }
-    .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #9ca3af; }
-    .form-group input, .form-group select { width: 100%; padding: 14px 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #e8e8ec; font-size: 15px; outline: none; transition: border-color 0.2s; }
-    .form-group input:focus, .form-group select:focus { border-color: #6366f1; }
-    #apikey-display { display: none; }
-    #apikey-display code { background: rgba(99,102,241,0.2); padding: 4px 10px; border-radius: 6px; font-family: monospace; font-size: 13px; word-break: break-all; }
-    .key-box { background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); border-radius: 10px; padding: 16px; margin: 16px 0; word-break: break-all; font-family: monospace; font-size: 13px; color: #a5b4fc; text-align: center; }
-    .step-indicator { display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; }
-    .step-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.15); }
-    .step-dot.active { background: #6366f1; }
-    .step-dot.done { background: #34d399; }
-    .comparison-table { width: 100%; border-collapse: collapse; margin: 24px 0; }
-    .comparison-table th, .comparison-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 14px; }
-    .comparison-table th { color: #9ca3af; font-weight: 600; font-size: 12px; text-transform: uppercase; }
-    .comparison-table td { color: #e8e8ec; }
-    .comparison-table tr:hover { background: rgba(255,255,255,0.02); }
-    .check { color: #34d399; }
-    .cross { color: #4b5563; }
-    .models-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 24px 0; }
-    .model-pill { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 6px 14px; font-size: 12px; color: #9ca3af; }
-    .model-pill.free { border-color: rgba(107,114,128,0.3); }
-    .model-pill.pro { border-color: rgba(99,102,241,0.3); color: #818cf8; }
+    .badge-amber { background: rgba(251,191,36,0.15); color: #fbbf24; }
+    .hero h1 {
+      font-family: 'Orbitron', 'SF Pro Display', sans-serif;
+      font-size: 48px; font-weight: 900;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #a78bfa 0%, #00f0ff 25%, #a78bfa 50%, #ff00aa 75%, #a78bfa 100%);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 14px; line-height: 1.2;
+      animation: titleGradient 6s ease-in-out infinite;
+      position: relative;
+      filter: drop-shadow(0 0 2px rgba(167,139,250,0.3));
+    }
+    .hero h1::after {
+      content: '';
+      position: absolute; bottom: -4px; left: 0;
+      width: 80px; height: 3px;
+      background: linear-gradient(90deg, #00f0ff, #a78bfa, transparent);
+      border-radius: 2px;
+      animation: titleLineGlow 3s ease-in-out infinite alternate;
+    }
+    @keyframes titleGradient {
+      0%   { background-position: 0% 50%; filter: drop-shadow(0 0 2px rgba(167,139,250,0.3)); }
+      25%  { background-position: 50% 0%; filter: drop-shadow(0 0 6px rgba(0,240,255,0.4)); }
+      50%  { background-position: 100% 50%; filter: drop-shadow(0 0 4px rgba(255,0,170,0.3)); }
+      75%  { background-position: 50% 100%; filter: drop-shadow(0 0 6px rgba(0,240,255,0.4)); }
+      100% { background-position: 0% 50%; filter: drop-shadow(0 0 2px rgba(167,139,250,0.3)); }
+    }
+    @keyframes titleLineGlow {
+      0%   { opacity: 0.6; width: 80px; box-shadow: 0 0 8px rgba(0,240,255,0.4); }
+      100% { opacity: 1; width: 120px; box-shadow: 0 0 16px rgba(0,240,255,0.6); }
+    }
+    .hero p { font-size: 18px; color: #9ca3af; max-width: 560px; margin: 0 auto 20px; }
+    .hero-badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 20px; }
+    .model-pill { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 4px 12px; font-size: 11px; color: #9ca3af; }
+    .model-pill.free { border-color: rgba(99,102,241,0.3); color: #818cf8; }
     .model-pill.premium { border-color: rgba(251,191,36,0.3); color: #fbbf24; }
-    .pending-box { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: 12px; padding: 20px; margin: 16px 0; text-align: center; }
-    .pending-box h4 { color: #fbbf24; margin-bottom: 8px; }
-    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.2); border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    footer { text-align: center; padding: 40px 0; color: #4b5563; font-size: 13px; }
+
+    /* ── INLINE SIGNUP ── */
+    .signup-inline { background: rgba(255,255,255,0.03); border: 1px solid rgba(99,102,241,0.25); border-radius: 16px; padding: 32px; margin-bottom: 50px; }
+    .signup-inline h2 { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 6px; color: #e8e8ec; }
+    .signup-inline .sub { text-align: center; color: #6b7280; font-size: 14px; margin-bottom: 24px; }
+    .signup-row { display: flex; gap: 10px; align-items: stretch; max-width: 600px; margin: 0 auto; }
+    .signup-row input[type="email"] { flex: 1; padding: 14px 18px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: #e8e8ec; font-size: 15px; outline: none; }
+    .signup-row input[type="email"]:focus { border-color: #6366f1; }
+    .signup-row select { padding: 14px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: #e8e8ec; font-size: 14px; outline: none; cursor: pointer; }
+    .signup-row select:focus { border-color: #6366f1; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s; white-space: nowrap; }
+    .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.3); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .signup-msg { text-align: center; margin-top: 12px; font-size: 13px; min-height: 20px; }
+    .signup-msg .success { color: #34d399; }
+    .signup-msg .error { color: #f87171; }
+    .key-result { background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25); border-radius: 10px; padding: 16px; margin-top: 16px; display: none; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .key-result label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #818cf8; font-weight: 600; display: block; margin-bottom: 6px; }
+    .key-result .key-val { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; color: #a5b4fc; word-break: break-all; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .key-result .copy-btn { background: rgba(99,102,241,0.3); border: none; color: #818cf8; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+    .key-result .copy-btn:hover { background: rgba(99,102,241,0.5); }
+    .key-result .next-steps { margin-top: 12px; font-size: 13px; color: #9ca3af; }
+    .key-result .next-steps a { color: #818cf8; }
+    .key-result .saved-note { color: #fbbf24; font-size: 12px; margin-top: 8px; font-weight: 600; }
+
+    /* ── TABS ── */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── TRY CHAT ── */
+    .chat-section { max-width: 720px; margin: 0 auto 50px; }
+    .chat-gate { text-align: center; padding: 40px 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(99,102,241,0.2); border-radius: 16px; }
+    .chat-gate p { color: #9ca3af; margin-bottom: 16px; font-size: 14px; }
+    .chat-gate .btn { margin-top: 8px; }
+    .chat-gate .email-nudge { display: flex; gap: 10px; max-width: 400px; margin: 0 auto; }
+    .chat-gate input[type="email"] { flex: 1; padding: 12px 16px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: #e8e8ec; font-size: 14px; outline: none; }
+    .chat-gate input[type="email"]:focus { border-color: #6366f1; }
+    .chat-container { display: none; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; }
+    .chat-header { padding: 14px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; }
+    .chat-header .chat-title { font-weight: 700; font-size: 14px; color: #e8e8ec; }
+    .chat-header .chat-meta { font-size: 12px; color: #6b7280; }
+    .chat-header .chat-reset { font-size: 12px; color: #818cf8; background: none; border: none; cursor: pointer; font-weight: 600; }
+    .chat-header .chat-reset:hover { text-decoration: underline; }
+    .chat-messages { height: 420px; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; scroll-behavior: smooth; }
+    .chat-messages::-webkit-scrollbar { width: 6px; }
+    .chat-messages::-webkit-scrollbar-track { background: transparent; }
+    .chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    .chat-msg { display: flex; gap: 10px; max-width: 85%; }
+    .chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .chat-msg .avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .chat-msg.user .avatar { background: rgba(99,102,241,0.2); }
+    .chat-msg.assistant .avatar { background: rgba(52,211,153,0.15); }
+    .chat-msg .bubble { padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; }
+    .chat-msg.user .bubble { background: rgba(99,102,241,0.2); color: #c7d2fe; border-bottom-right-radius: 4px; }
+    .chat-msg.assistant .bubble { background: rgba(255,255,255,0.05); color: #d4d4de; border-bottom-left-radius: 4px; }
+    .chat-msg .bubble.typing { color: #6b7280; font-style: italic; }
+    .chat-input-row { padding: 14px 20px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 10px; }
+    .chat-input-row input[type="text"] { flex: 1; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #e8e8ec; font-size: 14px; outline: none; }
+    .chat-input-row input[type="text"]:focus { border-color: #6366f1; }
+    .chat-input-row .btn { padding: 12px 20px; font-size: 14px; }
+    .chat-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; margin-left: 8px; }
+    .chat-badge.free { background: rgba(99,102,241,0.2); color: #818cf8; }
+    .chat-badge.pro { background: rgba(52,211,153,0.2); color: #34d399; }
+    .chat-badge.premium { background: rgba(251,191,36,0.2); color: #fbbf24; }
+    .chat-badge.platinum { background: rgba(168,85,247,0.2); color: #c084fc; }
+
+    /* ── SECTIONS ── */
+    .section { padding: 50px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+    .section h2 { font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 8px; color: #e8e8ec; }
+    .section-sub { text-align: center; color: #6b7280; margin-bottom: 32px; font-size: 15px; }
+
+    /* ── USE CASES ── */
+    .usecases-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+    .usecase-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 24px; text-align: center; }
+    .usecase-card .icon { font-size: 32px; margin-bottom: 10px; }
+    .usecase-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: #e8e8ec; }
+    .usecase-card p { font-size: 13px; color: #6b7280; line-height: 1.5; }
+    .usecase-card .tier-tag { font-size: 11px; margin-top: 8px; padding: 3px 10px; border-radius: 6px; display: inline-block; }
+    .usecase-card .tier-tag.free { background: rgba(99,102,241,0.15); color: #818cf8; }
+    .usecase-card .tier-tag.premium { background: rgba(251,191,36,0.15); color: #fbbf24; }
+
+    /* ── FEATURES ── */
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .feature-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 24px; }
+    .feature-card .icon { font-size: 24px; margin-bottom: 10px; }
+    .feature-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: #e8e8ec; }
+    .feature-card p { font-size: 13px; color: #6b7280; line-height: 1.5; }
+
+    /* ── PRICING ── */
+    .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .pricing-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 28px; text-align: center; }
+    .pricing-card.popular { border-color: #6366f1; position: relative; }
+    .pricing-card.popular::before { content: 'MOST POPULAR'; position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: #6366f1; color: white; padding: 3px 14px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+    .pricing-card.premium-highlight { border-color: rgba(251,191,36,0.4); }
+    .pricing-card h3 { font-size: 16px; margin-bottom: 6px; color: #e8e8ec; }
+    .pricing-card .price { font-size: 36px; font-weight: 800; margin: 12px 0 2px; color: #e8e8ec; }
+    .pricing-card .price span { font-size: 14px; color: #6b7280; font-weight: 400; }
+    .pricing-card .price .original { font-size: 20px; color: #4b5563; text-decoration: line-through; margin-right: 6px; font-weight: 500; }
+    .pricing-card .discount-badge { display: inline-block; background: rgba(239,68,68,0.15); color: #f87171; padding: 2px 10px; border-radius: 10px; font-size: 10px; font-weight: 700; margin-bottom: 6px; }
+    .pricing-card .tagline { font-size: 12px; color: #818cf8; font-weight: 600; margin-bottom: 12px; }
+    .pricing-card ul { list-style: none; margin: 16px 0; text-align: left; }
+    .pricing-card ul li { padding: 4px 0; color: #9ca3af; font-size: 13px; }
+    .pricing-card ul li::before { content: '✓ '; color: #34d399; }
+    .pricing-card .btn { width: 100%; margin-top: 8px; }
+
+    /* ── HOW IT WORKS / GUIDE ── */
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .step { text-align: center; padding: 20px; }
+    .step-num { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+    .step h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: #e8e8ec; }
+    .step p { font-size: 13px; color: #6b7280; }
+
+    /* ── GUIDE CARDS ── */
+    .guide-grid { display: grid; gap: 16px; }
+    .guide-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 24px 28px; }
+    .guide-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #e8e8ec; }
+    .guide-card h3 .num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: rgba(99,102,241,0.2); color: #818cf8; font-size: 12px; font-weight: 700; margin-right: 8px; }
+    .guide-card p { font-size: 14px; color: #9ca3af; margin-bottom: 12px; line-height: 1.6; }
+    .guide-card .code-block { margin: 0; font-size: 12px; }
+    .guide-card .tip { background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.15); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #6ee7b7; margin-top: 10px; }
+    .guide-card .warn { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.15); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #fbbf24; margin-top: 10px; }
+
+    /* ── CODE EXAMPLE ── */
+    .code-block { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; overflow-x: auto; white-space: pre; word-break: break-all; color: #d4d4de; }
+    .code-block .c { color: #6b7280; }
+    .code-block .s { color: #34d399; }
+    .code-block .k { color: #a78bfa; }
+    .code-block .u { color: #60a5fa; }
+
+    /* ── FAQ ── */
+    .faq-list { max-width: 700px; margin: 0 auto; }
+    .faq-item { border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+    .faq-q { padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 14px; color: #e8e8ec; user-select: none; }
+    .faq-q:hover { background: rgba(255,255,255,0.02); }
+    .faq-q .arrow { color: #6b7280; font-size: 12px; transition: transform 0.2s; }
+    .faq-q .arrow.open { transform: rotate(180deg); }
+    .faq-a { padding: 0 20px 16px; font-size: 13px; color: #9ca3af; line-height: 1.6; display: none; }
+    .faq-a.open { display: block; }
+
+    /* ── SUCCESS PAGE ── */
+    .success-box { text-align: center; padding: 40px 20px; display: none; }
+    .success-box .checkmark { font-size: 48px; margin-bottom: 16px; }
+    .success-box h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #34d399; }
+    .success-box p { color: #9ca3af; font-size: 14px; max-width: 480px; margin: 0 auto; }
+
+    /* ── FOOTER ── */
+    footer { text-align: center; padding: 40px 0 20px; color: #4b5563; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 40px; }
+    footer a { color: #818cf8; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── EXIT POPUP ── */
+    .exit-popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+    .exit-popup-overlay.show { display: flex; }
+    .exit-popup { background: #12121a; border: 1px solid rgba(99,102,241,0.3); border-radius: 20px; padding: 40px; max-width: 480px; text-align: center; position: relative; animation: popIn 0.3s ease; }
+    @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .exit-popup .close-btn { position: absolute; top: 16px; right: 20px; background: none; border: none; color: #6b7280; font-size: 20px; cursor: pointer; }
+    .exit-popup .close-btn:hover { color: #e8e8ec; }
+    .exit-popup h2 { font-size: 22px; font-weight: 700; color: #e8e8ec; margin-bottom: 8px; }
+    .exit-popup p { color: #9ca3af; font-size: 14px; margin-bottom: 20px; }
+    .exit-popup input[type="email"] { width: 100%; padding: 14px 18px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: #e8e8ec; font-size: 15px; outline: none; margin-bottom: 12px; }
+    .exit-popup input[type="email"]:focus { border-color: #6366f1; }
+    .exit-popup .btn { width: 100%; }
+
+    /* ── COMPARISON TABLE ── */
+    .comparison-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    .comparison-table th, .comparison-table td { padding: 12px 16px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 13px; }
+    .comparison-table th { color: #9ca3af; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .comparison-table td:first-child { text-align: left; color: #d4d4de; }
+    .comparison-table tr:last-child td { border-bottom: none; }
+    .comparison-table .check { color: #34d399; font-weight: 700; }
+    .comparison-table .cross { color: #4b5563; }
+    .comparison-table .highlight-col { background: rgba(99,102,241,0.08); border-left: 2px solid #6366f1; border-right: 2px solid #6366f1; }
+    .comparison-table tr:first-child .highlight-col { border-top: 2px solid #6366f1; border-radius: 8px 8px 0 0; }
+    .comparison-table tr:last-child .highlight-col { border-bottom: 2px solid #6366f1; border-radius: 0 0 8px 8px; }
+
+    /* ── SOCIAL PROOF ── */
+    .social-proof { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 16px 0; flex-wrap: wrap; }
+    .social-proof .avatars { display: flex; }
+    .social-proof .avatars .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: 2px solid #08080c; margin-left: -8px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: white; font-weight: 700; }
+    .social-proof .avatars .avatar:first-child { margin-left: 0; }
+    .social-proof .proof-text { font-size: 13px; color: #9ca3af; }
+    .social-proof .proof-text strong { color: #e8e8ec; }
+
+    /* ── URGENCY BAR ── */
+    .urgency-bar { background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(251,191,36,0.1)); border: 1px solid rgba(239,68,68,0.2); border-radius: 12px; padding: 14px 20px; text-align: center; margin: 20px 0; }
+    .urgency-bar p { font-size: 14px; color: #fbbf24; font-weight: 600; }
+    .urgency-bar p span { color: #f87171; }
+
+    /* ── MOBILE ── */
     @media (max-width: 768px) {
-      .hero h1 { font-size: 36px; }
-      .pricing-grid { grid-template-columns: 1fr; }
-      .btn-secondary { margin-left: 0; margin-top: 12px; }
+      .container { padding: 40px 16px; }
+      .hero { padding: 40px 0 30px; }
+      .hero h1 { font-size: 30px; }
+      .hero p { font-size: 15px; }
+      .nav-tab span { display: none; }
+      .signup-inline { padding: 20px; }
+      .signup-row { flex-direction: column; }
+      .chat-gate .email-nudge { flex-direction: column; }
+      .usecases-grid { grid-template-columns: 1fr; gap: 10px; }
+      .features-grid { grid-template-columns: 1fr; gap: 10px; }
+      .pricing-grid { grid-template-columns: 1fr; gap: 12px; }
+      .steps { grid-template-columns: 1fr; gap: 8px; }
+      .code-block { padding: 14px; font-size: 11px; }
+      .section { padding: 36px 0; }
+      .section h2 { font-size: 22px; }
+      .hero-badges { gap: 4px; }
+      .model-pill { font-size: 10px; padding: 3px 8px; }
+      .chat-messages { height: 350px; }
+    }
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 26px; }
+      .pricing-card .price { font-size: 28px; }
+      .btn { padding: 12px 20px; font-size: 14px; }
     }
   </style>
+
+<style>
+/* MOBILE MENU + PREMIUM TRANSITIONS */
+@media (max-width: 768px) {
+  .hamburger-btn {
+    display: flex !important; flex-direction: column; justify-content: center;
+    align-items: center; gap: 5px; width: 44px; height: 44px;
+    background: rgba(0,240,255,0.06); border: 1px solid rgba(0,240,255,0.2);
+    border-radius: 10px; cursor: pointer; padding: 10px; z-index: 1001;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 0 8px rgba(0,240,255,0.15);
+  }
+  .hamburger-btn:hover { background: rgba(0,240,255,0.12); border-color: rgba(0,240,255,0.4); box-shadow: 0 0 14px rgba(0,240,255,0.3); }
+  .hamburger-btn .bar {
+    display: block; width: 22px; height: 2px; background: #00f0ff;
+    border-radius: 2px;
+    transition: all 0.35s cubic-bezier(0.68,-0.55,0.265,1.55);
+    box-shadow: 0 0 4px rgba(0,240,255,0.5);
+  }
+  .hamburger-btn.active .bar:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger-btn.active .bar:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger-btn.active .bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+  .hamburger-btn.active { background: rgba(0,240,255,0.15); border-color: #00f0ff; box-shadow: 0 0 16px rgba(0,240,255,0.4); }
+  .mobile-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+    z-index: 999; opacity: 0; transition: opacity 0.35s ease;
+  }
+  .mobile-overlay.open { display: block; opacity: 1; }
+  .mobile-nav-panel {
+    position: fixed; top: 0; left: -320px; width: 280px; height: 100vh;
+    background: linear-gradient(180deg, #0a0a14 0%, #0d1117 50%, #0a0a14 100%);
+    z-index: 1000; padding: 70px 0 30px;
+    border-right: 2px solid #00f0ff;
+    box-shadow: 0 0 8px rgba(0,240,255,0.4), 0 0 20px rgba(0,240,255,0.15), 5px 0 40px rgba(0,0,0,0.6);
+    transition: left 0.4s cubic-bezier(0.22,1,0.36,1);
+    overflow-y: auto;
+  }
+  .mobile-nav-panel.open { left: 0; }
+  .mobile-nav-header {
+    padding: 0 24px 16px;
+    font-size: 11px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: rgba(0,240,255,0.5);
+    text-shadow: 0 0 6px rgba(0,240,255,0.3);
+    border-bottom: 1px solid rgba(0,240,255,0.15); margin-bottom: 12px;
+  }
+  .mobile-tab-btn, .mobile-nav-panel a.mobile-tab-btn {
+    display: flex; align-items: center; gap: 14px;
+    width: calc(100% - 32px); margin: 4px 16px; padding: 14px 18px;
+    background: rgba(0,240,255,0.03); border: 1px solid rgba(0,240,255,0.12); border-radius: 12px;
+    font-family: 'Segoe UI', system-ui, sans-serif; font-size: 16px; font-weight: 600;
+    color: #00f0ff;
+    text-shadow: 0 0 4px rgba(0,240,255,0.4), 0 0 10px rgba(0,240,255,0.15);
+    cursor: pointer; text-align: left;
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+    opacity: 0; transform: translateX(-30px);
+  }
+  .mobile-nav-panel.open .mobile-tab-btn { opacity: 1; transform: translateX(0); }
+  .mobile-tab-btn:nth-child(2) { transition-delay: 0.05s; }
+  .mobile-tab-btn:nth-child(3) { transition-delay: 0.10s; }
+  .mobile-tab-btn:nth-child(4) { transition-delay: 0.15s; }
+  .mobile-tab-btn:nth-child(5) { transition-delay: 0.20s; }
+  .mobile-tab-btn:nth-child(6) { transition-delay: 0.25s; }
+  .mobile-tab-btn:hover, .mobile-tab-btn.active {
+    background: rgba(0,240,255,0.1); border-color: rgba(0,240,255,0.4);
+    color: #fff;
+    text-shadow: 0 0 6px rgba(0,240,255,0.7), 0 0 15px rgba(0,240,255,0.3);
+    box-shadow: 0 0 12px rgba(0,240,255,0.15), inset 0 0 12px rgba(0,240,255,0.05);
+    transform: translateX(6px);
+  }
+  .mobile-tab-icon { font-size: 20px; width: 28px; text-align: center; }
+  .mobile-close-btn {
+    position: absolute; top: 16px; right: 16px; width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,240,255,0.06); border: 1px solid rgba(0,240,255,0.25);
+    border-radius: 50%; font-size: 20px; color: #00f0ff;
+    cursor: pointer; transition: all 0.25s ease;
+    text-shadow: 0 0 6px rgba(0,240,255,0.6);
+  }
+  .mobile-close-btn:hover {
+    background: rgba(0,240,255,0.15); border-color: #00f0ff;
+    color: #fff; transform: rotate(90deg);
+    box-shadow: 0 0 12px rgba(0,240,255,0.5);
+  }
+  .nav-tabs-container { display: none !important; }
+  /* Premium tab transitions */
+  .tab-content {
+    transition: opacity 0.45s cubic-bezier(0.22,1,0.36,1),
+                transform 0.45s cubic-bezier(0.22,1,0.36,1),
+                filter 0.35s ease;
+  }
+  .tab-content:not(.active) {
+    opacity: 0; pointer-events: none;
+    transform: perspective(800px) rotateX(8deg) translateY(20px) scale(0.97);
+    filter: blur(4px);
+  }
+  .tab-content.active {
+    opacity: 1;
+    transform: perspective(800px) rotateX(0) translateY(0) scale(1);
+    filter: blur(0);
+  }
+  .tab-content.active > * {
+    animation: ngFadeIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  .tab-content.active > *:nth-child(1) { animation-delay: 0.05s; }
+  .tab-content.active > *:nth-child(2) { animation-delay: 0.10s; }
+  .tab-content.active > *:nth-child(3) { animation-delay: 0.15s; }
+  .tab-content.active > *:nth-child(4) { animation-delay: 0.20s; }
+  .tab-content.active > *:nth-child(5) { animation-delay: 0.25s; }
+  .tab-content.active > *:nth-child(6) { animation-delay: 0.30s; }
+}
+@media (min-width: 769px) {
+  .hamburger-btn, .mobile-overlay, .mobile-nav-panel { display: none !important; }
+  .tab-content {
+    transition: opacity 0.45s cubic-bezier(0.22,1,0.36,1),
+                transform 0.45s cubic-bezier(0.22,1,0.36,1),
+                filter 0.35s ease;
+    position: relative;
+  }
+  .tab-content:not(.active) {
+    opacity: 0; pointer-events: none;
+    transform: perspective(800px) rotateX(8deg) translateY(20px) scale(0.97);
+    filter: blur(4px);
+  }
+  .tab-content.active {
+    opacity: 1;
+    transform: perspective(800px) rotateX(0) translateY(0) scale(1);
+    filter: blur(0);
+  }
+  .tab-content.active > * {
+    animation: ngFadeIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  .tab-content.active > *:nth-child(1) { animation-delay: 0.05s; }
+  .tab-content.active > *:nth-child(2) { animation-delay: 0.10s; }
+  .tab-content.active > *:nth-child(3) { animation-delay: 0.15s; }
+  .tab-content.active > *:nth-child(4) { animation-delay: 0.20s; }
+  .tab-content.active > *:nth-child(5) { animation-delay: 0.25s; }
+  .tab-content.active > *:nth-child(6) { animation-delay: 0.30s; }
+}
+@keyframes ngFadeIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <!-- HERO -->
+
+<nav class="nav">
+  <div class="nav-inner">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu">
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+    <a href="#" class="nav-logo" onclick="showTab('home'); return false;">⚡ NiceGuyAPI</a>
+    <div class="nav-spacer"></div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tab-home" onclick="showTab('home')">Home</button>
+      <button class="nav-tab" id="tab-chat" onclick="showTab('chat')"><span>💬 </span>Try Chat</button>
+      <button class="nav-tab" id="tab-guide" onclick="showTab('guide')"><span>📖 </span>How-To</button>
+      <button class="nav-tab" id="tab-dash" onclick="showTab('dash')"><span> </span>Dashboard</button>
+      <button class="nav-tab" id="tab-faq" onclick="showTab('faq')"><span>❓ </span>FAQ</button>
+      <button class="nav-tab" id="tab-blog" onclick="showTab('blog')"><span>📝 </span>Blog</button>
+      <a class="nav-tab" href="/niceguyapi/niceguyapi-socials.html" style="text-decoration:none;"><span>🌐 </span>Social Posts</a>
+    </div>
+    <a href="#signup" class="nav-cta" onclick="showTab('home')">Get API Key</a>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-overlay" id="mobileOverlay"></div>
+<div class="mobile-nav-panel" id="mobileNavPanel">
+  <button class="mobile-close-btn" id="mobileCloseBtn" aria-label="Close menu">&#10005;</button>
+  <div class="mobile-nav-header">Navigation</div>
+  <button class="mobile-tab-btn" data-tab="home" onclick="ngMobileSwitch('home')"><span class="mobile-tab-icon">&#127968;</span> Home</button>
+  <button class="mobile-tab-btn" data-tab="chat" onclick="ngMobileSwitch('chat')"><span class="mobile-tab-icon">&#128172;</span> Try Chat</button>
+  <button class="mobile-tab-btn" data-tab="guide" onclick="ngMobileSwitch('guide')"><span class="mobile-tab-icon">&#128214;</span> How-To</button>
+  <button class="mobile-tab-btn" data-tab="dash" onclick="ngMobileSwitch('dash')"><span class="mobile-tab-icon">&#128202;</span> Dashboard</button>
+  <button class="mobile-tab-btn" data-tab="faq" onclick="ngMobileSwitch('faq')"><span class="mobile-tab-icon">&#10067;</span> FAQ</button>
+  <button class="mobile-tab-btn" data-tab="blog" onclick="ngMobileSwitch('blog')"><span class="mobile-tab-icon">&#27112;</span> Blog</button>
+  <a class="mobile-tab-btn" href="/niceguyapi/niceguyapi-socials.html" style="text-decoration:none;color:rgba(255,255,255,0.7);"><span class="mobile-tab-icon">&#127760;</span> Social Posts</a>
+</div>
+
+<div class="container">
+
+  <!-- HOME TAB -->
+  <div class="tab-content active" id="content-home">
+
     <div class="hero">
-      <div class="badge badge-green">● Live &amp; Running</div>
-      <h1>NiceGuyAPI - One API for Every AI Model</h1>
-      <p>Access DeepSeek, Llama, Qwen, GPT, Claude, Gemini, and more through a single OpenAI-compatible endpoint. Free tier available.</p>
-      <div style="margin-top:16px;"><span class="discount-badge" style="font-size:13px;padding:6px 18px;">🔥 Launch Sale — Up to 50% Off All Plans — Limited Time!</span></div>
-      <a href="#signup" class="btn btn-primary">Get Your Free API Key</a>
-      <a href="#pricing" class="btn btn-secondary">View Pricing</a>
-      <div class="models-list">
-        <span class="model-pill free">DeepSeek V4 Flash</span>
-        <span class="model-pill free">Llama 3.3 70B</span>
-        <span class="model-pill free">Qwen3 Coder</span>
-        <span class="model-pill free">GPT-OSS 120B</span>
-        <span class="model-pill free">Gemma 4 31B</span>
-        <span class="model-pill pro">+ 12 more free models</span>
+      <div class="badge badge-green">● Live &amp; Ready — Now with AI Agent</div>
+      <h1>One API. Every AI Model.<br><span style="font-size:28px;background:linear-gradient(135deg,#34d399,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">+ Autonomous Agent</span></h1>
+      <p>Stop managing 5 different API keys. Access DeepSeek, Claude, GPT-4o, Gemini and 23+ more through a single endpoint. Agent mode searches the web, reads pages, and solves multi-step tasks.</p>
+      <div class="urgency-bar">
+        <p>🔥 <span>Launch Sale:</span> Up to 50% off all paid tiers — limited time only</p>
+      </div>
+      <div class="hero-badges">
+        <span class="model-pill free">DeepSeek V3</span>
+        <span class="model-pill free">Llama 3.3</span>
+        <span class="model-pill free">Qwen3</span>
+        <span class="model-pill free">GPT-OSS</span>
+        <span class="model-pill free">Gemma</span>
+        <span class="model-pill free">+ 18 more</span>
         <span class="model-pill premium">Claude Sonnet</span>
         <span class="model-pill premium">GPT-4o</span>
         <span class="model-pill premium">Gemini 2.0</span>
       </div>
     </div>
 
+    <div class="social-proof">
+      <div class="avatars">
+        <div class="avatar">J</div>
+        <div class="avatar">M</div>
+        <div class="avatar">S</div>
+        <div class="avatar">A</div>
+        <div class="avatar">K</div>
+      </div>
+      <div class="proof-text"><strong>Join developers</strong> already using NiceGuyAPI in their projects</div>
+    </div>
+
+    <div class="signup-inline" id="signup">
+      <h2>Get Your Free API Key — 30 Seconds</h2>
+      <p class="sub">No credit card required. Instant access to 23+ AI models.</p>
+      <div class="signup-row">
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+        <select id="plan">
+          <option value="free">Free — 12 req/mo — $0</option>
+          <option value="pro">Pro — 40 req/mo + Agent — $6/mo</option>
+          <option value="premium">Premium — 250 req/mo + Agent — $27/mo</option>
+          <option value="platinum">Platinum — 99,999 req/mo + 750K context — $55/mo</option>
+        </select>
+        <button class="btn btn-primary" id="signup-btn" onclick="handleSignup()">Get Key</button>
+      </div>
+      <div class="signup-msg" id="signup-msg"></div>
+      <div class="key-result" id="key-result">
+        <label>Your API Key</label>
+        <div class="key-val">
+          <span id="api-key"></span>
+          <button class="copy-btn" onclick="copyKey()">Copy</button>
+        </div>
+        <p class="next-steps">This key is saved to your browser. Check email for a backup link.</p>
+        <p class="saved-note">Saved! Your key works immediately. Enjoy your free <span id="free-tier-req">12</span> requests this month.</p>
+      </div>
+    </div>
+
+    <!-- TRY CHAT CTA -->
+    <div class="chat-section" style="margin-top:-20px;margin-bottom:50px;text-align:center;">
+      <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="showTab('chat')" style="font-size:16px;padding:16px 36px;">💬 Try the Free Chat →</button>
+        <button class="btn btn-primary" onclick="showTab('guide')" style="background:rgba(255,255,255,0.06);color:#9ca3af;font-size:16px;padding:16px 36px;border:1px solid rgba(255,255,255,0.12);">📖 Setup Guide</button>
+      </div>
+      <p style="width:100%;margin-top:10px;font-size:13px;color:#6b7280;">No API key needed to try the chat. No credit card ever.</p>
+    </div>
+
+    <!-- USE CASES -->
+    <div class="section">
+      <h2>Who Is This For?</h2>
+      <p class="sub">Whether you are a developer, creator, or just curious — there is something here for you.</p>
+      <div class="usecases-grid">
+        <div class="usecase-card">
+          <div class="icon">🤖</div>
+          <h3>AI Agent</h3>
+          <p>Autonomous agent that searches the web, reads webpages, and solves multi-step tasks. Give it a goal — it figures out the steps. Like having a research assistant that never sleeps.</p>
+          <span class="tier-tag free">✓ Pro &amp; Premium</span>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🧠</div>
+          <h3>Chat Assistant</h3>
+          <p>Ask questions, get explanations, brainstorm ideas, or just have a conversation. Like talking to a genius friend who never sleeps.</p>
+          <span class="tier-tag free">✓ Free tier</span>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">✍️</div>
+          <h3>Content Creator</h3>
+          <p>Write blog posts, social media captions, emails, product descriptions, and more. Pick the AI that matches your voice best.</p>
+          <span class="tier-tag free">✓ Free tier</span>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">💻</div>
+          <h3>Coding Assistant</h3>
+          <p>Get help with code, debug errors, build apps, or learn programming. Premium tier unlocks Claude and GPT-4o — the best coding AIs.</p>
+          <span class="tier-tag premium">★ Premium tier</span>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🎨</div>
+          <h3>Image Generation</h3>
+          <p>Create custom images, graphics, logos, or artwork. Just describe what you want and the AI generates it.</p>
+          <span class="tier-tag free">✓ Pro &amp; Premium</span>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🎵</div>
+          <h3>Song Generation</h3>
+          <p>Generate music, jingles, beats, or full songs. Perfect for content creators who need original audio.</p>
+          <span class="tier-tag free">✓ Pro &amp; Premium</span>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🏗️</div>
+          <h3>Build Apps &amp; Games</h3>
+          <p>Create custom apps, games, and websites with AI assistance. Premium tier includes hosting so you can share them with the world.</p>
+          <span class="tier-tag premium">★ Premium only</span>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🔌</div>
+          <h3>OpenClaw Integration</h3>
+          <p>Use NiceGuyAPI as the AI backend for OpenClaw — a free, open-source AI assistant you control. Full setup guide included.</p>
+          <span class="tier-tag free">✓ All tiers</span>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">🔬</div>
+          <h3>Research &amp; Learning</h3>
+          <p>Explore any topic, get summaries of complex subjects, or study for exams. Access to multiple models means different perspectives.</p>
+          <span class="tier-tag free">✓ Free tier</span>
+        </div>
+        <div class="usecase-card">
+          <div class="icon">💼</div>
+          <h3>Business Automation</h3>
+          <p>Process data, generate reports, draft proposals, analyze feedback — automate repetitive knowledge work with a single API.</p>
+          <span class="tier-tag premium">★ Premium tier</span>
+        </div>
+      </div>
+    </div>
+
     <!-- FEATURES -->
-    <div class="section" id="features">
-      <h2>What You Get</h2>
-      <p class="section-sub">Everything you need to build with AI. No fake features, no bait-and-switch.</p>
+    <div class="section">
+      <h2>Why NiceGuyAPI?</h2>
+      <p class="sub">One key. One endpoint. Every AI model you will ever need.</p>
       <div class="features-grid">
         <div class="feature-card">
-          <div class="icon">💬</div>
-          <h3>AI Chat</h3>
-          <p>17+ models including DeepSeek, Llama, Qwen, GPT, Gemma. OpenAI-compatible interface.</p>
+          <div class="icon">🤖</div>
+          <h3>Built-in AI Agent</h3>
+          <p>Agent mode with web search, web fetch, and calculator tools. The AI autonomously plans and executes multi-step tasks. Pro &amp; Premium.</p>
         </div>
         <div class="feature-card">
           <div class="icon">🔑</div>
-          <h3>Simple Auth</h3>
-          <p>One API key. X-API-Key header. That's it. Works with any HTTP client.</p>
+          <h3>One Key, All Models</h3>
+          <p>No need to sign up for 5 different services. One API key gives you access to 23+ models from DeepSeek, Claude, GPT, Gemini and more.</p>
         </div>
         <div class="feature-card">
-          <div class="icon">📊</div>
-          <h3>Usage Tracking</h3>
-          <p>Real-time usage endpoint. Know exactly how many requests you have left.</p>
+          <div class="icon">🔌</div>
+          <h3>OpenAI Compatible</h3>
+          <p>Drop-in replacement for OpenAI's API. If your code already uses OpenAI, switch to NiceGuyAPI by changing the base URL and key. Done.</p>
         </div>
         <div class="feature-card">
-          <div class="icon">🔄</div>
-          <h3>Key Rotation</h3>
-          <p>Compromised key? Rotate it instantly. Your old key stops working immediately.</p>
+          <div class="icon">🆓</div>
+          <h3>Genuinely Free Tier</h3>
+          <p>12 free requests per month — no credit card. Try everything, no risk. Enough to chat and see what the API can do.</p>
         </div>
         <div class="feature-card">
-          <div class="icon">💳</div>
-          <h3>Flexible Billing</h3>
-          <p>PayPal payments. Pay-as-you-go refills if you hit your limit before the month ends.</p>
+          <div class="icon">💰</div>
+          <h3>Pricing That Makes Sense</h3>
+          <p>Pro at $6/mo for 40 requests. Premium at $27/mo for 250. Platinum at $55/mo for unmatched power with 750K context.</p>
         </div>
         <div class="feature-card">
-          <div class="icon">🛡️</div>
-          <h3>Rate Limiting</h3>
-          <p>Tier-based limits that scale with your plan. 5/min free, 20/min Pro, 60/min Premium.</p>
+          <div class="icon">⚡</div>
+          <h3>Fast Responses</h3>
+          <p>Powered by OpenRouter's global infrastructure. Low latency, high availability. Premium tier gets priority routing.</p>
         </div>
+        <div class="feature-card">
+          <div class="icon">🔒</div>
+          <h3>Secure by Default</h3>
+          <p>API keys are bcrypt-hashed. HTTPS everywhere. Rate limiting protects your account. No data stored beyond usage counts.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARISON -->
+    <div class="section">
+      <h2>Why Not Just Use OpenAI Directly?</h2>
+      <p class="sub">See how NiceGuyAPI compares to signing up for each provider individually.</p>
+      <div style="overflow-x:auto;">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>OpenAI&nbsp;Direct</th>
+            <th>Anthropic&nbsp;Direct</th>
+            <th class="highlight-col">⚡ NiceGuyAPI</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>API Keys to Manage</td>
+            <td>1</td><td>1</td>
+            <td class="highlight-col check">1 (all models)</td>
+          </tr>
+          <tr>
+            <td>Models Available</td>
+            <td>GPT only</td><td>Claude only</td>
+            <td class="highlight-col check">23+ models</td>
+          </tr>
+          <tr></tr>
+          <tr>
+            <td>Separate Billing</td>
+            <td><span class="check">$20+/mo</span></td><td><span class="check">$20+/mo</span></td>
+            <td class="highlight-col" style="color:#34d399;font-weight:600">From $0</td>
+          </tr>
+          <tr>
+            <td>Free Tier</td>
+            <td class="cross">✗ Limited</td><td class="cross">✗ None</td>
+            <td class="highlight-col check">12 req/mo, no CC</td>
+          </tr>
+          <tr>
+            <td>Agent Mode (web search)</td>
+            <td class="cross">✗ Extra cost</td><td class="cross">✗ Extra cost</td>
+            <td class="highlight-col check">Included Pro+</td>
+          </tr>
+          <tr>
+            <td>Context Window</td>
+            <td>128K</td><td>200K</td>
+            <td class="highlight-col check">Up to 750K</td>
+          </tr>
+          <tr>
+            <td>Switch Models in Code</td>
+            <td class="cross">Different API</td><td class="cross">Different API</td>
+            <td class="highlight-col check">Change one string</td>
+          </tr>
+        </tbody>
+      </table>
       </div>
     </div>
 
     <!-- PRICING -->
     <div class="section" id="pricing">
-      <h2>Simple, Transparent Pricing</h2>
-      <p class="section-sub">Start free. Upgrade when you need more. No hidden fees, no credit card required for free tier.</p>
+      <h2>Simple, Honest Pricing</h2>
+      <p class="sub">Start free. Upgrade only when you need more. Cancel anytime.</p>
       <div class="pricing-grid">
-        <!-- FREE -->
         <div class="pricing-card">
           <h3>Free</h3>
+          <div class="tagline">Try it out — no commitment</div>
           <div class="price">$0<span>/mo</span></div>
-          <div class="tagline">Try it out - no credit card</div>
           <ul>
-            <li>50 AI requests per month</li>
-            <li>5 AI models</li>
-            <li>Up to 4K tokens per request</li>
-            <li>5 requests per minute</li>
-            <li>Community support</li>
+            <li>12 requests per month</li>
+            <li>23+ free AI models</li>
+            <li>Rate limit: 5 req/min</li>
+            <li>Save chat history</li>
+            <li>Perfect for trying it out</li>
           </ul>
-          <a href="#signup" class="btn btn-secondary btn-small" style="width:100%">Get Started</a>
+          <div class="btn" style="width:100%;margin-top:8px;background:rgba(255,255,255,0.06);color:#9ca3af;border:1px solid rgba(255,255,255,0.12);">Current Plan</div>
         </div>
-        <!-- PRO -->
         <div class="pricing-card popular">
           <h3>Pro</h3>
+          <span class="discount-badge">50% OFF LAUNCH SALE</span>
+          <div class="tagline">For regular AI users</div>
           <div class="price"><span class="original">$12</span>$6<span>/mo</span></div>
-          <div class="discount-badge">🔥 50% OFF — LIMITED TIME</div>
-          <div class="tagline">For developers &amp; builders</div>
           <ul>
-            <li>5,000 AI requests per month</li>
-            <li>All 17+ free models</li>
-            <li>Up to 32K tokens per request</li>
-            <li>20 requests per minute</li>
-            <li>Pay-as-you-go refills available</li>
-            <li>Email support</li>
+            <li>40 requests per month</li>
+            <li>23+ free AI models</li>
+            <li>Rate limit: 20 req/min</li>
+            <li>Image generation</li>
+            <li>Song generation</li>
+            <li>🤖 Agent mode — web search &amp; fetch</li>
+            <li>Conversation memory (6 turns)</li>
+            <li><strong>145K context window</strong></li>
           </ul>
-          <a href="#signup" class="btn btn-primary btn-small" style="width:100%">Subscribe - $6/mo</a>
+          <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="document.getElementById('plan').value='pro';handleSignup()">Get Pro — $6/mo</button>
         </div>
-        <!-- PREMIUM -->
-        <div class="pricing-card">
+        <div class="pricing-card premium-highlight">
           <h3>Premium</h3>
+          <span class="discount-badge" style="background:rgba(251,191,36,0.15);color:#fbbf24;">45% OFF LAUNCH SALE</span>
+          <div class="tagline">⚡ 250 requests — for developers</div>
           <div class="price"><span class="original">$49</span>$27<span>/mo</span></div>
-          <div class="discount-badge">🔥 45% OFF — LIMITED TIME</div>
-          <div class="tagline">Full power unlocked</div>
           <ul>
-            <li>25,000 AI requests per month</li>
-            <li>All models including premium</li>
-            <li>Up to 128K tokens per request</li>
-            <li>60 requests per minute</li>
-            <li>Claude, GPT-4o, Gemini included</li>
-            <li>Cheapest refill rates</li>
-            <li>Priority support</li>
+            <li>🔥 250 requests per month</li>
+            <li>ALL models including Claude, GPT-4o, Gemini</li>
+            <li>Rate limit: 60 req/min</li>
+            <li>🤖 Full Agent — search, fetch, calculate</li>
+            <li>Extended agent memory</li>
+            <li>Image + song generation</li>
+            <li>App, game &amp; website creation</li>
+            <li>Hosting included</li>
+            <li><strong>315K context window</strong></li>
           </ul>
-          <a href="#signup" class="btn btn-secondary btn-small" style="width:100%">Subscribe - $27/mo</a>
+          <button class="btn btn-primary" style="width:100%;margin-top:8px;background:linear-gradient(135deg, #f59e0b, #d97706);" onclick="document.getElementById('plan').value='premium';handleSignup()">Get Premium — $27/mo</button>
         </div>
       </div>
-
-      <!-- COMPARISON TABLE -->
-      <h3 style="margin: 48px 0 16px; font-size: 18px; text-align: center;">Feature Comparison</h3>
-      <table class="comparison-table">
-        <thead>
-          <tr>
-            <th>Feature</th>
-            <th>Free</th>
-            <th>Pro <span style="color:#6b7280;text-decoration:line-through;font-weight:400">$12</span> <span style="color:#34d399">$6</span></th>
-            <th>Premium <span style="color:#6b7280;text-decoration:line-through;font-weight:400">$49</span> <span style="color:#34d399">$27</span></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Monthly Requests</td>
-            <td>50</td>
-            <td>5,000</td>
-            <td>25,000</td>
-          </tr>
-          <tr>
-            <td>AI Models</td>
-            <td>5 models</td>
-            <td>All 17+ free models</td>
-            <td>All models (incl. premium)</td>
-          </tr>
-          <tr>
-            <td>Max Tokens/Request</td>
-            <td>4K</td>
-            <td>32K</td>
-            <td>128K</td>
-          </tr>
-          <tr>
-            <td>Rate Limit</td>
-            <td>5/min</td>
-            <td>20/min</td>
-            <td>60/min</td>
-          </tr>
-          <tr>
-            <td>Premium Models (Claude, GPT-4o, Gemini)</td>
-            <td class="cross">✗</td>
-            <td class="cross">✗</td>
-            <td class="check">✓</td>
-          </tr>
-          <tr>
-            <td>Pay-as-you-go Refill</td>
-            <td class="check">$0.05/req</td>
-            <td class="check" style="color:#34d399;font-weight:600">$0.02/req <span style="font-size:11px;color:#6b7280">(was $0.04)</span></td>
-            <td class="check" style="color:#34d399;font-weight:600">$0.01/req <span style="font-size:11px;color:#6b7280">(was $0.02)</span></td>
-          </tr>
-          <tr>
-            <td>Key Rotation</td>
-            <td class="check">✓</td>
-            <td class="check">✓</td>
-            <td class="check">✓</td>
-          </tr>
-        </tbody>
-      </table>
+        <div class="pricing-card" style="border-color:rgba(168,85,247,0.5);position:relative;">
+          <h3>Platinum</h3>
+          <span class="discount-badge" style="background:rgba(168,85,247,0.2);color:#c084fc;">MASSIVE SCALE</span>
+          <div class="tagline">&#9734; Unlimited requests &mdash; 750K context</div>
+          <div class="price">$55<span>/mo</span></div>
+          <ul>
+            <li>&#9734; <strong>99,999 requests/mo</strong></li>
+            <li>All Premium features included</li>
+            <li>Rate limit: 120 req/min</li>
+            <li>&#129302; Full Agent with all tools</li>
+            <li>Massive agent memory</li>
+            <li>Custom agent creation (999)</li>
+            <li>Image + song + game + app generation</li>
+            <li>Priority routing</li>
+            <li><strong>750K context window</strong></li>
+          </ul>
+          <button class="btn btn-primary" style="width:100%;margin-top:8px;background:linear-gradient(135deg, #9333ea, #7c3aed);" onclick="document.getElementById('plan').value='platinum';handleSignup()">Get Platinum &mdash; $55/mo</button>
+        </div>
     </div>
 
-    <!-- SIGNUP -->
-    <div class="section" id="signup">
-      <h2>Get Your API Key</h2>
-      <p class="section-sub">Sign up in seconds. Start making API calls immediately.</p>
-
-      <div class="step-indicator" id="step-indicator">
-        <div class="step-dot active" id="step1-dot"></div>
-        <div class="step-dot" id="step2-dot"></div>
-        <div class="step-dot" id="step3-dot"></div>
-      </div>
-
-      <div class="signup-form">
-        <!-- STEP 1: Email + Plan -->
-        <div id="step1">
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="email" placeholder="you@example.com" required>
-          </div>
-          <div class="form-group">
-            <label>Plan</label>
-            <select id="plan" onchange="updatePlanInfo()">
-              <option value="free">Free - $0/mo - 50 requests/month</option>
-              <option value="pro">Pro - $6/mo (was $12) - 5,000 req/mo - 50% OFF</option>
-              <option value="premium">Premium - $27/mo (was $49) - 25,000 req/mo - 45% OFF</option>
-            </select>
-          </div>
-          <div id="plan-info"></div>
-          <div id="form-message"></div>
-          <button class="btn btn-primary" style="width:100%" id="signup-btn" onclick="handleSignup()">Continue →</button>
+    <!-- HOW IT WORKS -->
+    <div class="section">
+      <h2>How It Works</h2>
+      <p class="sub">Three steps from zero to chatting with AI.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Get Your Key</h3>
+          <p>Enter your email, pick a plan, and get an instant API key. No credit card for free tier.</p>
         </div>
-
-        <!-- STEP 2: Payment (for paid tiers) -->
-        <div id="step2" style="display:none;">
-          <div id="payment-section">
-            <div class="pending-box">
-              <h4>Complete Your Payment</h4>
-              <p style="color:#9ca3af; font-size:14px; margin:8px 0;">
-                Your API key has been created. Complete payment to activate <strong id="pay-tier-name">Pro</strong> tier.
-              </p>
-              <p style="font-size:24px; font-weight:700; margin:12px 0;" id="pay-amount">$6.00/mo</p>
-              <a id="paypal-link" href="#" class="btn btn-success" target="_blank" onclick="markPayPalClicked()">
-                💳 Pay with PayPal
-              </a>
-              <p style="color:#6b7280; font-size:12px; margin-top:12px;">
-                After payment, click the button below to activate your account.
-              </p>
-            </div>
-            <div class="form-group" style="margin-top:16px;">
-              <label>PayPal Order ID (from your receipt)</label>
-              <input type="text" id="paypal-order-id" placeholder="PAY-XXXXXXXXXXXX">
-              <small style="color:#6b7280; font-size:11px;">Find this in your PayPal receipt email or transaction details.</small>
-            </div>
-            <div id="payment-message"></div>
-            <button class="btn btn-success" style="width:100%" id="activate-btn" onclick="handleActivate()">
-              ✓ I've Paid - Activate My Account
-            </button>
-            <button class="btn btn-secondary" style="width:100%; margin-top:8px;" onclick="goBack()">← Go Back</button>
-          </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Make a Request</h3>
+          <p>Send one simple HTTP request. Pick any model — DeepSeek, Claude, GPT-4o, Gemini — they all work the same way.</p>
         </div>
-
-        <!-- STEP 3: Success -->
-        <div id="step3" style="display:none;">
-          <div id="success-section">
-            <div class="alert" style="text-align:center;">
-              <div style="font-size:32px; margin-bottom:8px;">🎉</div>
-              <strong style="font-size:18px;">You're All Set!</strong>
-              <p style="margin-top:8px;">Your API key is ready. Save it below - it won't be shown again.</p>
-            </div>
-            <div class="key-box" id="final-key"></div>
-            <div class="alert info" style="font-size:13px;">
-              <strong>Tier:</strong> <span id="final-tier"></span><br>
-              <strong>Monthly Requests:</strong> <span id="final-limit"></span><br>
-              <strong>Usage Endpoint:</strong> <code>GET /v1/usage</code>
-            </div>
-            <button class="btn btn-primary" style="width:100%" onclick="resetForm()">Create Another Key</button>
-          </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Get a Response</h3>
+          <p>Get back a standard OpenAI-format response. Use it in OpenClaw, your app, your website — anywhere.</p>
         </div>
       </div>
     </div>
 
-    <!-- QUICK START -->
-    <div class="section" id="docs">
-      <h2>Quick Start</h2>
-      <p class="section-sub">Make your first API call in under a minute.</p>
-      <h3 style="margin: 32px 0 12px; font-size: 18px;">cURL</h3>
-      <div class="code-block">
-<span class="comment"># Chat with any model - just swap the model name</span>
-curl -X POST <span class="url">https://ghostapi-1v1f.onrender.com/v1/chat/completions</span> \
-  -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
-  -H <span class="string">"Content-Type: application/json"</span> \
-  -d <span class="string">'{
-    "model": "openrouter/deepseek/deepseek-v4-flash:free",
+    <!-- CODE EXAMPLE -->
+    <div class="section">
+      <h2>See How Simple It Is</h2>
+      <p class="sub">One request. Any model. Here is a cURL example:</p>
+      <div class="code-block"><span class="c"># Ask anything to any AI model</span>
+curl https://niceguyapi-repo.vercel.app/v1/chat/completions <span class="k">\</span>
+  -H <span class="s">"Content-Type: application/json"</span> <span class="k">\</span>
+  -H <span class="s">"X-API-Key: nga_live_..."</span> <span class="k">\</span>
+  -d <span class="s">'{
+    "model": "deepseek/deepseek-v3-0324:free",
     "messages": [{"role": "user", "content": "Hello!"}]
-  }'</span></div>
-      <h3 style="margin: 32px 0 12px; font-size: 18px;">JavaScript</h3>
-      <div class="code-block">
-<span class="keyword">const</span> res = <span class="keyword">await</span> fetch(<span class="string">"https://ghostapi-1v1f.onrender.com/v1/chat/completions"</span>, {
-  method: <span class="string">"POST"</span>,
-  headers: {
-    <span class="string">"X-API-Key"</span>: <span class="string">"gsk_live_YOUR_KEY_HERE"</span>,
-    <span class="string">"Content-Type"</span>: <span class="string">"application/json"</span>,
-  },
-  body: JSON.stringify({
-    model: <span class="string">"openrouter/deepseek/deepseek-v4-flash:free"</span>,
-    messages: [{ role: <span class="string">"user"</span>, content: <span class="string">"Hello!"</span> }],
-  }),
-});
-<span class="keyword">const</span> data = <span class="keyword">await</span> res.json();
-console.log(data.choices[0].message.content);</div>
-      <h3 style="margin: 32px 0 12px; font-size: 18px;">Check Your Usage</h3>
-      <div class="code-block">
-curl -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
-  <span class="url">https://ghostapi-1v1f.onrender.com/v1/usage</span></div>
-      <h3 style="margin: 32px 0 12px; font-size: 18px;">List Available Models</h3>
-      <div class="code-block">
-curl -H <span class="string">"X-API-Key: gsk_live_YOUR_KEY_HERE"</span> \
-  <span class="url">https://ghostapi-1v1f.onrender.com/v1/models</span></div>
+  }'</span>
+
+<span class="c"># Works with Python too:</span>
+<span class="k">import</span> requests
+res = requests.post(
+    <span class="s">"https://niceguyapi-repo.vercel.app/v1/chat/completions"</span>,
+    headers={<span class="s">"X-API-Key"</span>: <span class="s">"nga_live_..."</span>},
+    json={<span class="s">"model"</span>: <span class="s">"anthropic/claude-sonnet-4-20250514"</span>,
+          <span class="s">"messages"</span>: [{<span class="s">"role"</span>: <span class="s">"user"</span>, <span class="s">"content"</span>: <span class="s">"Hello!"}]}
+)</div>
+      <p style="text-align:center;margin-top:16px;"><a href="#" onclick="showTab('guide');return false;" style="color:#818cf8;font-size:14px;">📖 Full setup guide with OpenClaw integration →</a></p>
     </div>
 
-    <footer>
-      <p>NiceGuyAPI v2.0 — Built by <a href="https://github.com/MrGhostGuy" style="color:#818cf8">MrGhostGuy</a></p>
-      <p style="margin-top:8px">PayPal: <a href="https://paypal.me/kencyrus3" style="color:#818cf8">paypal.me/kencyrus3</a></p>
-    </footer>
+    <!-- AGENT DEMO -->
+    <div class="section">
+      <h2>🤖 AI Agent — Do More Than Chat</h2>
+      <p class="sub">Pro &amp; Premium tiers include an autonomous agent that searches the web, reads pages, and solves multi-step tasks.</p>
+      <div class="features-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="feature-card">
+          <div class="icon">🔍</div>
+          <h3>Web Search</h3>
+          <p>Agent searches the web in real-time for current events, prices, facts, and news. No stale training data.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🌐</div>
+          <h3>Web Fetch</h3>
+          <p>Agent reads any webpage and extracts the key information. Paste a URL and get a summary instantly.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🧮</div>
+          <h3>Calculator</h3>
+          <p>Safely evaluates math expressions. No more "AI got the math wrong" — it uses a real calculator.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">🧠</div>
+          <h3>Multi-Step Reasoning</h3>
+          <p>Agent chains multiple tool calls together. Search → fetch → analyze → summarize, all in one request.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">💾</div>
+          <h3>Conversation Memory</h3>
+          <p>Agent remembers your last 6 exchanges. Ask follow-ups naturally without repeating context.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon">⚡</div>
+          <h3>One API Call</h3>
+          <p>All agent complexity is hidden behind one simple API request. Just add "agent": true to your chat call.</p>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:24px;">
+        <div class="code-block" style="text-align:left;max-width:700px;margin:0 auto;"><span class="c"># Agent mode — one parameter unlocks everything</span>
+curl https://niceguyapi-repo.vercel.app/v1/chat/completions \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -H <span class="s">"X-API-Key: nga_live_YOUR_KEY"</span> \
+  -d <span class="s">'{
+    "agent": true,
+    "model": "openai/gpt-oss-120b:free",
+    "messages": [{"role": "user", "content": "Find today\'s top AI news and summarize it"}]
+  }'</span></div>
+      </div>
+    </div>
+
+    <!-- TRY CHAT SECTION -->
+    <div class="section" style="text-align:center;">
+      <h2>Try It Right Now</h2>
+      <p class="sub">Chat with AI directly on this page. No signup needed.</p>
+      <button class="btn btn-primary" onclick="showTab('chat')" style="font-size:18px;padding:18px:40px;">💬 Open Free Chat →</button>
+    </div>
+
+  </div>
+  <!-- END HOME TAB -->
+
+  <!-- CHAT TAB -->
+  <div class="tab-content" id="content-chat">
+    <div class="chat-section" style="margin-top:20px;">
+      <div class="chat-gate" id="chat-gate">
+        <div class="badge badge-green" style="margin-bottom:12px;">● Live Demo</div>
+        <h2 style="font-size:22px;font-weight:700;margin-bottom:8px;color:#e8e8ec;">Try the AI Chat</h2>
+        <p>Enter your email to get a temporary free key and start chatting. Your messages are linked to your account.</p>
+        <div class="email-nudge" style="margin-top:16px;">
+          <input type="email" id="chat-email" placeholder="you@example.com" autocomplete="email">
+          <button class="btn btn-primary" id="chat-start-btn" onclick="startChat()">Start Chatting →</button>
+        </div>
+        <div id="chat-gate-msg" style="margin-top:10px;font-size:13px;color:#6b7280;"></div>
+      </div>
+      <div class="chat-container" id="chat-container">
+        <div class="chat-header">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="chat-title">AI Chat</span>
+            <span class="chat-badge free" id="chat-tier-badge">Free</span>
+            <span class="chat-meta" id="chat-usage">0/14</span>
+            <label style="display:flex;align-items:center;gap:4px;margin-left:8px;font-size:12px;cursor:pointer;color:#9ca3af;">
+              <input type="checkbox" id="agent-toggle" onchange="toggleAgent()" style="accent-color:#6366f1;">
+              <span>🤖 Agent</span>
+            </label>
+          </div>
+          <button class="chat-reset" onclick="resetChat()">Reset</button>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-row">
+          <input type="text" id="chat-input" placeholder="Ask anything..." autocomplete="off">
+          <button class="btn btn-primary" id="chat-send-btn" onclick="sendChat()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END CHAT TAB -->
+
+  <!-- GUIDE TAB -->
+  <div class="tab-content" id="content-guide">
+    <div style="margin-top:20px;">
+      <h2 style="font-size:24px;font-weight:700;margin-bottom:6px;color:#e8e8ec;">Getting Started Guide</h2>
+      <p style="color:#6b7280;font-size:14px;margin-bottom:24px;">Everything you need to start using NiceGuyAPI, even if you have never used an API before.</p>
+      <div class="guide-grid">
+        <div class="guide-card">
+          <h3><span class="num">1</span>Get Your API Key (30 seconds)</h3>
+          <p>Go to the <a href="#" onclick="showTab('home');return false;" style="color:#818cf8;">Home tab</a> and enter your email. Select "Free" and click "Get Key." Your key will appear on screen and be saved to your browser.</p>
+          <div class="tip">💡 Your key starts with <strong>nga_live_</strong> or <strong>nga_test_</strong>. Copy it and keep it safe — it is your password.</div>
+        </div>
+        <div class="guide-card">
+          <h3><span class="num">2</span>Try It in Your Browser (1 minute — no code!)</h3>
+          <p>You can test your API key right now without writing any code. Just paste this URL into your browser (replace YOUR_KEY with your key):</p>
+          <div class="code-block" style="font-size:11px;">https://niceguyapi-repo.vercel.app/v1/models?key=YOUR_KEY</div>
+          <p>This will show you all the AI models available on your plan. If you see a list of models — your key works!</p>
+          <div class="tip">💡 No code editor? No problem. You can use <strong>curl</strong> from any terminal, or use a free tool like <strong>ReqBin</strong> (reqbin.com) to test APIs from your browser.</div>
+        </div>
+        <div class="guide-card">
+          <h3><span class="num">3</span>Use It with cURL (Terminal)</h3>
+          <p>Open your computer's terminal (Command Prompt on Windows, Terminal on Mac/Linux) and paste this:</p>
+          <div class="code-block">curl https://niceguyapi-repo.vercel.app/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: nga_live_YOUR_KEY" \
+  -d '{"model":"deepseek/deepseek-v3-0324:free","messages":[{"role":"user","content":"Say hello!"}]}'</div>
+          <p>You should get a JSON response with "Hello!" from the AI. If you do — everything is working perfectly.</p>
+        </div>
+        <div class="guide-card">
+          <h3><span class="num">4</span>Use It with Python</h3>
+          <p>Install Python from <a href="https://python.org" style="color:#818cf8;" target="_blank">python.org</a> if you do not have it. Then run:</p>
+          <div class="code-block">pip install requests</div>
+          <p>Then create a file called <strong>chat.py</strong> with this content:</p>
+          <div class="code-block">import requests
+
+API_KEY = "nga_live_YOUR_KEY"
+BASE_URL = "https://niceguyapi-repo.vercel.app"
+
+while True:
+    msg = input("You: ")
+    if msg.lower() == "quit":
+        break
+    res = requests.post(f"{BASE_URL}/v1/chat/completions",
+        headers={"X-API-Key": API_KEY},
+        json={"model": "deepseek/deepseek-v3-0324:free",
+              "messages": [{"role": "user", "content": msg}]})
+    data = res.json()
+    print("AI:", data["choices"][0]["message"]["content"])</div>
+          <p>Run it with: <strong>python chat.py</strong></p>
+        </div>
+        <div class="guide-card">
+          <h3><span class="num">5</span>Use It with OpenClaw (Advanced)</h3>
+          <p>OpenClaw is a free, open-source AI assistant platform you self-host. NiceGuyAPI works as the AI model provider.</p>
+          <p><strong>Step 1:</strong> Install OpenClaw from <a href="https://docs.openclaw.ai" style="color:#818cf8;" target="_blank">docs.openclaw.ai</a></p>
+          <div class="code-block"># Install OpenClaw (requires Node.js)
+npm install -g openclaw
+
+# Set your NiceGuyAPI key as the model provider
+openclaw config set model.baseUrl https://niceguyapi-repo.vercel.app/v1
+openclaw config set model.apiKey nga_live_YOUR_KEY
+openclaw config set model.name deepseek/deepseek-v3-0324:free
+
+# Start OpenClaw
+openclaw start</div>
+          <p><strong>Step 2:</strong> OpenClaw will now use NiceGuyAPI for all AI requests. You can change the model in the config to any model available on your tier.</p>
+          <div class="tip">💡 Pro and Premium users can set the model to <strong>anthropic/claude-sonnet-4-20250514</strong> or <strong>openai/gpt-4o</strong> for the best experience.</div>
+          <div class="warn">⚠️ Keep your API key secret. Never share it or post it publicly. If someone steals it, they use your request quota.</div>
+        </div>
+        <div class="guide-card">
+          <h3><span class="num">6</span>Manage Your Usage</h3>
+          <p>Check how many requests you have left:</p>
+          <div class="code-block">curl https://niceguyapi-repo.vercel.app/v1/usage \
+  -H "X-API-Key: nga_live_YOUR_KEY"</div>
+          <p>This returns your current usage, monthly limit, tier info, and available models.</p>
+        </div>
+        <div class="guide-card">
+          <h3><span class="num">7</span>Use Agent Mode (Pro &amp; Premium)</h3>
+          <p>Agent mode turns the AI into an autonomous assistant that can search the web, read webpages, and do calculations. Perfect for research, current events, and multi-step tasks.</p>
+          <div class="code-block"><span class="c"># Enable agent mode with one parameter</span>
+curl https://niceguyapi-repo.vercel.app/v1/chat/completions \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -H <span class="s">"X-API-Key: nga_live_YOUR_KEY"</span> \
+  -d <span class="s">'{
+    "model": "openai/gpt-oss-120b:free",
+    "agent": true,
+    "messages": [{"role": "user", "content": "What happened in AI news today? Summarize the top 3 stories."}]
+  }'</span>
+
+<span class="c"># The agent will:</span>
+<span class="c"># 1. Search the web for "AI news today"</span>
+<span class="c"># 2. Fetch the top result pages</span>
+<span class="c"># 3. Synthesize a summary</span></div>
+          <p>You can also use the <strong>POST /v1/agent</strong> endpoint directly for explicit agent calls.</p>
+          <div class="tip">💡 Agent mode works best with GPT-OSS 120B or higher models. Each agent request counts as 1 API call but may use up to 5 internal LLM round-trips.</div>
+        </div>
+        <div class="guide-card">
+          <h3><span class="num">8</span>Pick the Right Model</h3>
+          <p>Different models are better at different tasks:</p>
+          <div class="code-block">Free Tier Models (no credit card — 23+ models):
+  • deepseek/deepseek-v3-0324:free — Best all-around
+  • meta-llama/llama-3.3-70b-instruct:free — Great for reasoning
+  • qwen/qwen3-coder:free — Best for coding
+
+Premium Models (requires Premium plan — top-tier AI):
+  • anthropic/claude-sonnet-4-20250514 — Best overall AI
+  • openai/gpt-4o — Great for creative tasks
+  • google/gemini-2.0-flash — Fast and capable</div>
+          <div class="tip">💡 Start with <strong>deepseek/deepseek-v3-0324:free</strong>. It is fast, smart, and free. Switch models if you need something specific.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END GUIDE TAB -->
+
+  <!-- FAQ TAB -->
+  <div class="tab-content" id="content-faq">
+    <div style="margin-top:20px;">
+      <h2 style="font-size:24px;font-weight:700;margin-bottom:6px;color:#e8e8ec;">Frequently Asked Questions</h2>
+      <p style="color:#6b7280;font-size:14px;margin-bottom:24px;">Everything you need to know before getting started.</p>
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)"><span>What is NiceGuyAPI?</span><span class="arrow">▼</span></div>
+          <div class="faq-a">NiceGuyAPI is an AI model gateway. It gives you one API key that works with 23+ AI models — including DeepSeek, Claude, GPT-4o, Gemini, and more. Pro and Premium tiers also include an autonomous AI Agent that can search the web, read webpages, and perform multi-step tasks.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)"><span>Do I need to know how to code?</span><span class="arrow">▼</span></div>
+          <div class="faq-a">You need basic computer skills to use the API directly (we provide step-by-step instructions). But you can also use the <strong>Try Chat</strong> tab on this page to talk to AI without any coding at all. Just enter your email and start chatting.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)"><span>What does "12 requests per month" mean?</span><span class="arrow">▼</span></div>
+          <div class="faq-a">Each time you send a message to the AI, that is one request. The free plan gives you 12 messages per month. This is enough to try everything and see if NiceGuyAPI is right for you. For more, Pro gives 40 requests and Premium gives 250 per month.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)"><span>What is the AI Agent? How does it work?</span><span class="arrow">▼</span></div>
+          <div class="faq-a">The AI Agent is an autonomous mode (Pro and Premium) that goes beyond simple chat. When you enable Agent mode, the AI can search the web for real-time information, fetch and read webpages, and perform calculations — all autonomously. You give it a goal, it figures out the steps. For example: "Find the latest news about AI and summarize it" — the agent searches, reads, and synthesizes automatically. It uses up to 5 LLM round-trips per request to plan and execute.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)"><span>Why does Premium have 250 requests?</span><span class="arrow">▼</span></div>
+          <div class="faq-a">Premium is built for developers and power users who integrate the API into apps, tools, and workflows. At 250 requests per month for $27, you get outstanding value — plus access to Claude, GPT-4o, Gemini, full Agent capabilities, and creation tools (images, songs, apps, games, and hosting).</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)"><span>What is OpenClaw and how do I use it?</span><span class="arrow">▼</span></div>
+          <div class="faq-a">OpenClaw is a free, open-source AI assistant platform. You install it on your computer and it connects to AI models — like NiceGuyAPI. Think of it as your personal AI assistant that you fully control. Our <a href="#" onclick="showTab('guide');return false;" style="color:#818cf8;">setup guide</a> walks you through the entire process step by step.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)"><span>Can I change plans later?</span><span class="arrow">▼</span></div>
+          <div class="faq-a">Yes! Upgrade or downgrade anytime. When you upgrade, your new request limit kicks in immediately. Payments are handled securely through Stripe.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)"><span>What happens when I run out of requests?</span><span class="arrow">▼</span></div>
+          <div class="faq-a">You will get a friendly error message when you hit your limit. You can either wait until your next billing cycle (resets monthly), or upgrade to a higher tier. Need no limits at all? Platinum gives you 99,999 requests.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)"><span>What payment methods do you accept?</span><span class="arrow">▼</span></div>
+          <div class="faq-a">We accept all major credit and debit cards through Stripe. Payments are secure and automatic — cancel anytime with no penalties.</div>
+        </div>
+                <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)"><span>What are the context window sizes for each tier?</span><span class="arrow">&#9660;</span></div>
+          <div class="faq-a">Context window is how much text the AI can remember in a conversation. Free gets 75K, Pro gets 145K, Premium gets 315K, and Platinum gets a massive 750K context window &mdash; enough to process entire books, large codebases, or lengthy documents in a single conversation.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)"><span>What is Platinum? Is it worth it?</span><span class="arrow">&#9660;</span></div>
+          <div class="faq-a">Platinum ($55/mo) is our ultimate tier for power users who need no limits. You get 99,999 requests per month, the highest rate limits (120/min), and a massive 750K context window. If you are running an AI-powered business, building apps, or need the absolute best performance with no ceilings, Platinum is the one.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)"><span>Can I get a refund?</span><span class="arrow">▼</span></div>
+          <div class="faq-a">Since the free tier gives you full access to test the service, there are no refunds. But you can cancel anytime and will not be charged again.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END FAQ TAB -->
+
+  <!-- DASHBOARD TAB -->
+  <div class="tab-content" id="content-dash">
+    <div style="margin-top:20px;">
+      <h2 style="font-size:24px;font-weight:700;margin-bottom:6px;color:#e8e8ec;">Subscriber Dashboard</h2>
+      <p style="color:#6b7280;font-size:14px;margin-bottom:24px;">Enter your API key to view usage, manage keys, and control your account.</p>
+      <div id="dash-gate" style="max-width:500px;margin:0 auto 32px;text-align:center;background:rgba(255,255,255,0.03);border:1px solid rgba(99,102,241,0.25);border-radius:16px;padding:32px;">
+        <div class="badge badge-green" style="margin-bottom:12px;">Access Your Account</div>
+        <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;color:#e8e8ec;">Enter Your API Key</h3>
+        <p style="color:#6b7280;font-size:13px;margin-bottom:16px;">Paste your API key below. Keys start with <code style="background:rgba(0,0,0,0.3);padding:2px 6px;border-radius:4px;color:#818cf8;">nga_live_</code></p>
+        <input type="text" id="dash-key-input" placeholder="nga_live_..." style="width:100%;padding:14px 18px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#e8e8ec;font-size:14px;font-family:monospace;outline:none;margin-bottom:12px;" autocomplete="off">
+        <button class="btn btn-primary" onclick="dashLogin()" style="width:100%;">Access Dashboard</button>
+        <div id="dash-login-msg" style="margin-top:10px;font-size:13px;"></div>
+      </div>
+      <div id="dash-content" style="display:none;">
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(99,102,241,0.2);border-radius:16px;padding:24px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div><div style="font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Tier</div><div style="font-size:20px;font-weight:700;color:#e8e8ec;margin-top:4px;" id="dash-tier">&mdash;</div></div>
+            <div id="dash-tier-badge" style="padding:4px 14px;border-radius:20px;font-size:13px;font-weight:600;">&mdash;</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;text-align:center;">
+            <div><div style="font-size:28px;font-weight:800;color:#e8e8ec;" id="dash-used">&mdash;</div><div style="font-size:12px;color:#6b7280;">Used</div></div>
+            <div><div style="font-size:28px;font-weight:800;color:#34d399;" id="dash-remaining">&mdash;</div><div style="font-size:12px;color:#6b7280;">Remaining</div></div>
+            <div><div style="font-size:28px;font-weight:800;color:#a78bfa;" id="dash-total">&mdash;</div><div style="font-size:12px;color:#6b7280;">Limit</div></div>
+          </div>
+          <div style="margin-top:16px;background:rgba(255,255,255,0.05);border-radius:8px;height:8px;overflow:hidden;"><div id="dash-bar" style="height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:8px;width:0%"></div></div>
+          <div id="dash-features" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:24px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <h3 style="font-size:16px;font-weight:700;color:#e8e8ec;">Your Keys</h3>
+            <button class="btn btn-primary" onclick="dashCreateKey()" style="padding:8px 16px;font-size:13px;">+ New Key</button>
+          </div>
+          <div id="dash-keys-list" style="display:grid;gap:8px;"></div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div><h3 style="font-size:16px;font-weight:700;color:#e8e8ec;">Agent Memory</h3><p style="font-size:13px;color:#6b7280;margin-top:4px;">Clear agent conversation history.</p></div>
+            <button onclick="dashResetAgent()" style="padding:8px 16px;font-size:13px;background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.25);border-radius:8px;cursor:pointer;font-weight:600;">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END DASHBOARD TAB -->
+
+  <!-- BLOG TAB -->
+  <div class="tab-content" id="content-blog">
+    <div style="margin-top:20px;">
+      <div style="text-align:center;margin-bottom:30px;">
+        <div class="badge badge-green" style="margin-bottom:12px;">📝 NiceGuyAPI Blog</div>
+        <h2 style="font-size:28px;font-weight:700;color:#e8e8ec;margin-bottom:8px;">Guides, Tutorials & Updates</h2>
+        <p style="color:#6b7280;font-size:14px;max-width:500px;margin:0 auto;">Learn how to get the most out of NiceGuyAPI. From beginner setup to advanced agent workflows.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:30px;">
+
+        <div class="guide-card" style="cursor:pointer;" onclick="window.open('https://mrghostguy.github.io/niceguyapi/niceguyapi-blog.html?p=getting-started-with-niceguyapi','_blank')">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span class="badge" style="background:rgba(99,102,241,0.15);color:#818cf8;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">Tutorial</span>
+            <span style="font-size:12px;color:#4b5563;">5 min</span>
+          </div>
+          <h3 style="color:#e8e8ec;font-size:16px;font-weight:700;margin-bottom:6px;">Getting Started in 5 Minutes</h3>
+          <p style="font-size:13px;color:#6b7280;">Sign up, get your free API key, and make your first request. Works with cURL, Python, and JavaScript.</p>
+        </div>
+
+        <div class="guide-card" style="cursor:pointer;" onclick="window.open('https://mrghostguy.github.io/niceguyapi/niceguyapi-blog.html?p=best-free-ai-apis-2026','_blank')">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span class="badge" style="background:rgba(52,211,153,0.15);color:#34d399;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">Guide</span>
+            <span style="font-size:12px;color:#4b5563;">8 min</span>
+          </div>
+          <h3 style="color:#e8e8ec;font-size:16px;font-weight:700;margin-bottom:6px;">Best Free AI APIs in 2026</h3>
+          <p style="font-size:13px;color:#6b7280;">We compared OpenRouter, OpenAI, Anthropic, and more. See why developers are switching to unified gateways.</p>
+        </div>
+
+        <div class="guide-card" style="cursor:pointer;" onclick="window.open('https://mrghostguy.github.io/niceguyapi/niceguyapi-blog.html?p=build-ai-agent-niceguyapi','_blank')">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span class="badge" style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">Advanced</span>
+            <span style="font-size:12px;color:#4b5563;">12 min</span>
+          </div>
+          <h3 style="color:#e8e8ec;font-size:16px;font-weight:700;margin-bottom:6px;">Build an AI Agent</h3>
+          <p style="font-size:13px;color:#6b7280;">Step-by-step tutorial: Build a ReAct-style agent that searches the web, reads pages, and solves multi-step tasks.</p>
+        </div>
+
+        <div class="guide-card" style="cursor:pointer;" onclick="window.open('https://mrghostguy.github.io/niceguyapi/niceguyapi-blog.html?p=openai-compatible-api-guide','_blank')">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span class="badge" style="background:rgba(99,102,241,0.15);color:#818cf8;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">Tutorial</span>
+            <span style="font-size:12px;color:#4b5563;">6 min</span>
+          </div>
+          <h3 style="color:#e8e8ec;font-size:16px;font-weight:700;margin-bottom:6px;">OpenAI Drop-in Replacement</h3>
+          <p style="font-size:13px;color:#6b7280;">Replace your OpenAI API calls in one line of code. Works with all OpenAI SDKs — Python, JS, LangChain.</p>
+        </div>
+
+      </div>
+      <div style="text-align:center;margin-top:20px;">
+        <a href="https://mrghostguy.github.io/niceguyapi/niceguyapi-socials.html" class="btn btn-secondary" style="background:rgba(255,255,255,0.06);color:#9ca3af;border:1px solid rgba(255,255,255,0.12);padding:12px 28px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;display:inline-block;">🌐 View All Social Posts →</a>
+      </div>
+    </div>
+  </div>
+  <!-- END BLOG TAB -->
+
+  <!-- SUCCESS BOX (hidden, shown after payment) -->
+  <div class="success-box" id="success-box">
+    <div class="checkmark">✅</div>
+    <h2>Payment Successful!</h2>
+    <p>Your account has been upgraded. Check your email for your API key if you don't see it above.</p>
   </div>
 
-  <script>
-    const API_BASE = 'https://ghostapi-1v1f.onrender.com';
-    let currentApiKey = '';
-    let currentTier = '';
-    let paypalClicked = false;
+</div>
 
-    function updatePlanInfo() {
-      const plan = document.getElementById('plan').value;
-      const prices = { free: 0, pro: 6, premium: 27 };
-      const originalPrices = { free: 0, pro: 12, premium: 49 };
-      const limits = { free: '50', pro: '5,000', premium: '25,000' };
-      const names = { free: 'Free', pro: 'Pro', premium: 'Premium' };
-      if (plan === 'free') {
-        document.getElementById('plan-info').innerHTML = '<div class="alert info" style="font-size:13px;">Free tier - no payment required. Get your API key instantly.</div>';
-      } else {
-        document.getElementById('plan-info').innerHTML = `<div class="alert info" style="font-size:13px;"><strong>${names[plan]}:</strong> <span style="text-decoration:line-through;color:#6b7280">$${originalPrices[plan]}</span> <span style="color:#34d399">$${prices[plan]}/mo</span> for ${limits[plan]} requests. <span style="color:#f87171;font-weight:600">LAUNCH SALE!</span> Pay via PayPal after signup.</div>`;
-      }
+<footer>
+  <p>⚡ NiceGuyAPI v5.4.2 — One API for Every AI Model + Autonomous Agent | bit.ly/NiceGuyAPI</p>
+  <p style="margin-top:4px;">Powered by <a href="https://openrouter.ai" target="_blank">OpenRouter</a> | <a href="https://github.com/MrGhostGuy/stax-agent/tree/master/niceguyapi" target="_blank">GitHub</a></p>
+</footer>
+
+<!-- EXIT INTENT POPUP -->
+<div class="exit-popup-overlay" id="exit-popup">
+  <div class="exit-popup">
+    <button class="close-btn" onclick="closeExitPopup()">✕</button>
+    <div style="font-size:40px;margin-bottom:12px;">🎁</div>
+    <h2>Wait — Get a Free API Key</h2>
+    <p>Before you go, grab your free API key. 12 requests/month, no credit card, instant access to 23+ AI models.</p>
+    <input type="email" id="exit-email" placeholder="you@example.com" autocomplete="email">
+    <button class="btn btn-primary" id="exit-btn" onclick="handleExitSignup()">Get My Free Key →</button>
+    <p style="margin-top:12px;font-size:12px;color:#4b5563;">No spam. Just your API key.</p>
+  </div>
+</div>
+
+<script>
+var API_BASE = 'https://niceguyapi-repo.vercel.app';
+
+function showTab(name) {
+  var tabs = ['home', 'chat', 'guide', 'faq', 'dash', 'blog'];
+  for (var i = 0; i < tabs.length; i++) {
+    var t = tabs[i];
+    var c = document.getElementById('content-' + t);
+    var b = document.getElementById('tab-' + t);
+    if (c) c.className = 'tab-content' + (t === name ? ' active' : '');
+    if (b) b.className = 'nav-tab' + (t === name ? ' active' : '');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleFaq(el) {
+  var arrow = el.querySelector('.arrow');
+  var ans = el.nextElementSibling;
+  var isOpen = ans.classList.contains('open');
+  var allAns = document.querySelectorAll('.faq-a');
+  for (var i = 0; i < allAns.length; i++) allAns[i].classList.remove('open');
+  var allArrows = document.querySelectorAll('.faq-q .arrow');
+  for (var i = 0; i < allArrows.length; i++) allArrows[i].classList.remove('open');
+  if (!isOpen) { ans.classList.add('open'); arrow.classList.add('open'); }
+}
+
+async function handleSignup() {
+  var email = document.getElementById('email').value.trim();
+  var plan = document.getElementById('plan').value;
+  var msg = document.getElementById('signup-msg');
+  var btn = document.getElementById('signup-btn');
+  if (!email || email.indexOf('@') < 0) { msg.innerHTML = '<span class="error">Please enter a valid email.</span>'; return; }
+  btn.disabled = true; btn.textContent = 'Creating key...'; msg.innerHTML = '';
+  try {
+    var res = await fetch(API_BASE + '/v1/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, tier: plan }) });
+    var data = await res.json();
+    if (res.ok && data.api_key) {
+      localStorage.setItem('niceguyapi_key', data.api_key);
+      localStorage.setItem('niceguyapi_email', email);
+      localStorage.setItem('niceguyapi_tier', data.tier || plan);
+      document.getElementById('api-key').textContent = data.api_key;
+      document.getElementById('key-result').style.display = 'block';
+      var tr = { free: '14', pro: '40', premium: '500', platinum: 'Unlimited' };
+      document.getElementById('free-tier-req').textContent = tr[plan] || '14';
+      msg.innerHTML = '<span class="success">Your key is ready! Save it above.</span>';
+      if (data.stripe_url) { window.location.href = data.stripe_url; }
+    } else {
+      msg.innerHTML = '<span class="error">' + (data.error && data.error.message || 'Something went wrong. Try again.') + '</span>';
     }
+  } catch (err) {
+    msg.innerHTML = '<span class="error">Connection error. Server may be waking up. Try again in 30 seconds.</span>';
+  }
+  btn.disabled = false; btn.textContent = 'Get Key';
+}
 
-    function setStep(n) {
-      for (let i = 1; i <= 3; i++) {
-        document.getElementById('step' + i).style.display = i === n ? 'block' : 'none';
-        const dot = document.getElementById('step' + i + '-dot');
-        dot.className = 'step-dot' + (i < n ? ' done' : i === n ? ' active' : '');
-      }
+function copyKey(key) {
+  if (!key) key = document.getElementById('api-key').textContent;
+  navigator.clipboard.writeText(key).then(function () {
+    alert('Copied to clipboard!');
+  });
+}
+
+// Chat
+var chatKey = null, chatTier = 'Free', chatUsage = { used: 0, total: 14 }, chatAgent = false;
+
+async function startChat() {
+  var email = document.getElementById('chat-email').value.trim();
+  var gateMsg = document.getElementById('chat-gate-msg');
+  var btn = document.getElementById('chat-start-btn');
+  if (!email || email.indexOf('@') < 0) { gateMsg.innerHTML = 'Please enter a valid email.'; return; }
+  btn.disabled = true; btn.textContent = 'Setting up...'; gateMsg.innerHTML = '';
+  try {
+    var res = await fetch(API_BASE + '/v1/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, tier: 'free' }) });
+    var data = await res.json();
+    if (res.ok && data.api_key) {
+      chatKey = data.api_key; chatTier = data.tier || 'Free'; chatUsage = { used: 0, total: 14 }; chatAgent = false;
+      localStorage.setItem('niceguyapi_chat', JSON.stringify({ key: chatKey, email: email, tier: chatTier, used: 0 }));
+      showChatUI();
+    } else {
+      gateMsg.innerHTML = (data.error && data.error.message || 'Something went wrong. Try again.') + '<br><small>If you signed up already, check your email for your API key.</small>';
     }
+  } catch (err) { gateMsg.innerHTML = 'Connection error. Server may be waking up. Try again in 30 seconds.'; }
+  btn.disabled = false; btn.textContent = 'Start Chatting \u2192';
+}
 
-    function goBack() {
-      setStep(1);
-      document.getElementById('form-message').innerHTML = '';
-      document.getElementById('payment-message').innerHTML = '';
+function showChatUI() {
+  document.getElementById('chat-gate').style.display = 'none';
+  document.getElementById('chat-container').style.display = 'block';
+  var badge = document.getElementById('chat-tier-badge');
+  badge.textContent = chatTier;
+  badge.className = 'chat-badge ' + (chatTier === 'Platinum' ? 'platinum' : chatTier === 'Premium' ? 'premium' : chatTier === 'Pro' ? 'pro' : 'free');
+  updateChatUsage();
+  document.getElementById('chat-messages').innerHTML = '';
+  addMessage('assistant', 'Hi! I am your AI assistant powered by NiceGuyAPI. Ask me anything!');
+}
+
+function updateChatUsage() {
+  document.getElementById('chat-usage').textContent = chatUsage.used + '/' + chatUsage.total + ' requests used';
+}
+
+function resetChat() {
+  localStorage.removeItem('niceguyapi_chat');
+  chatKey = null; chatTier = 'Free'; chatUsage = { used: 0, total: 14 };
+  document.getElementById('chat-gate').style.display = 'block';
+  document.getElementById('chat-container').style.display = 'none';
+  document.getElementById('chat-email').value = '';
+  document.getElementById('chat-gate-msg').innerHTML = '';
+  document.getElementById('chat-start-btn').disabled = false;
+  document.getElementById('chat-start-btn').textContent = 'Start Chatting \u2192';
+}
+
+function addMessage(role, text) {
+  var container = document.getElementById('chat-messages');
+  var div = document.createElement('div');
+  div.className = 'chat-msg ' + role;
+  var avatar = role === 'user' ? '\uD83D\uDC64' : '\uD83E\uDD16';
+  div.innerHTML = '<div class="avatar">' + avatar + '</div><div class="bubble">' + text.replace(/\n/g, '<br>') + '</div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function toggleAgent() {
+  chatAgent = document.getElementById('agent-toggle').checked;
+  if (chatAgent) addMessage('assistant', '\uD83E\uDD16 Agent mode enabled! I can now search the web, read webpages, and do calculations.');
+}
+
+async function sendChat() {
+  var input = document.getElementById('chat-input');
+  var btn = document.getElementById('chat-send-btn');
+  var text = input.value.trim();
+  if (!text || !chatKey) return;
+  addMessage('user', text); input.value = ''; btn.disabled = true; btn.textContent = '...';
+  var container = document.getElementById('chat-messages');
+  var typing = document.createElement('div');
+  typing.className = 'chat-msg assistant'; typing.id = 'typing-indicator';
+  typing.innerHTML = '<div class="avatar">\uD83E\uDD16</div><div class="bubble typing">' + (chatAgent ? 'Planning...' : 'Thinking...') + '</div>';
+  container.appendChild(typing); container.scrollTop = container.scrollHeight;
+  try {
+    var body = { model: chatAgent ? 'openai/gpt-oss-120b:free' : 'openai/gpt-oss-120b:free', messages: [{ role: 'user', content: text }] };
+    if (chatAgent) body.agent = true;
+    var res = await fetch(API_BASE + '/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-API-Key': chatKey }, body: JSON.stringify(body) });
+    typing.remove();
+    if (res.status === 403) { addMessage('assistant', '\uD83E\uDD16 Agent mode requires Pro or Premium. Upgrade to unlock agent capabilities!'); return; }
+    if (res.status === 429) { addMessage('assistant', '\u26A0\uFE0F You have hit your monthly request limit! Upgrade for more.'); return; }
+    var data = await res.json();
+    var reply = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || (data.error && data.error.message) || 'Sorry, something went wrong. Try again.';
+    addMessage('assistant', reply);
+    chatUsage.used++; updateChatUsage();
+    var saved = localStorage.getItem('niceguyapi_chat');
+    if (saved) { var obj = JSON.parse(saved); obj.used = chatUsage.used; localStorage.setItem('niceguyapi_chat', JSON.stringify(obj)); }
+  } catch (err) { typing.remove(); addMessage('assistant', 'Connection error. The server may be waking up. Try again in a moment.'); }
+  btn.disabled = false; btn.textContent = 'Send'; input.focus();
+}
+
+// Restore chat session
+(function () {
+  var saved = localStorage.getItem('niceguyapi_chat');
+  if (saved) { try { var obj = JSON.parse(saved); if (obj.key) { chatKey = obj.key; chatTier = obj.tier || 'Free'; chatUsage.used = obj.used || 0; showChatUI(); } } catch (e) { } }
+})();
+
+// URL params
+var urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('canceled') === 'true') {
+  document.getElementById('signup-msg').innerHTML = '<span style="color:#fbbf24;">Payment canceled. You can try again anytime.</span>';
+}
+if (window.location.hash === '#success' || urlParams.get('success') === 'true') {
+  document.getElementById('signup').style.display = 'none';
+  var sb = document.getElementById('success-box'); if (sb) sb.style.display = 'block';
+  document.getElementById('signup-msg').innerHTML = '<span class="success">Payment successful! Your account has been upgraded.</span>';
+}
+
+// Enter key handlers
+document.getElementById('email').addEventListener('keydown', function (e) { if (e.key === 'Enter') handleSignup(); });
+var ce = document.getElementById('chat-email'); if (ce) ce.addEventListener('keydown', function (e) { if (e.key === 'Enter') startChat(); });
+var ci = document.getElementById('chat-input'); if (ci) ci.addEventListener('keydown', function (e) { if (e.key === 'Enter') sendChat(); });
+
+// Dashboard
+var dashSessionKey = null;
+var dashSessionEmail = null;
+
+async function dashLogin() {
+  var keyInput = document.getElementById('dash-key-input').value.trim();
+  var msg = document.getElementById('dash-login-msg');
+  if (!keyInput) { msg.innerHTML = '<span style="color:#f87171;">Please enter your API key.</span>'; return; }
+  try {
+    var res = await fetch(API_BASE + '/v1/usage', { headers: { 'X-API-Key': keyInput } });
+    var data = await res.json();
+    if (res.ok && data.email) {
+      dashSessionKey = keyInput; dashSessionEmail = data.email;
+      document.getElementById('dash-gate').style.display = 'none';
+      document.getElementById('dash-content').style.display = 'block';
+      renderDashboard(data);
+      loadKeys();
+    } else {
+      msg.innerHTML = '<span style="color:#f87171;">' + (data.error && data.error.message || 'Invalid API key.') + '</span>';
     }
+  } catch (err) { msg.innerHTML = '<span style="color:#f87171;">Connection error. Try again.</span>'; }
+}
 
-    function markPayPalClicked() {
-      paypalClicked = true;
+function renderDashboard(data) {
+  document.getElementById('dash-tier').textContent = data.tier.charAt(0).toUpperCase() + data.tier.slice(1);
+  var badge = document.getElementById('dash-tier-badge');
+  var colors = { free: ['rgba(99,102,241,0.2)', '#818cf8'], pro: ['rgba(52,211,153,0.2)', '#34d399'], premium: ['rgba(251,191,36,0.2)', '#fbbf24'], platinum: ['rgba(168,85,247,0.2)', '#c084fc'] };
+  var c = colors[data.tier] || colors.free;
+  badge.style.background = c[0]; badge.style.color = c[1]; badge.textContent = data.tier.charAt(0).toUpperCase() + data.tier.slice(1);
+  document.getElementById('dash-used').textContent = data.monthly_used || 0;
+  document.getElementById('dash-remaining').textContent = data.monthly_remaining !== undefined ? data.monthly_remaining : (data.monthly_limit - data.monthly_used);
+  document.getElementById('dash-total').textContent = data.monthly_limit >= 99999 ? '\u221E' : data.monthly_limit;
+  var pct = data.monthly_limit >= 99999 ? 0 : Math.min(100, ((data.monthly_used || 0) / data.monthly_limit) * 100);
+  document.getElementById('dash-bar').style.width = pct + '%';
+  var features = document.getElementById('dash-features');
+  features.innerHTML = '';
+  if (data.features) {
+    if (data.features.agent) features.innerHTML += '<span class="badge" style="background:rgba(52,211,153,0.15);color:#34d399;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">Agent</span>';
+    if (data.features.custom_agent) features.innerHTML += '<span class="badge" style="background:rgba(168,85,247,0.15);color:#c084fc;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">Custom Agents (' + data.features.custom_agent + ')</span>';
+    if (data.features.image) features.innerHTML += '<span class="badge" style="background:rgba(99,102,241,0.15);color:#818cf8;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">Images</span>';
+    if (data.features.song) features.innerHTML += '<span class="badge" style="background:rgba(251,191,36,0.15);color:#fbbf24;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;">Songs</span>';
+  }
+}
+
+async function loadKeys() {
+  if (!dashSessionKey) return;
+  try {
+    var res = await fetch(API_BASE + '/v1/keys', { headers: { 'X-API-Key': dashSessionKey } });
+    var data = await res.json();
+    var list = document.getElementById('dash-keys-list');
+    list.innerHTML = '';
+    if (data.keys && data.keys.length) {
+      for (var i = 0; i < data.keys.length; i++) {
+        var k = data.keys[i];
+        var div = document.createElement('div');
+        div.style.cssText = 'display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:12px 16px;';
+        div.innerHTML = '<div><div style="font-family:monospace;font-size:13px;color:#a5b4fc;">' + k.prefix + '........</div><div style="font-size:11px;color:#6b7280;margin-top:2px;">' + k.label + ' \u2022 ' + k.tier + ' \u2022 ' + k.monthly_used + '/' + k.monthly_limit + ' used</div></div><div style="display:flex;gap:4px;"><button onclick="copyKey(\'nga_live_' + k.prefix + '\')" style="padding:4px 10px;font-size:11px;background:rgba(99,102,241,0.2);color:#818cf8;border:1px solid rgba(99,102,241,0.3);border-radius:6px;cursor:pointer;">Copy</button><button onclick="rotateKey(\'' + k.prefix + '\')" style="padding:4px 10px;font-size:11px;background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);border-radius:6px;cursor:pointer;">Rotate</button></div>';
+        list.appendChild(div);
+      }
+    } else {
+      list.innerHTML = '<p style="color:#6b7280;font-size:13px;text-align:center;padding:16px;">No keys found.</p>';
     }
+  } catch (e) { }
+}
 
-    async function handleSignup() {
-      const email = document.getElementById('email').value.trim();
-      const plan = document.getElementById('plan').value;
-      const btn = document.getElementById('signup-btn');
-      const msg = document.getElementById('form-message');
-
-      if (!email) {
-        msg.innerHTML = '<div class="alert error">Please enter your email.</div>';
-        return;
-      }
-      if (!email.includes('@') || !email.includes('.')) {
-        msg.innerHTML = '<div class="alert error">Please enter a valid email address.</div>';
-        return;
-      }
-
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span>Creating your key...';
-      msg.innerHTML = '';
-
-      try {
-        const res = await fetch(`${API_BASE}/v1/signup`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, tier: plan }),
-        });
-        const data = await res.json();
-
-        if (data.key) {
-          currentApiKey = data.key;
-          currentTier = data.tier;
-
-          if (data.payment_required) {
-            // Paid tier - show payment step
-            setStep(2);
-            document.getElementById('pay-tier-name').textContent = data.pending_tier.charAt(0).toUpperCase() + data.pending_tier.slice(1);
-            document.getElementById('pay-amount').textContent = '$' + (data.pending_tier === 'pro' ? '6' : '27') + '/mo';
-            document.getElementById('paypal-link').href = data.paypal_url;
-            document.getElementById('payment-message').innerHTML = '';
-          } else {
-            // Free tier - show success immediately
-            showSuccess(data);
-          }
-        } else {
-          msg.innerHTML = `<div class="alert error">Error: ${data.error?.message || data.error || 'Unknown error'}</div>`;
-          btn.disabled = false;
-          btn.textContent = 'Continue →';
-        }
-      } catch (err) {
-        msg.innerHTML = `<div class="alert error">Connection error. Server may be waking up (free tier). Try again in 30 seconds.</div>`;
-        btn.disabled = false;
-        btn.textContent = 'Continue →';
-      }
+async function rotateKey(prefix) {
+  if (!dashSessionKey) return;
+  try {
+    var res = await fetch(API_BASE + '/v1/keys/' + prefix + '/rotate', { method: 'POST', headers: { 'X-API-Key': dashSessionKey } });
+    var data = await res.json();
+    if (data.api_key) {
+      alert('New key: ' + data.api_key + '\n\nPaste this now \u2014 the old key no longer works.');
+      if (data.api_key.indexOf('nga_') === 0) { dashSessionKey = data.api_key; loadKeys(); }
     }
+  } catch (e) { alert('Error rotating key.'); }
+}
 
-    async function handleActivate() {
-      const orderId = document.getElementById('paypal-order-id').value.trim();
-      const btn = document.getElementById('activate-btn');
-      const msg = document.getElementById('payment-message');
-
-      if (!paypalClicked) {
-        msg.innerHTML = '<div class="alert error">Please click the PayPal payment link above first.</div>';
-        return;
-      }
-
-      if (!orderId) {
-        msg.innerHTML = '<div class="alert error">Please enter your PayPal Order ID from the receipt.</div>';
-        return;
-      }
-
-      if (!orderId.startsWith('PAY-')) {
-        msg.innerHTML = '<div class="alert error">Order ID should start with PAY-. Find it in your PayPal receipt.</div>';
-        return;
-      }
-
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span>Activating...';
-      msg.innerHTML = '';
-
-      try {
-        const res = await fetch(`${API_BASE}/v1/billing/confirm`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ api_key: currentApiKey, paypal_order_id: orderId }),
-        });
-        const data = await res.json();
-
-        if (data.status === 'activated') {
-          showSuccess({ tier: data.tier, monthly_limit: data.monthly_limit, key: currentApiKey });
-        } else {
-          msg.innerHTML = `<div class="alert error">Activation failed: ${data.error?.message || 'Unknown error'}</div>`;
-          btn.disabled = false;
-          btn.textContent = "✓ I've Paid - Activate My Account";
-        }
-      } catch (err) {
-        msg.innerHTML = '<div class="alert error">Connection error. Please try again.</div>';
-        btn.disabled = false;
-        btn.textContent = "✓ I've Paid - Activate My Account";
-      }
+async function dashCreateKey() {
+  if (!dashSessionKey) return;
+  var label = prompt('Label for this key (optional):') || 'Key';
+  try {
+    var res = await fetch(API_BASE + '/v1/keys', { method: 'POST', headers: { 'X-API-Key': dashSessionKey, 'Content-Type': 'application/json' }, body: JSON.stringify({ label: label }) });
+    var data = await res.json();
+    if (data.api_key) {
+      alert('New key created: ' + data.api_key + '\n\nSave it now \u2014 it won\'t be shown again.');
+      loadKeys();
     }
+  } catch (e) { alert('Error creating key.'); }
+}
 
-    function showSuccess(data) {
-      setStep(3);
-      document.getElementById('final-key').textContent = data.key;
-      document.getElementById('final-tier').textContent = data.tier.charAt(0).toUpperCase() + data.tier.slice(1);
-      document.getElementById('final-limit').textContent = data.monthly_limit.toLocaleString() + ' requests/month';
+async function dashResetAgent() {
+  if (!dashSessionKey) return;
+  if (!confirm('Clear all agent conversation history?')) return;
+  try {
+    var res = await fetch(API_BASE + '/v1/agent/reset', { method: 'POST', headers: { 'X-API-Key': dashSessionKey } });
+    var data = await res.json();
+    alert(data.message || 'Agent history cleared.');
+  } catch (e) { alert('Error clearing agent history.'); }
+}
+
+// Exit intent popup
+var exitPopupShown = false;
+var exitPopupEnabled = true;
+
+document.addEventListener('mouseleave', function (e) {
+  if (e.clientY < 10 && !exitPopupShown && exitPopupEnabled) showExitPopup();
+});
+
+var lastScrollY = 0, scrollUpCount = 0;
+window.addEventListener('scroll', function () {
+  if (window.innerWidth > 768) return;
+  var y = window.scrollY;
+  if (y < lastScrollY - 100) { scrollUpCount++; if (scrollUpCount > 3 && !exitPopupShown && exitPopupEnabled) showExitPopup(); }
+  else if (y > lastScrollY + 50) scrollUpCount = 0;
+  lastScrollY = y;
+});
+
+function showExitPopup() {
+  if (localStorage.getItem('niceguyapi_key')) return;
+  exitPopupShown = true;
+  document.getElementById('exit-popup').classList.add('show');
+}
+
+function closeExitPopup() {
+  document.getElementById('exit-popup').classList.remove('show');
+  exitPopupEnabled = false;
+}
+
+async function handleExitSignup() {
+  var email = document.getElementById('exit-email').value.trim();
+  var btn = document.getElementById('exit-btn');
+  if (!email || email.indexOf('@') < 0) { alert('Please enter a valid email.'); return; }
+  btn.disabled = true; btn.textContent = 'Creating key...';
+  try {
+    var res = await fetch(API_BASE + '/v1/signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, tier: 'free' }) });
+    var data = await res.json();
+    if (res.ok && data.api_key) {
+      localStorage.setItem('niceguyapi_key', data.api_key);
+      localStorage.setItem('niceguyapi_email', email);
+      closeExitPopup();
+      document.getElementById('api-key').textContent = data.api_key;
+      document.getElementById('key-result').style.display = 'block';
+      document.getElementById('signup-msg').innerHTML = '<span class="success">Your key is ready! Save it above.</span>';
+      showTab('home');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      alert(data.error && data.error.message || 'Something went wrong. Try again.');
     }
+  } catch (err) { alert('Connection error. Try again.'); }
+  btn.disabled = false; btn.textContent = 'Get My Free Key \u2192';
+}
 
-    function resetForm() {
-      currentApiKey = '';
-      currentTier = '';
-      paypalClicked = false;
-      document.getElementById('email').value = '';
-      document.getElementById('plan').value = 'free';
-      document.getElementById('paypal-order-id').value = '';
-      document.getElementById('form-message').innerHTML = '';
-      document.getElementById('payment-message').innerHTML = '';
-      document.getElementById('plan-info').innerHTML = '';
-      document.getElementById('signup-btn').disabled = false;
-      document.getElementById('signup-btn').textContent = 'Continue →';
-      document.getElementById('activate-btn').disabled = false;
-      document.getElementById('activate-btn').textContent = "✓ I've Paid - Activate My Account";
-      setStep(1);
-      updatePlanInfo();
-    }
+// Dashboard enter key
+document.addEventListener('DOMContentLoaded', function () {
+  var dk = document.getElementById('dash-key-input');
+  if (dk) dk.addEventListener('keydown', function (e) { if (e.key === 'Enter') dashLogin(); });
+});
+</script>
 
-    // Init
-    updatePlanInfo();
-  </script>
+<script>
+(function(){
+  var hb=document.getElementById('hamburgerBtn'),pn=document.getElementById('mobileNavPanel'),
+      ov=document.getElementById('mobileOverlay'),cl=document.getElementById('mobileCloseBtn');
+  function openM(){hb.classList.add('active');pn.classList.add('open');ov.classList.add('open');document.body.style.overflow='hidden';syncActive();}
+  function closeM(){hb.classList.remove('active');pn.classList.remove('open');ov.classList.remove('open');document.body.style.overflow='';}
+  function syncActive(){var a=document.querySelector('.nav-tab.active');var n=a?a.id.replace('tab-',''):'home';
+    document.querySelectorAll('.mobile-tab-btn').forEach(function(b){b.classList.toggle('active',b.dataset.tab===n);});}
+  hb.addEventListener('click',function(){pn.classList.contains('open')?closeM():openM();});
+  cl.addEventListener('click',closeM);ov.addEventListener('click',closeM);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&pn.classList.contains('open'))closeM();});
+  window.ngMobileSwitch=function(n){closeM();setTimeout(function(){showTab(n);},200);syncActive();};
+  var orig=window.showTab;window.showTab=function(n){var r=orig(n);syncActive();return r;};
+})();
+</script>
 </body>
 </html>
