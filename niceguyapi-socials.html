@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog & Socials — NiceGuyAPI</title>
+  <meta name="description" content="NiceGuyAPI blog and social media posts — guides, tutorials, announcements, and updates from across all our channels.">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; background: #08080c; color: #d4d4de; line-height: 1.7; }
+    .container { max-width: 900px; margin: 0 auto; padding: 60px 24px; }
+
+    /* NAV */
+    .nav { position: sticky; top: 0; z-index: 100; background: rgba(8,8,12,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 0 24px; }
+    .nav-inner { max-width: 900px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+    .nav-logo { font-weight: 700; font-size: 16px; background: linear-gradient(135deg, #a78bfa, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; }
+    .nav-links { display: flex; gap: 16px; align-items: center; }
+    .nav-links a { font-size: 13px; font-weight: 600; color: #9ca3af; text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: #818cf8; }
+    .nav-cta { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; cursor: pointer; text-decoration: none; }
+
+    /* HERO */
+    .hero { text-align: center; padding: 60px 0 20px; }
+    .hero h1 { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #a78bfa, #818cf8, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+    .hero p { font-size: 16px; color: #9ca3af; max-width: 500px; margin: 0 auto; }
+
+    /* PLATFORM FILTER */
+    .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 20px 0 30px; }
+    .filter-btn { padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; color: #9ca3af; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: all 0.2s; }
+    .filter-btn:hover { border-color: rgba(99,102,241,0.3); color: #e8e8ec; }
+    .filter-btn.active { background: rgba(99,102,241,0.2); color: #818cf8; border-color: rgba(99,102,241,0.3); }
+
+    /* POST LIST */
+    .post-list { display: flex; flex-direction: column; gap: 16px; padding-bottom: 60px; }
+    .post-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; transition: all 0.25s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+    .post-card:hover { border-color: rgba(99,102,241,0.3); background: rgba(99,102,241,0.04); transform: translateY(-2px); }
+    .post-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .platform-icon { width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; flex-shrink: 0; }
+    .platform-name { font-size: 12px; font-weight: 600; color: #6b7280; }
+    .post-date { font-size: 12px; color: #4b5563; margin-left: auto; }
+    .post-card h2 { font-size: 18px; font-weight: 700; color: #e8e8ec; margin-bottom: 6px; }
+    .post-card p { font-size: 14px; color: #6b7280; margin-bottom: 0; line-height: 1.5; }
+    .post-tags { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+    .post-tag { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 2px 10px; font-size: 11px; color: #9ca3af; }
+    .post-tag.highlight { background: rgba(99,102,241,0.15); color: #818cf8; }
+
+    /* PLATFORM ICON COLORS */
+    .icon-dev { background: #0a0a0a; color: #fff; }
+    .icon-reddit { background: #ff4500; }
+    .icon-twitter { background: #000; }
+    .icon-linkedin { background: #0a66c2; }
+    .icon-producthunt { background: #da552f; }
+    .icon-hashnode { background: #2962ff; }
+    .icon-github { background: #333; }
+    .icon-youtube { background: #ff0000; }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 40px; color: #4b5563; }
+
+    /* FOOTER */
+    .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .footer p { font-size: 13px; color: #4b5563; }
+    .footer a { color: #818cf8; text-decoration: none; }
+
+    @media (max-width: 768px) {
+      .container { padding: 40px 16px; }
+      .hero h1 { font-size: 28px; }
+      .post-card { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="https://bit.ly/NiceGuyAPI" class="nav-logo">NiceGuyAPI</a>
+    <div class="nav-links">
+      <a href="https://bit.ly/NiceGuyAPI">Home</a>
+      <a href="https://bit.ly/NiceGuyAPI/niceguyapi-blog.html">Blog</a>
+      <a href="#" class="active">Social Posts</a>
+      <a href="https://bit.ly/NiceGuyAPI">Pricing</a>
+      <a href="https://niceguyapi-repo.vercel.app/v1/signup" class="nav-cta">Get Free Key</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="hero">
+    <h1>Blog & Social Posts</h1>
+    <p>All our content across every platform — in one place. Updated whenever we post something new.</p>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar" id="filterBar">
+    <button class="filter-btn active" data-filter="all" onclick="filterPosts('all')">All Posts</button>
+    <button class="filter-btn" data-filter="blog" onclick="filterPosts('blog')">Blog Articles</button>
+    <button class="filter-btn" data-filter="devto" onclick="filterPosts('devto')">Dev.to</button>
+    <button class="filter-btn" data-filter="twitter" onclick="filterPosts('twitter')">Twitter/X</button>
+    <button class="filter-btn" data-filter="reddit" onclick="filterPosts('reddit')">Reddit</button>
+    <button class="filter-btn" data-filter="linkedin" onclick="filterPosts('linkedin')">LinkedIn</button>
+    <button class="filter-btn" data-filter="github" onclick="filterPosts('github')">GitHub</button>
+    <button class="filter-btn" data-filter="producthunt" onclick="filterPosts('producthunt')">Product Hunt</button>
+  </div>
+
+  <!-- POST LISTED VIA JS DATA -->
+  <div class="post-list" id="postList"></div>
+</div>
+
+<div class="footer">
+  <p>© 2026 NiceGuyAPI — <a href="https://bit.ly/NiceGuyAPI">Home</a></p>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// POST DATA — EDIT THIS ARRAY TO ADD NEW POSTS
+// ══════════════════════════════════════════════
+// When you publish on any platform, add an entry here.
+// The page will automatically show it with the right platform icon.
+
+const POSTS = [
+  // ── BLOG ARTICLES ──
+  {
+    platform: 'blog',
+    icon: '📝',
+    iconClass: 'icon-dev',
+    title: 'Getting Started with NiceGuyAPI in 5 Minutes',
+    description: 'Learn how to sign up, get your free API key, and make your first request to access 24+ AI models through a single endpoint.',
+    url: 'https://mrghostguy.github.io/niceguyapi/niceguyapi-blog.html?p=getting-started-with-niceguyapi',
+    date: '2026-06-01',
+    internal: true,
+    tags: ['Tutorial', 'Getting Started']
+  },
+  {
+    platform: 'blog',
+    icon: '📝',
+    iconClass: 'icon-dev',
+    title: 'Best Free AI APIs in 2026 — A Developer\'s Comparison',
+    description: 'We compared OpenRouter, OpenAI, Anthropic, and more. See why developers are switching to unified API gateways for multi-model AI development.',
+    url: 'https://mrghostguy.github.io/niceguyapi/niceguyapi-blog.html?p=best-free-ai-apis-2026',
+    date: '2026-06-01',
+    internal: true,
+    tags: ['Guide', 'Comparison', 'SEO']
+  },
+  {
+    platform: 'blog',
+    icon: '📝',
+    iconClass: 'icon-dev',
+    title: 'How to Build an AI Agent with NiceGuyAPI',
+    description: 'Step-by-step tutorial: Build a ReAct-style AI agent that can search the web, read pages, and solve multi-step tasks using our agent endpoint.',
+    url: 'https://mrghostguy.github.io/niceguyapi/niceguyapi-blog.html?p=build-ai-agent-niceguyapi',
+    date: '2026-06-01',
+    internal: true,
+    tags: ['Advanced', 'AI Agent', 'Tutorial']
+  },
+  {
+    platform: 'blog',
+    icon: '📝',
+    iconClass: 'icon-dev',
+    title: 'Using NiceGuyAPI as an OpenAI Drop-in Replacement',
+    description: 'Replace your OpenAI API calls with NiceGuyAPI in just one line of code. Works with all OpenAI SDKs — Python, JavaScript, LangChain, and more.',
+    url: 'https://mrghostguy.github.io/niceguyapi/niceguyapi-blog.html?p=openai-compatible-api-guide',
+    date: '2026-06-01',
+    internal: true,
+    tags: ['Tutorial', 'OpenAI', 'Migration']
+  },
+
+  // ── DEV.TO ── (add new posts as they go live)
+  // Template:
+  // {
+  //   platform: 'devto',
+  //   icon: 'D',
+  //   iconClass: 'icon-dev',
+  //   title: 'Your Dev.to Article Title',
+  //   description: 'Short description...',
+  //   url: 'https://dev.to/mrghostguy/your-article-url',
+  //   date: '2026-06-02',
+  //   tags: ['Tutorial', 'AI']
+  // },
+
+  // ── TWITTER/X ──
+  // Template:
+  // {
+  //   platform: 'twitter',
+  //   icon: '𝕏',
+  //   iconClass: 'icon-twitter',
+  //   title: 'Tweet: Launch announcement thread',
+  //   description: '5-tweet thread announcing NiceGuyAPI v5.4 launch...',
+  //   url: 'https://x.com/NiceGuyAPI/status/xxx',
+  //   date: '2026-06-02',
+  //   tags: ['Launch', 'Thread']
+  // },
+
+  // ── REDDIT ──
+  // Template:
+  // {
+  //   platform: 'reddit',
+  //   icon: 'R',
+  //   iconClass: 'icon-reddit',
+  //   title: '[OC] I built a free API gateway for 24+ AI models',
+  //   description: 'Posted to r/SideProject...',
+  //   url: 'https://reddit.com/r/SideProject/comments/xxx',
+  //   date: '2026-06-02',
+  //   tags: ['SideProject', 'Launch']
+  // },
+];
+
+// ══════════════════════════════════════════════
+// PLATFORM DISPLAY NAMES
+// ══════════════════════════════════════════════
+const PLATFORM_NAMES = {
+  blog: 'Blog',
+  devto: 'Dev.to',
+  twitter: 'Twitter/X',
+  reddit: 'Reddit',
+  linkedin: 'LinkedIn',
+  github: 'GitHub',
+  producthunt: 'Product Hunt',
+  hashnode: 'Hashnode',
+};
+
+// ══════════════════════════════════════════════
+// RENDER POSTS
+// ══════════════════════════════════════════════
+let currentFilter = 'all';
+
+function renderPosts() {
+  const list = document.getElementById('postList');
+  const filtered = currentFilter === 'all'
+    ? POSTS
+    : POSTS.filter(p => p.platform === currentFilter);
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state">
+      <p>No posts yet for this platform. <br>You can add new posts by editing the POSTS array in this file.</p>
+    </div>`;
+    return;
+  }
+
+  // Sort by date (newest first)
+  filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  list.innerHTML = filtered.map(post => {
+    const platformName = PLATFORM_NAMES[post.platform] || post.platform;
+    const external = !post.internal ? 'target="_blank" rel="noopener"' : '';
+    return `
+      <a class="post-card" data-platform="${post.platform}" href="${post.url}" ${external}>
+        <div class="post-top">
+          <div class="platform-icon ${post.iconClass}">${post.icon}</div>
+          <span class="platform-name">${platformName}</span>
+          <span class="post-date">${formatDate(post.date)}</span>
+        </div>
+        <h2>${post.title}</h2>
+        <p>${post.description}</p>
+        ${post.tags ? `<div class="post-tags">${post.tags.map(t => `<span class="post-tag${t === 'SEO' ? ' highlight' : ''}">${t}</span>`).join('')}</div>` : ''}
+      </a>
+    `;
+  });
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function filterPosts(platform) {
+  currentFilter = platform;
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === platform);
+  });
+  renderPosts();
+}
+
+// Initial render
+renderPosts();
+</script>
+
+</body>
+</html>

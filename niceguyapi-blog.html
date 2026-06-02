@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog — NiceGuyAPI</title>
+  <meta name="description" content="NiceGuyAPI blog — guides, tutorials, and updates about our free AI model gateway. Learn how to use 24+ AI models with one API key.">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; background: #08080c; color: #d4d4de; line-height: 1.7; }
+    .container { max-width: 800px; margin: 0 auto; padding: 60px 24px; }
+    .nav { position: sticky; top: 0; z-index: 100; background: rgba(8,8,12,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 0 24px; }
+    .nav-inner { max-width: 800px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 56px; }
+    .nav-logo { font-weight: 700; font-size: 16px; background: linear-gradient(135deg, #a78bfa, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; }
+    .nav-links { display: flex; gap: 16px; align-items: center; }
+    .nav-links a { font-size: 13px; font-weight: 600; color: #9ca3af; text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: #e8e8ec; }
+    .nav-links a.active { color: #818cf8; }
+    .nav-cta { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; cursor: pointer; text-decoration: none; }
+    .hero { text-align: center; padding: 60px 0 40px; }
+    .hero h1 { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, #a78bfa, #818cf8, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+    .hero p { font-size: 16px; color: #9ca3af; max-width: 500px; margin: 0 auto; }
+    .blog-list { display: flex; flex-direction: column; gap: 24px; padding: 20px 0 60px; }
+    .blog-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 28px; transition: all 0.25s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+    .blog-card:hover { border-color: rgba(99,102,241,0.3); background: rgba(99,102,241,0.04); transform: translateY(-2px); }
+    .blog-card .tag { display: inline-block; background: rgba(99,102,241,0.15); color: #818cf8; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-bottom: 10px; }
+    .blog-card .tag.green { background: rgba(52,211,153,0.15); color: #34d399; }
+    .blog-card .tag.amber { background: rgba(251,191,36,0.15); color: #fbbf24; }
+    .blog-card h2 { font-size: 20px; font-weight: 700; color: #e8e8ec; margin-bottom: 8px; }
+    .blog-card p { font-size: 14px; color: #6b7280; margin-bottom: 12px; }
+    .blog-card .meta { font-size: 12px; color: #4b5563; display: flex; gap: 12px; align-items: center; }
+    .article { padding: 40px 0 60px; }
+    .article h1 { font-size: 32px; font-weight: 800; color: #e8e8ec; margin-bottom: 8px; line-height: 1.3; }
+    .article .meta { font-size: 13px; color: #6b7280; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .article h2 { font-size: 22px; font-weight: 700; color: #e8e8ec; margin: 32px 0 12px; }
+    .article h3 { font-size: 18px; font-weight: 600; color: #d4d4de; margin: 24px 0 8px; }
+    .article p { margin-bottom: 16px; color: #9ca3af; }
+    .article ul, .article ol { margin: 12px 0 16px 24px; color: #9ca3af; }
+    .article li { margin-bottom: 6px; }
+    .article code { background: rgba(99,102,241,0.1); color: #a78bfa; padding: 2px 6px; border-radius: 4px; font-size: 13px; font-family: 'SF Mono', monospace; }
+    .article pre { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px; overflow-x: auto; margin: 16px 0; }
+    .article pre code { background: none; padding: 0; }
+    .article a { color: #818cf8; }
+    .article blockquote { border-left: 3px solid #6366f1; padding-left: 16px; margin: 20px 0; color: #9ca3af; font-style: italic; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: #818cf8; text-decoration: none; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+    .back-link:hover { color: #a78bfa; }
+    .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 40px; }
+    .footer p { font-size: 13px; color: #4b5563; }
+    .footer a { color: #818cf8; text-decoration: none; }
+    @media (max-width: 768px) {
+      .container { padding: 40px 16px; }
+      .hero h1 { font-size: 28px; }
+      .blog-card { padding: 20px; }
+      .article h1 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="https://bit.ly/NiceGuyAPI" class="nav-logo">NiceGuyAPI</a>
+    <div class="nav-links">
+      <a href="https://bit.ly/NiceGuyAPI">Home</a>
+      <a href="#" class="active">Blog</a>
+      <a href="https://bit.ly/NiceGuyAPI">Pricing</a>
+      <a href="https://niceguyapi-repo.vercel.app/v1/signup" class="nav-cta">Get Free Key</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="hero">
+    <h1>NiceGuyAPI Blog</h1>
+    <p>Guides, tutorials, and updates about building with our AI model gateway</p>
+  </div>
+
+  <div class="blog-list">
+    <a class="blog-card" href="?p=getting-started-with-niceguyapi">
+      <span class="tag green">Tutorial</span>
+      <h2>Getting Started with NiceGuyAPI in 5 Minutes</h2>
+      <p>Learn how to sign up, get your free API key, and make your first request to access 24+ AI models through a single endpoint.</p>
+      <div class="meta"><span>📅 June 1, 2026</span><span>⏱ 5 min read</span><span>🏷 #tutorial #api #getting-started</span></div>
+    </a>
+    <a class="blog-card" href="?p=best-free-ai-apis-2026">
+      <span class="tag">Guide</span>
+      <h2>Best Free AI APIs in 2026 — A Developer's Comparison</h2>
+      <p>We compared OpenRouter, OpenAI, Anthropic, and more. See why developers are switching to unified API gateways for multi-model AI development.</p>
+      <div class="meta"><span>📅 June 1, 2026</span><span>⏱ 8 min read</span><span>🏷 #guide #ai #comparison</span></div>
+    </a>
+    <a class="blog-card" href="?p=build-ai-agent-niceguyapi">
+      <span class="tag amber">Advanced</span>
+      <h2>How to Build an AI Agent with NiceGuyAPI</h2>
+      <p>Step-by-step tutorial: Build a ReAct-style AI agent that can search the web, read pages, and solve multi-step tasks using our agent endpoint.</p>
+      <div class="meta"><span>📅 June 1, 2026</span><span>⏱ 12 min read</span><span>🏷 #agent #tutorial #react</span></div>
+    </a>
+    <a class="blog-card" href="?p=openai-compatible-api-guide">
+      <span class="tag green">Tutorial</span>
+      <h2>Using NiceGuyAPI as an OpenAI Drop-in Replacement</h2>
+      <p>You can replace your OpenAI API calls with NiceGuyAPI in just one line of code. Works with all OpenAI SDKs — Python, JavaScript, and more.</p>
+      <div class="meta"><span>📅 June 1, 2026</span><span>⏱ 6 min read</span><span>🏷 #openai #compatibility #migration</span></div>
+    </a>
+  </div>
+</div>
+
+<div class="footer">
+  <p>© 2026 NiceGuyAPI — One API key, every AI model. <a href="https://bit.ly/NiceGuyAPI">Home</a></p>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const post = params.get('p');
+const BASE = 'https://bit.ly/NiceGuyAPI';
+const API = 'https://niceguyapi-repo.vercel.app';
+
+const articles = {
+  'getting-started-with-niceguyapi': `
+    <div class="container"><div class="article">
+      <a href="?" class="back-link">← Back to Blog</a>
+      <h1>Getting Started with NiceGuyAPI in 5 Minutes</h1>
+      <div class="meta">📅 June 1, 2026 · ⏱ 5 min read · By NiceGuyAPI Team</div>
+      <p>Like most developers, you're probably juggling API keys from multiple AI providers. OpenAI, Anthropic, Google, DeepSeek... each with different endpoints, SDKs, and pricing.</p>
+      <p>NiceGuyAPI solves this with a single API key that gives you access to 24+ AI models through one endpoint.</p>
+      <h2>Step 1: Sign Up</h2>
+      <p>Head to <a href="${BASE}">${BASE}</a> and click <strong>Get Started</strong> or <strong>Get Free Key</strong>.</p>
+      <p>Enter your email, choose a plan (Free is fine to start), and you'll receive your API key instantly.</p>
+      <h2>Step 2: Make Your First Request</h2>
+      <p>Once you have your key, you can start making requests immediately. NiceGuyAPI uses the OpenAI-compatible format, so you can use any OpenAI SDK.</p>
+      <h3>Using cURL:</h3>
+      <pre><code>curl ${API}/v1/chat/completions \\
+  -H "Authorization: Bearer ***" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "deepseek/deepseek-chat",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'</code></pre>
+      <h3>Using Python:</h3>
+      <pre><code>import openai
+
+client = openai.OpenAI(
+    api_key="***",
+    base_url="${API}/v1"
+)
+
+response = client.chat.completions.create(
+    model="deepseek/deepseek-chat",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+
+print(response.choices[0].message.content)</code></pre>
+      <h3>Using JavaScript:</h3>
+      <pre><code>import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "***",
+  baseURL: "${API}/v1"
+});
+
+const response = await client.chat.completions.create({
+  model: "deepseek/deepseek-chat",
+  messages: [{ role: "user", content: "Hello!" }]
+});
+
+console.log(response.choices[0].message.content);</code></pre>
+      <h2>Step 3: Try Different Models</h2>
+      <p>Switch models by just changing the <code>model</code> parameter:</p>
+      <ul>
+        <li><code>deepseek/deepseek-chat</code> — Great for coding, reasoning</li>
+        <li><code>openai/gpt-4o</code> — Best all-around performance</li>
+        <li><code>anthropic/claude-3-5-sonnet</code> — Excellent for long-form content</li>
+        <li><code>google/gemini-1.5-pro</code> — Strong multimodal capabilities</li>
+        <li><code>meta-llama/llama-3.3-70b</code> — Open source, fast inference</li>
+      </ul>
+      <h2>Free Tier Limits</h2>
+      <p>Our free tier gives you <strong>14 requests per month</strong> with access to 5 popular models. Paid plans start at <strong>$6/month</strong>.</p>
+      <h2>Next Steps</h2>
+      <ul>
+        <li>Check out our <a href="${BASE}">full documentation</a></li>
+        <li>Explore the <a href="${BASE}">API reference</a></li>
+        <li>Join our community discussions</li>
+      </ul>
+      <p>Happy coding! 🚀</p>
+    </div></div>`,
+
+  'best-free-ai-apis-2026': `
+    <div class="container"><div class="article">
+      <a href="?" class="back-link">← Back to Blog</a>
+      <h1>Best Free AI APIs in 2026 — A Developer's Comparison</h1>
+      <div class="meta">📅 June 1, 2026 · ⏱ 8 min read · By NiceGuyAPI Team</div>
+      <p>The AI API landscape is fragmented. OpenAI, Anthropic, Google, DeepSeek, Mistral — each requires its own API key, its own SDK, its own billing.</p>
+      <p>We compared the major players to help you choose the right tools for your projects.</p>
+      <h2>The Problem with Multiple AI APIs</h2>
+      <ul>
+        <li><strong>Multiple API keys</strong> to manage and secure</li>
+        <li><strong>Different endpoints</strong> and request formats</li>
+        <li><strong>Separate billing</strong> for each provider</li>
+        <li><strong>Rate limits</strong> vary across providers</li>
+        <li><strong>Different SDKs</strong> to learn and maintain</li>
+      </ul>
+      <h2>The Solution: Unified API Gateways</h2>
+      <p>Services like <strong>NiceGuyAPI</strong> aggregate multiple AI providers behind a single endpoint. One API key, one billing account, access to all models.</p>
+      <h2>Comparison</h2>
+      <ul>
+        <li><strong>Models:</strong> NiceGuyAPI (24+) vs OpenAI (1) vs Anthropic (1) vs Google (1)</li>
+        <li><strong>API Keys:</strong> NiceGuyAPI (1) vs Individual (1 per provider)</li>
+        <li><strong>Free Tier:</strong> NiceGuyAPI (14 req/mo) vs OpenAI ($5-10 starter credit)</li>
+        <li><strong>Pricing:</strong> NiceGuyAPI from $0/mo, OpenAI from $5/mo per model</li>
+        <li><strong>OpenAI-compatible:</strong> NiceGuyAPI ✅, Others ❌</li>
+      </ul>
+      <h2>Try It Free</h2>
+      <p>NiceGuyAPI is free to start — 14 requests per month, no credit card required.</p>
+      <p><a href="${BASE}">Sign up → ${BASE}</a></p>
+    </div></div>`,
+
+  'build-ai-agent-niceguyapi': `
+    <div class="container"><div class="article">
+      <a href="?" class="back-link">← Back to Blog</a>
+      <h1>How to Build an AI Agent with NiceGuyAPI</h1>
+      <div class="meta">📅 June 1, 2026 · ⏱ 12 min read · By NiceGuyAPI Team</div>
+      <p>AI agents are the future of software — programs that can search the web, read pages, calculate, and make decisions autonomously.</p>
+      <h2>What is an AI Agent?</h2>
+      <p>Unlike a simple chatbot, an AI agent can:</p>
+      <ul>
+        <li>🔍 Search the web for current information</li>
+        <li>📄 Read and analyze web pages</li>
+        <li>🧮 Perform calculations</li>
+        <li>🔄 Chain multiple actions together</li>
+        <li>🧠 Remember conversation context</li>
+      </ul>
+      <h2>NiceGuyAPI's Agent Mode</h2>
+      <p>Our agent endpoint uses the ReAct (Reasoning + Acting) pattern. The agent thinks about what to do, takes action, observes the result, and repeats.</p>
+      <h2>Code Example</h2>
+      <pre><code>curl ${API}/v1/agent \\
+  -H "Authorization: Bearer ***" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "message": "What was the top-grossing movie this weekend?",
+    "tools": ["web_search", "web_fetch", "calculate"]
+  }'</code></pre>
+      <h2>Agent Memory</h2>
+      <p>Our agent remembers up to 6 previous turns in the conversation for natural follow-up questions.</p>
+      <h2>Getting Started</h2>
+      <p>To use agent mode, you need at least the <strong>Pro plan ($6/mo)</strong>. Free tier users get chat-only access.</p>
+      <p><a href="${BASE}">Sign up → ${BASE}</a></p>
+    </div></div>`,
+
+  'openai-compatible-api-guide': `
+    <div class="container"><div class="article">
+      <a href="?" class="back-link">← Back to Blog</a>
+      <h1>Using NiceGuyAPI as an OpenAI Drop-in Replacement</h1>
+      <div class="meta">📅 June 1, 2026 · ⏱ 6 min read · By NiceGuyAPI Team</div>
+      <p>Replace your OpenAI API calls with NiceGuyAPI in <strong>one line of code</strong>.</p>
+      <h2>One-Line Migration</h2>
+      <h3>Before (OpenAI):</h3>
+      <pre><code>client = openai.OpenAI(api_key="sk-xxx")</code></pre>
+      <h3>After (NiceGuyAPI):</h3>
+      <pre><code>client = openai.OpenAI(
+  api_key="***",
+  base_url="${API}/v1"
+)</code></pre>
+      <p>That's it. All your existing code works exactly the same way.</p>
+      <h2>Supported SDKs</h2>
+      <ul>
+        <li>✅ Python — <code>openai</code> package</li>
+        <li>✅ JavaScript/TypeScript — <code>openai</code> npm package</li>
+        <li>✅ LangChain</li>
+        <li>✅ LlamaIndex</li>
+        <li>✅ AutoGen</li>
+        <li>✅ Any OpenAI-compatible framework</li>
+      </ul>
+      <h2>LangChain Example</h2>
+      <pre><code>from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(
+    model="deepseek/deepseek-chat",
+    api_key="***",
+    base_url="${API}/v1"
+)
+
+response = llm.invoke("Write a Python function to reverse a string")
+print(response.content)</code></pre>
+      <h2>Try It Now</h2>
+      <p><a href="${BASE}">Sign up free → ${BASE}</a></p>
+      <p>No credit card required. Get your API key in 30 seconds.</p>
+    </div></div>`
+};
+
+if (post && articles[post]) {
+  document.body.innerHTML = articles[post];
+}
+</script>
+</body>
+</html>
