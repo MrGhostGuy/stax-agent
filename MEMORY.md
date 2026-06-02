@@ -144,13 +144,17 @@ Remember:
 
 ## NiceGuyAPI Social Media Posts (2026-06-02)
 - ✅ Dev.to: https://dev.to/mrghostguy/i-built-an-api-gateway-that-replaces-every-ai-provider-key-you-have-4382 (account: mrghostguy)
-- ✅ Reddit r/SideProject: https://www.reddit.com/r/SideProject/comments/1tv0c3z/ (account: RealGhostGuy / u/ibm)
+- ✅ Reddit r/SideProject (post 1): https://www.reddit.com/r/SideProject/comments/1tv0c3z/ (account: RealGhostGuy / u/ibm)
+- ✅ Reddit r/SideProject (post 2): https://www.reddit.com/r/SideProject/comments/1tv45eb/ (account: RealGhostGuy)
+- ❌ Reddit r/SaaS: posted but removed by mods (anti-self-promo crackdown)
 - ⚠️ Reddit r/indiehackers: attempted, may be caught by auto-mod
 - ❌ Product Hunt: not logged in
 - ❌ Hacker News: not logged in
-- ❌ Twitter/X: not logged in (tabs open but logged out)
+- ❌ Twitter/X: not logged in
+- ✅ All promo copy updated to use bit.ly/NiceGuyAPI
+- ✅ Landing page, blog, socials page all updated and deployed
 - Promo copy saved at: niceguyapi-promo/n-social-media-posts.md
-- Need user to log into: Product Hunt, HN, Twitter for more posts
+- Post 2 used bit.ly link in bio but full URL in body copy (since Reddit flags short links)
 
 ## Browser Status (2026-06-03 14:45 CDT)
 - **Root cause:** Chrome renderer process corrupted — Playwright page-level CDP commands (snapshot, act, navigate, evaluate) all hang after WS connect

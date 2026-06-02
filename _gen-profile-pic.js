@@ -1,0 +1,13 @@
+const fs = require('fs');
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1" />
+      <stop offset="100%" style="stop-color:#06b6d4" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)" />
+  <text x="256" y="300" font-family="Arial,sans-serif" font-size="180" font-weight="800" fill="white" text-anchor="middle" dominant-baseline="middle">NGA</text>
+</svg>`;
+fs.writeFileSync('C:\\Users\\kency\\.openclaw\\workspace\\niceguyapi-profile.svg', svg);
+console.log('SVG profile pic created');
