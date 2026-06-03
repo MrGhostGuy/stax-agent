@@ -9,7 +9,7 @@ Role: Builder.
 - **Short link**: https://bit.ly/NiceGuyAPI
 - **GitHub Pages**: https://mrghostguy.github.io/niceguyapi/ (legacy, redirect to short link)
 - **Stripe**: LIVE mode — real payments processing
-- **Version**: v5.3 — tab switching fixed, dashboard fully functional
+- **Version**: v5.5.0 — Stripe webhook for auto tier upgrades, tab switching fixed, dashboard fully functional
 - **Backup**: C:\Users\kency\.openclaw\workspace\niceguyapi-backups\
 - All tabs working: Home, Try Chat, How-To, Dashboard, FAQ
 - Signup flow: free key instant, paid redirects to Stripe Checkout
@@ -200,3 +200,26 @@ Remember:
 - Issue was Chrome renderer process corruption
 - Fix: `taskkill /F /IM chrome.exe /T` then `browser(action="start")` for fresh instance
 - Gateway restart does NOT fix it — only killing Chrome works
+
+## NiceGuyAPI Social Media Cron Jobs (2026-06-03)
+- **Morning Post** (9AM CT): posts to Reddit (r/SideProject, r/SaaS) + Dev.to
+- **Evening Post** (7PM CT): posts to same platforms with DIFFERENT content
+- Each post focuses on ONE different feature to keep things fresh
+- Posts drive toward paid tier signups with clear CTAs
+- Cron IDs: Morning=`4646b80d`, Evening=`3df41310`
+
+## Product Hunt Launch (2026-06-03)
+- Account: @mrghostguy (Jeff Hollaway) — logged in via GitHub
+- Profile: pic, headline, about section all set
+- Launch form: partially filled (name, tagline, URL done)
+- Still needs: description trim, launch tags, first comment, screenshots
+- PH URL for launch: https://mrghostguy.github.io/niceguyapi/
+
+## Stripe Webhook Fix (v5.5.0 — 2026-06-03)
+- Added POST /v1/stripe/webhook endpoint to api/index.js
+- Handles checkout.session.completed → auto-upgrades user tier (free → pro/premium/platinum)
+- Handles customer.subscription.deleted → auto-downgrades to free
+- Users get EXACTLY the features of the tier they paid for (matching TIERS config)
+- WHSEC secret needs to be added to Vercel env vars by user
+- Webhook endpoint needs to be registered in Stripe Dashboard
+- Git pushed and deployed to Vercel ✅
